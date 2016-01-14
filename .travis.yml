@@ -1,5 +1,6 @@
 language: c
-install: make cmake get-deps
+sudo: required
+dist: trusty
 compiler: gcc
 script:
   - mkdir build
