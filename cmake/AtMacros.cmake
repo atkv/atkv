@@ -78,3 +78,33 @@ macro(at_download_cmocka)
   add_library(cmocka SHARED IMPORTED)
   set_target_properties(cmocka PROPERTIES IMPORTED_LOCATION ${CMOCKA_LIB_DIR}/libcmocka.so)
 endmacro()
+
+macro(at_create_libraries AT_MODULES)
+  foreach(AT_MODULE ${AT_MODULES})
+    # Convert to uppercase
+    string(TOUPPER ${AT_MODULE} AT_MODULE_UPPER)
+
+    if(BUILD_${AT_MODULE_UPPER})
+      file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${AT_MODULE}.h.in "${AT_GPL_HEADER}")
+      # Adding absolute path to headers
+      foreach(AT_HDR ${AT_${AT_MODULE_UPPER}_HDRS})
+        set(AT_HDR_ABS ${AT_INCLUDE_DIR}/at/${AT_MODULE}/${AT_HDR})
+        set(lines_to_remove "#include <at/${AT_MODULE}.h>")
+        list(APPEND AT_${AT_MODULE_UPPER}_HDRS_ABS ${AT_HDR_ABS})
+        at_cat(${AT_HDR_ABS} ${CMAKE_CURRENT_BINARY_DIR}/${AT_MODULE}.h.in ${lines_to_remove})
+      endforeach()
+      # Adding absolute path to sources
+      foreach(AT_SRC ${AT_${AT_MODULE_UPPER}_SRCS})
+        list(APPEND AT_${AT_MODULE_UPPER}_SRCS_ABS ${AT_SOURCE_DIR}/${AT_MODULE}/${AT_SRC})
+      endforeach()
+      # Create one-header per module
+      CONFIGURE_FILE(${CMAKE_CURRENT_BINARY_DIR}/${AT_MODULE}.h.in ${AT_INCLUDE_DIR}/at/${AT_MODULE}.h)
+      # Get a list of all sources
+      list(APPEND AT_SRCS ${AT_${AT_MODULE_UPPER}_SRCS_ABS})
+
+      # Build the library
+      add_library(at_${AT_MODULE} SHARED ${AT_${AT_MODULE_UPPER}_SRCS_ABS} ${AT_${AT_MODULE_UPPER}_HDRS_ABS})
+    endif()
+
+  endforeach()
+endmacro()

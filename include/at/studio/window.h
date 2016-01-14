@@ -16,6 +16,33 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef AT_STUDIO_WINDOW_H
-#define AT_STUDIO_WINDOW_H
+#ifndef AT_STUDIO_APP_WINDOW_H
+#define AT_STUDIO_APP_WINDOW_H
+#include <gtk/gtk.h>
+/* ============================================================================
+ * STRUCTURE
+ * ==========================================================================*/
+#define AT_TYPE_STUDIO_APP_WINDOW at_studio_app_window_get_type()
+G_DECLARE_DERIVABLE_TYPE(AtStudioAppWindow, at_studio_app_window, AT, STUDIO_APP_WINDOW, GObject)
+typedef struct _AtStudioAppWindowClass{
+  GObjectClass parent_class;
+}AtStudioAppWindowClass;
+/* ============================================================================
+ * FUNCTIONS
+ * ==========================================================================*/
+AtStudioAppWindow*
+at_studio_app_window_new(GtkApplication* app);
+
+void
+at_studio_app_window_show(AtStudioAppWindow* window);
+
+void
+at_studio_app_window_load_image_view();
+
+void
+at_studio_app_window_load_slice_view();
+
+void
+at_studio_app_window_load_graph_view();
+
 #endif

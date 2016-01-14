@@ -17,7 +17,7 @@ option(COVERALLS_UPLOAD "Upload the generated coveralls json" ON)
 include(cmake/AtMacros.cmake)
 set(EXTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/include)
 set(EXTERNAL_LIB_DIR ${CMAKE_SOURCE_DIR}/external/lib)
-include_directories(${EXTERNAL_INCLUDE_DIR})
+include_directories(${EXTERNAL_INCLUDE_DIR} include)
 #================================================================= DEPENDENCIES
 find_package(PkgConfig REQUIRED)
 # GTK 3
@@ -32,6 +32,7 @@ set(AT_MODULES chart core gl ift imgproc medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(AT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 FILE(READ "GPLHEADER" AT_GPL_HEADER)
+set(CMAKE_BUILD_TYPE Debug)
 
 # CORE
 # ----------------
@@ -62,33 +63,7 @@ set(AT_IMGPROC_HDRS app.h window.h)
 set(AT_IMGPROC_SRCS app.c window.c)
 
 # Compiling modules
-foreach(AT_MODULE ${AT_MODULES})
-  # Convert to uppercase
-  string(TOUPPER ${AT_MODULE} AT_MODULE_UPPER)
-  
-  if(BUILD_${AT_MODULE_UPPER})
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${AT_MODULE}.h.in "${AT_GPL_HEADER}")
-    # Adding absolute path to headers
-    foreach(AT_HDR ${AT_${AT_MODULE_UPPER}_HDRS})
-      set(AT_HDR_ABS ${AT_INCLUDE_DIR}/at/${AT_MODULE}/${AT_HDR})
-      set(lines_to_remove "#include <at/${AT_MODULE}.h>")
-      list(APPEND AT_${AT_MODULE_UPPER}_HDRS_ABS ${AT_HDR_ABS})
-      at_cat(${AT_HDR_ABS} ${CMAKE_CURRENT_BINARY_DIR}/${AT_MODULE}.h.in ${lines_to_remove})
-    endforeach()
-    # Adding absolute path to sources
-    foreach(AT_SRC ${AT_${AT_MODULE_UPPER}_SRCS})
-      list(APPEND AT_${AT_MODULE_UPPER}_SRCS_ABS ${AT_SOURCE_DIR}/${AT_MODULE}/${AT_SRC})
-    endforeach()
-    # Create one-header per module
-    CONFIGURE_FILE(${CMAKE_CURRENT_BINARY_DIR}/${AT_MODULE}.h.in ${AT_INCLUDE_DIR}/at/${AT_MODULE}.h)
-    # Get a list of all sources
-    list(APPEND AT_SRCS ${AT_${AT_MODULE_UPPER}_SRCS_ABS})
-
-    # Build the library
-    add_library(at_${AT_MODULE} SHARED ${AT_${AT_MODULE_UPPER}_SRCS_ABS} ${AT_${AT_MODULE_UPPER}_HDRS_ABS})
-  endif()
-  
-endforeach()
+at_create_libraries("${AT_MODULES}")
 
 # Studio Executable
 if(BUILD_STUDIO)
