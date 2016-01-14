@@ -30,3 +30,13 @@
 
 # Debug files
 *.dSYM/
+
+# Build dir
+bin/
+build/
+
+# Generated one-file header
+include/at/*.h
+
+*.swp
+*.user
