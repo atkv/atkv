@@ -40,3 +40,4 @@ include/at/*.h
 
 *.swp
 *.user
+external/

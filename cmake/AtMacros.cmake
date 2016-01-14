@@ -47,3 +47,34 @@ macro(at_create_tests module)
     ENDFOREACH()
   ENDIF()
 endmacro()
+
+# ------------------
+# Download and build Cmocka
+# ------------------
+macro(at_download_cmocka)
+  set(CMockaCMakeArgs
+     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+     -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/external
+     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+     -DUNIT_TESTING=OFF
+     )
+
+  ExternalProject_Add(cmockaDownload
+      PREFIX ${CMAKE_SOURCE_DIR}/external
+      SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/cmocka
+      BINARY_DIR ${CMAKE_BINARY_DIR}/external/cmocka-build
+      STAMP_DIR ${CMAKE_BINARY_DIR}/external/cmocka-stamp
+      TMP_DIR ${CMAKE_BINARY_DIR}/external/cmocka-tmp
+      INSTALL_DIR ${CMAKE_BINARY_DIR}/external
+      CMAKE_ARGS ${CMockaCMakeArgs}
+      # GIT_REPOSITORY "git://git.cryptomilk.org/projects/cmocka.git"
+      #GIT_TAG "origin/master"
+      #GIT_SUBMODULES ""
+      UPDATE_COMMAND cd ${CMAKE_SOURCE_DIR} && git submodule update --init --recursive external/cmocka
+      DOWNLOAD_COMMAND cd ${CMAKE_SOURCE_DIR} && git submodule update --init --recursive external/cmocka
+  )
+  set(CMOCKA_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/include)
+  set(CMOCKA_LIB_DIR ${CMAKE_SOURCE_DIR}/external/lib)
+  add_library(cmocka SHARED IMPORTED)
+  set_target_properties(cmocka PROPERTIES IMPORTED_LOCATION ${CMOCKA_LIB_DIR}/libcmocka.so)
+endmacro()

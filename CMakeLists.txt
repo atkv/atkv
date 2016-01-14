@@ -15,7 +15,9 @@ option(COVERALLS     "Generate coveralls data" OFF)
 option(COVERALLS_UPLOAD "Upload the generated coveralls json" ON)
 #================================================== CUSTOM FUNCTIONS AND MACROS
 include(cmake/AtMacros.cmake)
-
+set(EXTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/include)
+set(EXTERNAL_LIB_DIR ${CMAKE_SOURCE_DIR}/external/lib)
+include_directories(${EXTERNAL_INCLUDE_DIR})
 #================================================================= DEPENDENCIES
 find_package(PkgConfig REQUIRED)
 # GTK 3
@@ -102,9 +104,13 @@ endif()
 
 # ======================================================================= TESTS
 if(BUILD_TESTING)
-  INCLUDE(CTest)
-  INCLUDE(Coveralls)
-  FIND_PACKAGE(CMocka QUIET)
+  include(CTest)
+  include(Coveralls)
+  include(ExternalProject)
+  find_package(CMocka QUIET)
+  if(NOT CMOCKA_FOUND)
+    at_download_cmocka()
+  endif()
   ENABLE_TESTING()
   # profiling directives (GCov and GProf)
   ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage -pg)
