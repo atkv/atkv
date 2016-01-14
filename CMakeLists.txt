@@ -17,8 +17,10 @@ include(cmake/AtMacros.cmake)
 find_package(PkgConfig REQUIRED)
 # GTK 3
 # ----------------
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-include_directories(${GTK3_INCLUDE_DIRS})
+if(BUILD_STUDIO)
+  pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+  include_directories(${GTK3_INCLUDE_DIRS})
+endif()
 
 # ===================================================================== MODULES
 set(AT_MODULES chart core gl ift imgproc medical ml)
@@ -79,15 +81,16 @@ foreach(AT_MODULE ${AT_MODULES})
 endforeach()
 
 # Studio Executable
-foreach(AT_HDR ${AT_STUDIO_HDRS})
-  list(APPEND AT_STUDIO_HDRS_ABS ${AT_INCLUDE_DIR}/at/studio/${AT_HDR})
-endforeach()
-foreach(AT_SRC ${AT_STUDIO_SRCS})
-  list(APPEND AT_STUDIO_SRCS_ABS ${AT_SOURCE_DIR}/studio/${AT_SRC})
-endforeach()
-
-add_executable(at_studio ${AT_STUDIO_HDRS_ABS} ${AT_STUDIO_SRCS_ABS})
-target_link_libraries(at_studio ${GTK3_LIBRARIES})
+if(BUILD_STUDIO)
+  foreach(AT_HDR ${AT_STUDIO_HDRS})
+    list(APPEND AT_STUDIO_HDRS_ABS ${AT_INCLUDE_DIR}/at/studio/${AT_HDR})
+  endforeach()
+  foreach(AT_SRC ${AT_STUDIO_SRCS})
+    list(APPEND AT_STUDIO_SRCS_ABS ${AT_SOURCE_DIR}/studio/${AT_SRC})
+  endforeach()
+  add_executable(at_studio ${AT_STUDIO_HDRS_ABS} ${AT_STUDIO_SRCS_ABS})
+  target_link_libraries(at_studio ${GTK3_LIBRARIES})
+endif()
 
 # ======================================================================= TESTS
 # ======================================================================== DOCS
