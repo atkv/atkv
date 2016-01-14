@@ -14,7 +14,7 @@ endfunction()
 function(at_cat IN_FILE OUT_FILE lines_to_remove)
   file(READ ${IN_FILE} CONTENTS)
   # Remove gpl header
-  string(REGEX REPLACE "/\\*[^*]*\\*/(.*)" "\\1" CONTENTS2 "${CONTENTS}")
+  string(REGEX REPLACE "/\\*\\*.*\\*\\*/(.*)" "\\1" CONTENTS2 "${CONTENTS}")
   foreach(line_to_remove ${lines_to_remove})
     string(REGEX REPLACE ${line_to_remove} "" CONTENTS2 "${CONTENTS2}")
   endforeach()

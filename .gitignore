@@ -37,3 +37,6 @@ build/
 
 # Generated one-file header
 include/at/*.h
+
+*.swp
+*.user

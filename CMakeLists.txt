@@ -24,6 +24,7 @@ include_directories(${GTK3_INCLUDE_DIRS})
 set(AT_MODULES chart core gl ift imgproc medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(AT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+FILE(READ "GPLHEADER" AT_GPL_HEADER)
 
 # CORE
 # ----------------
@@ -56,9 +57,9 @@ foreach(AT_MODULE ${AT_MODULES})
   string(TOUPPER ${AT_MODULE} AT_MODULE_UPPER)
   
   if(BUILD_${AT_MODULE_UPPER})
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${AT_MODULE}.h.in "${AT_GPL_HEADER}")
     # Adding absolute path to headers
     foreach(AT_HDR ${AT_${AT_MODULE_UPPER}_HDRS})
-      message(${AT_HDR})
       set(AT_HDR_ABS ${AT_INCLUDE_DIR}/at/${AT_MODULE}/${AT_HDR})
       set(lines_to_remove "#include <at/${AT_MODULE}.h>")
       list(APPEND AT_${AT_MODULE_UPPER}_HDRS_ABS ${AT_HDR_ABS})
@@ -84,7 +85,6 @@ endforeach()
 foreach(AT_SRC ${AT_STUDIO_SRCS})
   list(APPEND AT_STUDIO_SRCS_ABS ${AT_SOURCE_DIR}/studio/${AT_SRC})
 endforeach()
-message(STATUS ${AT_STUDIO_SRCS_ABS})
 
 add_executable(at_studio ${AT_STUDIO_HDRS_ABS} ${AT_STUDIO_SRCS_ABS})
 target_link_libraries(at_studio ${GTK3_LIBRARIES})
