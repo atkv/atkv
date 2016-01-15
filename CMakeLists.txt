@@ -17,9 +17,15 @@ option(COVERALLS_UPLOAD "Upload the generated coveralls json" ON)
 include(cmake/AtMacros.cmake)
 set(EXTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/include)
 set(EXTERNAL_LIB_DIR ${CMAKE_SOURCE_DIR}/external/lib)
-include_directories(${EXTERNAL_INCLUDE_DIR})
+include_directories(${EXTERNAL_INCLUDE_DIR} include)
 #================================================================= DEPENDENCIES
 find_package(PkgConfig REQUIRED)
+# GObject
+# ----------------
+pkg_check_modules(GOBJECT REQUIRED gobject-2.0)
+INCLUDE_DIRECTORIES(${GOBJECT_INCLUDE_DIRS})
+add_definitions(-DHAVE_GOBJECT)
+
 # GTK 3
 # ----------------
 if(BUILD_STUDIO)
@@ -33,12 +39,43 @@ set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(AT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 FILE(READ "GPLHEADER" AT_GPL_HEADER)
 
+set(AT_TYPES uint8_t uint16_t uint32_t uint64_t
+              int8_t  int16_t  int32_t  int64_t
+              float  double)
+set(AT_TYPES_ENUM UINT8 UINT16 UINT32 UINT64
+                   INT8  INT16  INT32  INT64
+                  FLOAT DOUBLE)
+set(AT_TYPES_FLOAT FALSE FALSE FALSE FALSE
+                   FALSE FALSE FALSE FALSE
+                   TRUE TRUE)
+set(AT_TYPES_MAX UINT8_MAX UINT16_MAX UINT32_MAX UINT64_MAX
+                  INT8_MAX  INT16_MAX  INT32_MAX  INT64_MAX
+                   FLT_MAX    DBL_MAX)
+set(AT_TYPES_MIN         0          0          0          0
+                  INT8_MIN  INT16_MIN  INT32_MIN  INT64_MIN
+                   FLT_MIN    DBL_MIN)
+
 # CORE
 # ----------------
-set(AT_CORE_HDRS config.h array.h)
-set(AT_CORE_SRCS array.c)
+list(LENGTH AT_TYPES len1)
+math(EXPR   len2 "${len1} - 1")
+foreach(TYPE_INDEX RANGE ${len2})
+  list(GET AT_TYPES      ${TYPE_INDEX} AT_TYPE)
+  list(GET AT_TYPES_ENUM ${TYPE_INDEX} AT_TYPE_ENUM)
+  list(GET AT_TYPES_MAX  ${TYPE_INDEX} AT_TYPE_MAX)
+  list(GET AT_TYPES_MIN  ${TYPE_INDEX} AT_TYPE_MIN)
+  list(GET AT_TYPES_FLOAT ${TYPE_INDEX} AT_TYPE_FLOAT)
+  list(APPEND AT_ARRAY_TYPES_HDRS array_${AT_TYPE}.h)
+  list(APPEND AT_ARRAY_TYPES_SRCS array_${AT_TYPE}.c)
+  string(TOUPPER ${AT_TYPE} AT_TYPE_UPPER)
+  configure_file(${AT_INCLUDE_DIR}/at/core/array_template.h.in ${AT_INCLUDE_DIR}/at/core/array_${AT_TYPE}.h)
+  configure_file(${AT_SOURCE_DIR}/core/array_template.c.in ${AT_SOURCE_DIR}/core/array_${AT_TYPE}.c)
+endforeach()
+set(AT_CORE_HDRS type.h range.h macro.h config.h arraybase.h
+    ${AT_ARRAY_TYPES_HDRS} array.h)
+set(AT_CORE_SRCS range.c ${AT_ARRAY_TYPES_SRCS})
 set(AT_CORE_TESTS array)
-set(AT_CORE_LIBRARIES at_core m ${GObject_LIBRARIES})
+set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 
 # STUDIO
 # ----------------
@@ -113,8 +150,8 @@ if(BUILD_TESTING)
   endif()
   ENABLE_TESTING()
   # profiling directives (GCov and GProf)
-  ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage -pg)
-  set(CMAKE_EXE_LINKER_FLAGS "-g -Wall -std=c11 -Wshadow -Wunused-variable -Wno-unused-function -Wunused -Wno-system-headers -pg -fprofile-arcs -ftest-coverage")
+  #ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage -pg)
+  #set(CMAKE_EXE_LINKER_FLAGS "-g -Wall -std=c11 -Wshadow -Wunused-variable -Wno-unused-function -Wunused -Wno-system-headers -pg -fprofile-arcs -ftest-coverage")
 
   # Setup coveralls
   IF(COVERALLS)
