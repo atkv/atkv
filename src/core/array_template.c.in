@@ -1,0 +1,669 @@
+/* ===================================================================
+#   Copyright (C) 2015-2015
+#   Anderson Tavares <nocturne.pe at gmail.com> PK 0x38e7bfc5c2def8ff
+#   Lucy Mansilla    <lucyacm at gmail.com>
+#   Caio de Braz     <caiobraz at gmail.com>
+#   Hans Harley      <hansbecc at gmail.com>
+#   Paulo Miranda    <pavmbr at yahoo.com.br>
+#
+#   Institute of Mathematics and Statistics - IME
+#   University of Sao Paulo - USP
+#
+#   This file is part of Grafeo.
+#
+#   Grafeo is free software: you can redistribute it and/or
+#   modify it under the terms of the GNU General Public License
+#   as published by the Free Software Foundation, either version
+#   3 of the License, or (at your option) any later version.
+#
+#   Grafeo is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty
+#   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#   See the GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public
+#   License along with Grafeo.  If not, see
+#   <http://www.gnu.org/licenses/>.
+# ===================================================================*/
+#include <at/core.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tgmath.h>
+/*===========================================================================
+ * PRIVATE API
+ *===========================================================================*/
+
+typedef struct _AtArray_@AT_TYPE@Private{
+  @AT_TYPE@* data;
+}AtArray_@AT_TYPE@Private;
+
+G_DEFINE_TYPE_WITH_PRIVATE(AtArray_@AT_TYPE@, at_array_@AT_TYPE@, AT_TYPE_ARRAY_BASE)
+
+static void
+at_array_@AT_TYPE@_finalize(GObject* object){
+  AtArray_@AT_TYPE@* array = AT_ARRAY_@AT_TYPE@(object);
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  if(at_array_base_get_contiguous(AT_ARRAY_BASE(array)))
+    g_free(priv->data);
+  G_OBJECT_CLASS(at_array_@AT_TYPE@_parent_class)->finalize(object);
+}
+
+static void
+at_array_@AT_TYPE@_init(AtArray_@AT_TYPE@ *self){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(self);
+  priv->data = NULL;
+}
+
+static void
+at_array_@AT_TYPE@_class_init(AtArray_@AT_TYPE@Class *klass){
+  GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  object_class->finalize = at_array_@AT_TYPE@_finalize;
+
+}
+static @AT_TYPE@
+at_array_reduce_sum_func(@AT_TYPE@ data1, @AT_TYPE@ data2){
+  return data1 + data2;
+}
+static @AT_TYPE@
+at_array_reduce_max_func(@AT_TYPE@ data1, @AT_TYPE@ data2){
+  return max(data1, data2);
+}
+static @AT_TYPE@
+at_array_reduce_min_func(@AT_TYPE@ data1, @AT_TYPE@ data2){
+  return min(data1 ,data2);
+}
+static @AT_TYPE@
+at_array_reduce_prod_func(@AT_TYPE@ data1, @AT_TYPE@ data2){
+  return data1 * data2;
+}
+/*===========================================================================
+ * PUBLIC API
+ *===========================================================================*/
+
+void
+at_array_@AT_TYPE@_new(AtArray_@AT_TYPE@** output){
+  *output = g_object_new(AT_TYPE_ARRAY_@AT_TYPE@, NULL);
+  at_array_base_set_type(AT_ARRAY_BASE(*output), sizeof(@AT_TYPE@),AT_@AT_TYPE_ENUM@);
+}
+void
+at_array_@AT_TYPE@_new_with_size(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size){
+  at_array_@AT_TYPE@_new(output);
+  at_array_base_set_size(AT_ARRAY_BASE(*output), dim, size);
+  size_t num_bytes = at_array_base_get_num_bytes(AT_ARRAY_BASE(*output));
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(*output);
+  priv->data = realloc(priv->data,num_bytes);
+}
+void
+at_array_@AT_TYPE@_new_with_data(AtArray_@AT_TYPE@** output, uint16_t dim,
+                                uint64_t* size, @AT_TYPE@* data){
+  at_array_@AT_TYPE@_new_with_size(output, dim, size);
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(*output);
+  memcpy(priv->data,data,at_array_base_get_num_bytes(AT_ARRAY_BASE(*output)));
+}
+
+void
+at_array_@AT_TYPE@_new_1D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1){
+  at_array_@AT_TYPE@_new_with_size(output,1,&size1);
+}
+
+void
+at_array_@AT_TYPE@_new_2D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 1);
+  size[0] = size1;  size[1] = size2;
+  at_array_@AT_TYPE@_new_with_size(output,2,size);
+}
+
+void
+at_array_@AT_TYPE@_new_3D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 1 + sizeof(uint64_t));
+  size[0] = size1;  size[1] = size2; size[2] = size3;
+  at_array_@AT_TYPE@_new_with_size(output,3,size);
+}
+
+void
+at_array_@AT_TYPE@_new_4D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3,
+                         uint64_t size4){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 2);
+  size[0] = size1;  size[1] = size2; size[2] = size3; size[3] = size4;
+  at_array_@AT_TYPE@_new_with_size(output,4,size);
+}
+void
+at_array_@AT_TYPE@_zeros_with_size(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size){
+  at_array_@AT_TYPE@_new_with_size(output,dim,size);
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(*output);
+  memset(priv->data,0,at_array_get_num_elements(*output)*sizeof(@AT_TYPE@));
+}
+void
+at_array_@AT_TYPE@_zeros_1D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1){
+  at_array_@AT_TYPE@_zeros_with_size(output,1,&size1);
+}
+
+void
+at_array_@AT_TYPE@_zeros_2D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 1);
+  size[0] = size1;  size[1] = size2;
+  at_array_@AT_TYPE@_zeros_with_size(output,2,size);
+}
+
+void
+at_array_@AT_TYPE@_zeros_3D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 1 + sizeof(uint64_t));
+  size[0] = size1;  size[1] = size2; size[2] = size3;
+  at_array_@AT_TYPE@_zeros_with_size(output,3,size);
+}
+
+void
+at_array_@AT_TYPE@_zeros_4D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3,
+                         uint64_t size4){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 2);
+  size[0] = size1;  size[1] = size2; size[2] = size3; size[3] = size4;
+  at_array_@AT_TYPE@_zeros_with_size(output,4,size);
+}
+void
+at_array_@AT_TYPE@_ones_with_size(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size){
+  at_array_@AT_TYPE@_new_with_size(output,dim,size);
+  at_array_@AT_TYPE@_fill(*output, 1);
+}
+
+void
+at_array_@AT_TYPE@_ones_1D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1){
+  at_array_@AT_TYPE@_ones_with_size(output,1,&size1);
+}
+
+void
+at_array_@AT_TYPE@_ones_2D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 1);
+  size[0] = size1;  size[1] = size2;
+  at_array_@AT_TYPE@_ones_with_size(output,2,size);
+}
+
+void
+at_array_@AT_TYPE@_ones_3D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 1 + sizeof(uint64_t));
+  size[0] = size1;  size[1] = size2; size[2] = size3;
+  at_array_@AT_TYPE@_ones_with_size(output,3,size);
+}
+
+void
+at_array_@AT_TYPE@_ones_4D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3,
+                         uint64_t size4){
+  g_autofree uint64_t* size = g_malloc(sizeof(uint64_t) << 2);
+  size[0] = size1;  size[1] = size2; size[2] = size3; size[3] = size4;
+  at_array_@AT_TYPE@_ones_with_size(output,4,size);
+}
+
+void
+at_array_@AT_TYPE@_append(AtArray_@AT_TYPE@* output, @AT_TYPE@ value){
+//  if(at_array_is_empty(output)){
+//    uint16_t dim = at_array_get_dim(output);
+//    dim = dim > 0? dim:1;
+//    at_array_realloc(output, dim, );
+//  }
+
+//  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(output);
+//  uint64_t num_elements  = at_array_get_num_elements(output);
+//  uint64_t num_allocated = at_array_get_num_allocated(output);
+
+//  if(num_allocated == 0)
+//  priv->data[priv->num_elements] = value;
+}
+
+void
+at_array_@AT_TYPE@_fill(AtArray_@AT_TYPE@* array, @AT_TYPE@ value){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  uint64_t num_elements = at_array_get_num_elements(array);
+  uint64_t i;
+  // If it's contiguous, make a contiguous loop
+  if(at_array_get_contiguous(array))
+    for(i = 0; i < num_elements; i++)
+      priv->data[i] = value;
+  else{
+    // It's a subarray. We need to get the real index
+    uint64_t* relative = g_malloc(at_array_get_dim(array) * sizeof(uint64_t));
+    uint64_t index;
+    for(i = 0; i < num_elements; i++){
+      index = at_array_base_get_index_absolute(AT_ARRAY_BASE(array), i, relative);
+      priv->data[index] = value;
+    }
+  }
+}
+
+gboolean
+at_array_@AT_TYPE@_is_empty(AtArray_@AT_TYPE@* array){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  return priv->data == NULL;
+}
+
+@AT_TYPE@
+at_array_@AT_TYPE@_get_by_index(AtArray_@AT_TYPE@* array, uint64_t index){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  g_autofree uint64_t* indices_relative = NULL;
+  if(at_array_base_get_contiguous(AT_ARRAY_BASE(array)))
+    return priv->data[index];
+  else{
+    indices_relative = g_malloc(at_array_get_dim(array) * sizeof(uint64_t));
+    uint64_t index_abs = at_array_base_get_index_absolute(AT_ARRAY_BASE(array),index,indices_relative);
+    return priv->data[index_abs];
+  }
+}
+
+@AT_TYPE@
+at_array_@AT_TYPE@_get_by_indices(AtArray_@AT_TYPE@* array, uint64_t* indices){
+  uint64_t index;
+  at_array_@AT_TYPE@_get_index(array,indices, &index);
+  return at_array_@AT_TYPE@_get_by_index(array, index);
+}
+
+void
+at_array_@AT_TYPE@_get_index(AtArray_@AT_TYPE@* array, uint64_t* indices, uint64_t* index){
+  at_array_base_get_index(AT_ARRAY_BASE(array), indices, index);
+}
+
+void
+at_array_@AT_TYPE@_get_indices(AtArray_@AT_TYPE@* array, uint64_t index, uint64_t* indices){
+  at_array_base_get_indices(AT_ARRAY_BASE(array), index, indices);
+}
+
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_divide(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value1 / value2;
+}
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_add(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value1 + value2;
+}
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_subtract(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value1 - value2;
+}
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_mult(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value1 * value2;
+}
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_set(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value2;
+}
+#if !@AT_TYPE_FLOAT@
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_bitwise_and(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value1 & value2;
+}
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_bitwise_or(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value1 | value2;
+}
+inline static @AT_TYPE@
+at_binary_@AT_TYPE@_bitwise_xor(@AT_TYPE@ value1, @AT_TYPE@ value2){
+  return value1 ^ value2;
+}
+#endif
+
+static void
+at_array_@AT_TYPE@_binary_array_@AT_TYPE@_to_@AT_TYPE@(AtArray_@AT_TYPE@* array1,
+                                                   AtArray_@AT_TYPE@* array2,
+                                                   AtArray_@AT_TYPE@** output,@AT_TYPE@ (*func)(@AT_TYPE@ data1, @AT_TYPE@ data2)){
+  // Validate broadcasting
+  AtArray_base* array1_base = AT_ARRAY_BASE(array1);
+  AtArray_base* array2_base = AT_ARRAY_BASE(array2);
+
+  if(at_array_base_broadcast_is_valid(array1_base, array2_base)){
+    uint16_t dim;
+    if(*output == NULL){
+      g_autofree uint64_t* size = at_array_base_broadcast_get_size(array1_base, array2_base);
+      dim = at_array_base_broadcast_get_dim (array1_base, array2_base);
+      at_array_new(output,dim,size);
+
+    } else {
+      dim = at_array_get_dim(*output);
+    }
+
+    // Fill output
+    g_autofree uint64_t* indices = g_malloc(dim * sizeof(uint64_t) * 3);
+    uint64_t* indices1 = indices  + dim;
+    uint64_t* indices2 = indices1 + dim;
+    uint64_t num_elements = at_array_get_num_elements(*output);
+    uint64_t i;
+
+    uint64_t* offset1  = indices1 + (dim-at_array_get_dim(array1));
+    uint64_t* offset2  = indices2 + (dim-at_array_get_dim(array2));
+    uint64_t* offset01 = indices + (dim-at_array_get_dim(array1));
+    uint64_t* offset02 = indices + (dim-at_array_get_dim(array2));
+
+    for(i = 0; i < num_elements; i++){
+      at_array_get_index(*output, i, indices);
+      at_array_mod(array1, offset01, offset1);
+      at_array_mod(array2, offset02, offset2);
+      at_array_set(*output, indices, func(at_array_get(array1, offset1),at_array_get(array2, offset2)));
+    }
+  }
+}
+static void
+at_array_@AT_TYPE@_binary_@AT_TYPE@_to_@AT_TYPE@(AtArray_@AT_TYPE@* array1,
+                                            @AT_TYPE@ scalar,
+                                            AtArray_@AT_TYPE@** output,
+                                            @AT_TYPE@(*func)(@AT_TYPE@, @AT_TYPE@)){
+  if(*output != array1) at_array_copy(array1, output);
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(*output);
+  uint64_t num_elements = at_array_get_num_elements(*output);
+  uint64_t i;
+  if(at_array_get_contiguous(*output))
+    for(i = 0; i < num_elements; i++){
+      priv->data[i] = func(priv->data[i],scalar);
+    }
+  else
+  {
+    uint64_t index;
+    g_autofree uint64_t* relative = g_malloc(at_array_get_dim(*output)*sizeof(uint64_t));
+    for(i = 0; i < num_elements; i++){
+      index = at_array_base_get_index_absolute(AT_ARRAY_BASE(*output),i,relative);
+      priv->data[index] = func(priv->data[index],scalar);
+    }
+  }
+}
+
+#define AT_DEFINE_BINARY(op) \
+void \
+at_array_@AT_TYPE@_##op##_array_@AT_TYPE@_to_@AT_TYPE@(AtArray_@AT_TYPE@* array1,\
+                                               AtArray_@AT_TYPE@* array2,\
+                                               AtArray_@AT_TYPE@** output){\
+  at_array_@AT_TYPE@_binary_array_@AT_TYPE@_to_@AT_TYPE@(array1,array2,output,at_binary_@AT_TYPE@_##op);\
+}\
+void \
+at_array_@AT_TYPE@_##op##_@AT_TYPE@_to_@AT_TYPE@(AtArray_@AT_TYPE@* array1,\
+                                         @AT_TYPE@ scalar,\
+                                         AtArray_@AT_TYPE@** output){\
+  at_array_@AT_TYPE@_binary_@AT_TYPE@_to_@AT_TYPE@(array1,scalar,output,at_binary_@AT_TYPE@_##op); \
+}
+
+AT_DEFINE_BINARY(add)
+AT_DEFINE_BINARY(subtract)
+AT_DEFINE_BINARY(mult)
+AT_DEFINE_BINARY(divide)
+AT_DEFINE_BINARY(set)
+#if !@AT_TYPE_FLOAT@
+AT_DEFINE_BINARY(bitwise_and)
+AT_DEFINE_BINARY(bitwise_or)
+AT_DEFINE_BINARY(bitwise_xor)
+#endif
+
+void
+at_array_@AT_TYPE@_mod_indices(AtArray_@AT_TYPE@* array, uint64_t* indices, uint64_t* output){
+  at_array_base_mod_indices(AT_ARRAY_BASE(array),indices,output);
+}
+
+void
+at_array_@AT_TYPE@_set_by_indices(AtArray_@AT_TYPE@* array, uint64_t* indices, @AT_TYPE@ value){
+  uint64_t index;
+  at_array_@AT_TYPE@_get_index(array,indices,&index);
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  priv->data[index] = value;
+}
+
+void
+at_array_@AT_TYPE@_t_set_by_index(AtArray_@AT_TYPE@* array, uint64_t index, @AT_TYPE@ value){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  priv->data[index] = value;
+}
+
+AT_DEFINE_COPY_TO(@AT_TYPE@, uint8_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, uint16_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, uint32_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, uint64_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, int8_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, int16_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, int32_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, int64_t)
+AT_DEFINE_COPY_TO(@AT_TYPE@, float)
+AT_DEFINE_COPY_TO(@AT_TYPE@, double)
+
+void
+at_array_@AT_TYPE@_sub(AtArray_@AT_TYPE@* array, AtRange* ranges, AtArray_@AT_TYPE@** output){
+  at_array_new(output);
+  uint64_t offset = at_array_base_sub(AT_ARRAY_BASE(array), ranges, AT_ARRAY_BASE(*output));
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  AtArray_@AT_TYPE@Private* priv_output = at_array_@AT_TYPE@_get_instance_private(*output);
+  priv_output->data = priv->data + offset;
+}
+
+AtArray_@AT_TYPE@*
+at_array_@AT_TYPE@_get_parent(AtArray_@AT_TYPE@* array){
+  return AT_ARRAY_@AT_TYPE@(at_array_base_get_parent(AT_ARRAY_BASE(array)));
+}
+
+void
+at_array_@AT_TYPE@_map(AtArray(@AT_TYPE@)* array, AtMapFunc(@AT_TYPE@) func, AtArray(@AT_TYPE@)** output){
+  if(*output == NULL) at_array_copy(array, output);
+  AtArray_@AT_TYPE@Private* priv_output = at_array_@AT_TYPE@_get_instance_private(*output);
+  uint64_t num_elements = at_array_get_num_elements(*output);
+  uint64_t i;
+  if(at_array_get_contiguous(*output)){
+    for(i = 0; i < num_elements; i++){
+      priv_output->data[i] = func(*output,i,priv_output->data[i]);
+    }
+  }else{
+    g_autofree uint64_t* relative = g_malloc(at_array_get_dim(*output) * sizeof(uint64_t));
+    uint64_t index;
+    for(i = 0; i < num_elements; i++){
+      index = at_array_base_get_index_absolute(AT_ARRAY_BASE(*output),i,relative);
+      priv_output->data[index] = func(*output,i,priv_output->data[index]);
+    }
+  }
+}
+
+void
+at_array_@AT_TYPE@_map_inplace(AtArray_@AT_TYPE@* array, AtMapFunc_@AT_TYPE@ func){
+  at_array_@AT_TYPE@_map(array,func,&array);
+}
+
+long double
+at_array_@AT_TYPE@_reduce_all(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ func,
+                             @AT_TYPE@ starting_value){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  long double reduced = starting_value;
+  uint64_t i, index;
+  uint64_t num_elements = at_array_get_num_elements(AT_ARRAY_BASE(array));
+
+  uint64_t* relative = g_malloc(at_array_get_dim(array)*sizeof(uint64_t));
+  for(i = 0; i < num_elements; i++){
+    index = at_array_base_get_index_absolute(AT_ARRAY_BASE(array),i,relative);
+    reduced = func(reduced, priv->data[index]);
+  }
+  return reduced;
+}
+
+void
+at_array_@AT_TYPE@_reduce_1(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ func,
+                           uint16_t dim, AtArray_@AT_TYPE@** output, @AT_TYPE@ starting_value){
+  at_array_@AT_TYPE@_reduce_N(array,func,1,&dim,output,starting_value);
+}
+void
+at_array_@AT_TYPE@_reduce_N(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ func,
+                           uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output,
+                           @AT_TYPE@ starting_value){
+  uint16_t original_dim = at_array_get_dim(array);
+  uint16_t reduced_dim  = original_dim - num_axes;
+  g_autofree uint64_t* reduced_size = g_malloc(sizeof(uint64_t) * reduced_dim);
+  g_autofree uint64_t* reduced_axes = g_malloc(sizeof(uint64_t) * reduced_dim);
+
+  // Get the size of reduced array
+  uint16_t k = 0,f;
+  uint64_t i, size, j;
+  for(i = 0; i < original_dim; i++){
+    // Find whether current axis is marked as reduced
+    for(f = 0; f < num_axes; f++){
+      if(i == axes[f]) break;
+    }
+    // Include those axes not marked as reduced
+    if(f == num_axes){
+      size = at_array_get_size(array,i);
+      reduced_size[k]   = size;
+      reduced_axes[k++] = i;
+    }
+  }
+
+  // Create the array
+  at_array_@AT_TYPE@_new_with_size(output,reduced_dim,reduced_size);
+  AtArray_@AT_TYPE@* reduced = *output;
+  at_array_@AT_TYPE@_fill(reduced,starting_value);
+
+  // Fill the array
+  // Ex: Reduce (5,2,3) in Y (5,3)
+  //  We need to convert 1D to ND
+  //   Ex:  17     =>      (2,1,2)
+  //  So (0,0,0) will go to (0,0)
+  //     (2,1,2) will go to (2,2)
+  g_autofree uint64_t* absolute = g_malloc(at_array_get_dim(array) * sizeof(uint64_t));
+  g_autofree uint64_t* indices_reduced = g_malloc(reduced_dim * sizeof(uint64_t));
+  g_autofree uint64_t* relative = g_malloc(original_dim * sizeof(uint64_t));
+  uint64_t *indices;
+  uint64_t index_reduced;
+  AtArray_@AT_TYPE@Private *priv = at_array_@AT_TYPE@_get_instance_private(array);
+  AtArray_@AT_TYPE@Private *rpriv = at_array_@AT_TYPE@_get_instance_private(reduced);
+  uint64_t num_elements = at_array_get_num_elements(array);
+
+  uint64_t index;
+  for(i = 0; i < num_elements;i++){
+    // Get ND indices (relative or absolute, according to array)
+    if(at_array_get_contiguous(array)) {
+      index = i;
+      at_array_@AT_TYPE@_get_indices(array,i,absolute);
+      indices = absolute;
+    }else {
+      index = at_array_base_get_index_absolute(AT_ARRAY_BASE(array),i,relative);
+      indices = relative;
+    }
+    // Discard reduced axis
+    for(j = 0; j < reduced_dim; j++){
+      indices_reduced[j] = indices[reduced_axes[j]];
+    }
+    at_array_@AT_TYPE@_get_index(reduced,indices_reduced,&index_reduced);
+    rpriv->data[index_reduced] = func(rpriv->data[index_reduced],priv->data[index]);
+  }
+
+}
+
+void
+at_array_@AT_TYPE@_squeeze(AtArray_@AT_TYPE@* array){
+  at_array_base_squeeze(AT_ARRAY_BASE(array));
+}
+void
+at_array_@AT_TYPE@_squeeze_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes){
+  at_array_base_squeeze_axes(AT_ARRAY_BASE(array),num_axes,axes);
+}
+
+void
+at_array_@AT_TYPE@_read(const char* filename, AtArray_@AT_TYPE@ **output){
+
+}
+
+void
+at_array_@AT_TYPE@_write(const char* filename, AtArray_@AT_TYPE@ *input){
+
+}
+
+void
+at_array_@AT_TYPE@_max(AtArray_@AT_TYPE@* array, @AT_TYPE@* output){
+  *output = (@AT_TYPE@)at_array_@AT_TYPE@_reduce_all(array,at_array_reduce_max_func,@AT_TYPE_MIN@);
+}
+
+void
+at_array_@AT_TYPE@_max_axis(AtArray_@AT_TYPE@* array, uint16_t axis, AtArray_@AT_TYPE@** output){
+  at_array_@AT_TYPE@_reduce_1(array,at_array_reduce_max_func,axis,output,@AT_TYPE_MIN@);
+}
+
+void
+at_array_@AT_TYPE@_max_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output){
+  at_array_@AT_TYPE@_reduce_N(array,at_array_reduce_max_func,num_axes,axes,output,@AT_TYPE_MIN@);
+}
+
+void
+at_array_@AT_TYPE@_min(AtArray_@AT_TYPE@* array, @AT_TYPE@* output){
+  *output = (@AT_TYPE@)at_array_@AT_TYPE@_reduce_all(array,at_array_reduce_min_func,@AT_TYPE_MAX@);
+}
+
+void
+at_array_@AT_TYPE@_min_axis(AtArray_@AT_TYPE@* array, uint16_t axis, AtArray_@AT_TYPE@** output){
+  at_array_@AT_TYPE@_reduce_1(array,at_array_reduce_min_func,axis,output,@AT_TYPE_MAX@);
+}
+
+void
+at_array_@AT_TYPE@_min_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output){
+  at_array_@AT_TYPE@_reduce_N(array,at_array_reduce_min_func,num_axes,axes,output,@AT_TYPE_MAX@);
+}
+
+void
+at_array_@AT_TYPE@_prod(AtArray_@AT_TYPE@* array, @AT_TYPE@* output){
+  *output = (@AT_TYPE@)at_array_@AT_TYPE@_reduce_all(array,at_array_reduce_prod_func,1);
+}
+
+void
+at_array_@AT_TYPE@_prod_axis(AtArray_@AT_TYPE@* array, uint16_t axis, AtArray_@AT_TYPE@** output){
+  at_array_@AT_TYPE@_reduce_1(array,at_array_reduce_prod_func,axis,output,1);
+}
+
+void
+at_array_@AT_TYPE@_prod_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output){
+  at_array_@AT_TYPE@_reduce_N(array,at_array_reduce_prod_func,num_axes,axes,output,1);
+}
+
+void
+at_array_@AT_TYPE@_range_to(AtArray_@AT_TYPE@** output, @AT_TYPE@ to){
+  at_array_@AT_TYPE@_range_from_to(output, 0, to);
+}
+
+void
+at_array_@AT_TYPE@_range_from_to(AtArray_@AT_TYPE@** output, @AT_TYPE@ from, @AT_TYPE@ to){
+  at_array_@AT_TYPE@_range_from_to_step(output, from, to, 1);
+}
+
+void
+at_array_@AT_TYPE@_range_from_to_step(AtArray_@AT_TYPE@** output, @AT_TYPE@ from, @AT_TYPE@ to, @AT_TYPE@ step){
+  uint64_t size = (uint64_t)ceil((double)(to-from)/(double)step);
+  g_autofree @AT_TYPE@* data = g_malloc(size * sizeof(@AT_TYPE@));
+  data[0] = from;
+  uint64_t i;
+  for(i = 1; i < size; i++){
+    data[i] = data[i-1] + step;
+  }
+  at_array_@AT_TYPE@_new_with_data(output,1,&size,data);
+}
+
+#if !@AT_TYPE_FLOAT@
+void
+at_array_@AT_TYPE@_bitwise_not(AtArray_@AT_TYPE@* array1, AtArray_@AT_TYPE@** output){
+  at_array_copy(array1, output);
+  uint64_t num_elements = at_array_get_num_elements(*output);
+  uint64_t i;
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(*output);
+  for(i = 0; i < num_elements; i++)
+    priv->data[i] = ~priv->data[i];
+}
+#endif
