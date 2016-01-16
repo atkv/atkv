@@ -1,0 +1,511 @@
+/**
+ ** This file is part of the atkv project.
+ ** Copyright 2016 Anderson Tavares <nocturne.pe@gmail.com>.
+ **
+ ** This program is free software: you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License as published by
+ ** the Free Software Foundation, either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ **
+ ** You should have received a copy of the GNU General Public License
+ ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
+#ifndef AT_ARRAY_@AT_TYPE_UPPER@_H
+#define AT_ARRAY_@AT_TYPE_UPPER@_H
+#include <glib-object.h>
+#include <at/core.h>
+/*===========================================================================
+ * MACROS AND ENUMS
+ *===========================================================================*/
+#define AT_TYPE_ARRAY_@AT_TYPE@ at_array_@AT_TYPE@_get_type()
+/*===========================================================================
+ * CLASS DECLARATION
+ *===========================================================================*/
+G_DECLARE_DERIVABLE_TYPE(AtArray_@AT_TYPE@, at_array_@AT_TYPE@, AT, ARRAY_@AT_TYPE@, AtArray_base)
+typedef struct _AtArray_@AT_TYPE@Class{
+  AtArray_baseClass parent_class;
+}AtArray_@AT_TYPE@Class;
+
+/*===========================================================================
+ * FUNCTIONS
+ *===========================================================================*/
+typedef @AT_TYPE@ (*AtMapFunc_@AT_TYPE@)(AtArray_@AT_TYPE@* array, uint64_t index, @AT_TYPE@ value);
+typedef @AT_TYPE@ (*AtReduceFunc_@AT_TYPE@)(@AT_TYPE@ value1, @AT_TYPE@ value2);
+/**
+ * @brief at_array_@AT_TYPE@_new
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_new(AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_new_with_size
+ * @param output
+ * @param dim
+ * @param size
+ */
+void
+at_array_@AT_TYPE@_new_with_size(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size);
+/**
+ * @brief at_array_@AT_TYPE@_new_with_data
+ * @param output
+ * @param dim
+ * @param size
+ * @param data
+ */
+void
+at_array_@AT_TYPE@_new_with_data(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size, @AT_TYPE@* data);
+
+/**
+ * @brief at_array_@AT_TYPE@_new_1D
+ * @param output
+ * @param size1
+ */
+void
+at_array_@AT_TYPE@_new_1D(AtArray_@AT_TYPE@** output, uint64_t size1);
+/**
+ * @brief at_array_@AT_TYPE@_new_2D
+ * @param output
+ * @param size1
+ * @param size2
+ */
+void
+at_array_@AT_TYPE@_new_2D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2);
+/**
+ * @brief at_array_@AT_TYPE@_new_3D
+ * @param output
+ * @param size1
+ * @param size2
+ * @param size3
+ */
+void
+at_array_@AT_TYPE@_new_3D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3);
+/**
+ * @brief at_array_@AT_TYPE@_new_4D
+ * @param output
+ * @param size1
+ * @param size2
+ * @param size3
+ * @param size4
+ */
+void
+at_array_@AT_TYPE@_new_4D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3,
+                         uint64_t size4);
+/**
+ * @brief at_array_@AT_TYPE@_zeros_with_size
+ * @param output
+ * @param dim
+ * @param size
+ */
+void
+at_array_@AT_TYPE@_zeros_with_size(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size);
+
+/**
+ * @brief at_array_@AT_TYPE@_zeros_1D
+ * @param output
+ * @param size1
+ */
+void
+at_array_@AT_TYPE@_zeros_1D(AtArray_@AT_TYPE@** output, uint64_t size1);
+/**
+ * @brief at_array_@AT_TYPE@_zeros_2D
+ * @param output
+ * @param size1
+ * @param size2
+ */
+void
+at_array_@AT_TYPE@_zeros_2D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2);
+/**
+ * @brief at_array_@AT_TYPE@_zeros_3D
+ * @param output
+ * @param size1
+ * @param size2
+ * @param size3
+ */
+void
+at_array_@AT_TYPE@_zeros_3D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3);
+/**
+ * @brief at_array_@AT_TYPE@_zeros_4D
+ * @param output
+ * @param size1
+ * @param size2
+ * @param size3
+ * @param size4
+ */
+void
+at_array_@AT_TYPE@_zeros_4D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3,
+                         uint64_t size4);
+/**
+ * @brief at_array_@AT_TYPE@_ones_with_size
+ * @param output
+ * @param dim
+ * @param size
+ */
+void
+at_array_@AT_TYPE@_ones_with_size(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size);
+
+/**
+ * @brief at_array_@AT_TYPE@_ones_1D
+ * @param output
+ * @param size1
+ */
+void
+at_array_@AT_TYPE@_ones_1D(AtArray_@AT_TYPE@** output, uint64_t size1);
+/**
+ * @brief at_array_@AT_TYPE@_ones_2D
+ * @param output
+ * @param size1
+ * @param size2
+ */
+void
+at_array_@AT_TYPE@_ones_2D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2);
+/**
+ * @brief at_array_@AT_TYPE@_ones_3D
+ * @param output
+ * @param size1
+ * @param size2
+ * @param size3
+ */
+void
+at_array_@AT_TYPE@_ones_3D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3);
+/**
+ * @brief at_array_@AT_TYPE@_ones_4D
+ * @param output
+ * @param size1
+ * @param size2
+ * @param size3
+ * @param size4
+ */
+void
+at_array_@AT_TYPE@_ones_4D(AtArray_@AT_TYPE@** output,
+                         uint64_t size1,
+                         uint64_t size2,
+                         uint64_t size3,
+                         uint64_t size4);
+/**
+ * @brief at_array_@AT_TYPE@_append
+ * @param output
+ * @param value
+ */
+void
+at_array_@AT_TYPE@_append(AtArray_@AT_TYPE@* output, @AT_TYPE@ value);
+/**
+ * @brief at_array_@AT_TYPE@_is_empty
+ * @param output
+ * @return
+ */
+gboolean
+at_array_@AT_TYPE@_is_empty(AtArray_@AT_TYPE@* output);
+/**
+ * @brief at_array_@AT_TYPE@_get_by_index
+ * @param array
+ * @param index
+ * @return
+ */
+@AT_TYPE@
+at_array_@AT_TYPE@_get_by_index(AtArray_@AT_TYPE@* array, uint64_t index);
+/**
+ * @brief at_array_@AT_TYPE@_get_by_indices
+ * @param array
+ * @param indices
+ * @return
+ */
+@AT_TYPE@
+at_array_@AT_TYPE@_get_by_indices(AtArray_@AT_TYPE@* array, uint64_t* indices);
+
+/* Binary Operations
+ *-------------------------------*/
+AT_DECLARE_BINARY(@AT_TYPE@,add)
+AT_DECLARE_BINARY(@AT_TYPE@,subtract)
+AT_DECLARE_BINARY(@AT_TYPE@,mult)
+AT_DECLARE_BINARY(@AT_TYPE@,divide)
+AT_DECLARE_BINARY(@AT_TYPE@,set)
+#if !@AT_TYPE_FLOAT@
+AT_DECLARE_BINARY(@AT_TYPE@,bitwise_and)
+AT_DECLARE_BINARY(@AT_TYPE@,bitwise_or)
+AT_DECLARE_BINARY(@AT_TYPE@,bitwise_xor)
+#endif
+
+/**
+ * @brief at_array_@AT_TYPE@_get_index
+ * @param array
+ * @param indices
+ * @param index
+ */
+void
+at_array_@AT_TYPE@_get_index(AtArray_@AT_TYPE@* array, uint64_t* indices, uint64_t* index);
+
+/**
+ * @brief at_array_@AT_TYPE@_get_indices
+ * @param array
+ * @param index
+ * @param indices
+ */
+void
+at_array_@AT_TYPE@_get_indices(AtArray_@AT_TYPE@* array, uint64_t index, uint64_t* indices);
+/**
+ * @brief at_array_@AT_TYPE@_mod_indices
+ * @param array
+ * @param indices
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_mod_indices(AtArray_@AT_TYPE@* array, uint64_t* indices, uint64_t* output);
+/**
+ * @brief at_array_@AT_TYPE@_set_by_indices
+ * @param array
+ * @param indices
+ * @param value
+ */
+void
+at_array_@AT_TYPE@_set_by_indices(AtArray_@AT_TYPE@* array, uint64_t* indices, @AT_TYPE@ value);
+/**
+ * @brief at_array_@AT_TYPE@_set_by_index
+ * @param array
+ * @param index
+ * @param value
+ */
+void
+at_array_@AT_TYPE@_set_by_index(AtArray_@AT_TYPE@* array, uint64_t index, @AT_TYPE@ value);
+/**
+ * @brief at_array_@AT_TYPE@_copy_to_@AT_TYPE@
+ * @param array
+ * @param output
+ */
+AT_DECLARE_COPY_TO(@AT_TYPE@, uint8_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, uint16_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, uint32_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, uint64_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, int8_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, int16_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, int32_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, int64_t)
+AT_DECLARE_COPY_TO(@AT_TYPE@, float)
+AT_DECLARE_COPY_TO(@AT_TYPE@, double)
+/**
+ * @brief at_array_@AT_TYPE@_sub
+ * @param array
+ * @param ranges
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_sub(AtArray_@AT_TYPE@* array, AtRange* ranges, AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_get_parent
+ * @param array
+ * @return
+ */
+AtArray_@AT_TYPE@*
+at_array_@AT_TYPE@_get_parent(AtArray_@AT_TYPE@* array);
+
+/**
+ * @brief at_array_@AT_TYPE@_map
+ * @param array
+ * @param func
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_map(AtArray_@AT_TYPE@* array, AtMapFunc_@AT_TYPE@ func, AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_map_inplace
+ * @param array
+ * @param func
+ */
+void
+at_array_@AT_TYPE@_map_inplace(AtArray_@AT_TYPE@* array, AtMapFunc_@AT_TYPE@ func);
+/**
+ * @brief at_array_@AT_TYPE@_reduce_all
+ * @param array
+ * @param func
+ * @return
+ */
+long double
+at_array_@AT_TYPE@_reduce_all(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ func,
+                             @AT_TYPE@ starting_value);
+/**
+ * @brief at_array_@AT_TYPE@_reduce_1
+ * @param array
+ * @param func
+ * @param dim
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_reduce_1(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ func,
+                           uint16_t dim, AtArray_@AT_TYPE@** output,
+                           @AT_TYPE@ starting_value);
+/**
+ * @brief at_array_@AT_TYPE@_reduce_N
+ * @param array
+ * @param func
+ * @param num_axes
+ * @param axes
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_reduce_N(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ func,
+                           uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output,
+                           @AT_TYPE@ starting_value);
+
+/**
+ * @brief at_array_@AT_TYPE@_squeeze
+ * @param array
+ */
+void
+at_array_@AT_TYPE@_squeeze(AtArray_@AT_TYPE@* array);
+/**
+ * @brief at_array_base_squeeze_axes
+ * @param array
+ * @param num_axes
+ * @param axes
+ */
+void
+at_array_@AT_TYPE@_squeeze_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes);
+/**
+ * @brief at_array_@AT_TYPE@_read
+ * @param filename
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_read(const char* filename, AtArray_@AT_TYPE@ **output);
+/**
+ * @brief at_array_@AT_TYPE@_write
+ * @param filename
+ * @param input
+ */
+void
+at_array_@AT_TYPE@_write(const char* filename, AtArray_@AT_TYPE@ *input);
+/**
+ * @brief at_array_@AT_TYPE@_fill
+ * @param array
+ * @param value
+ */
+void
+at_array_@AT_TYPE@_fill(AtArray_@AT_TYPE@* array, @AT_TYPE@ value);
+/**
+ * @brief at_array_@AT_TYPE@_max
+ * @param array
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_max(AtArray_@AT_TYPE@* array, @AT_TYPE@* output);
+/**
+ * @brief at_array_@AT_TYPE@_max_axis
+ * @param array
+ * @param axis
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_max_axis(AtArray_@AT_TYPE@* array, uint16_t axis, AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_max_axes
+ * @param array
+ * @param num_axes
+ * @param axes
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_max_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output);
+
+/**
+ * @brief at_array_@AT_TYPE@_min
+ * @param array
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_min(AtArray_@AT_TYPE@* array, @AT_TYPE@* output);
+/**
+ * @brief at_array_@AT_TYPE@_min_axis
+ * @param array
+ * @param axis
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_min_axis(AtArray_@AT_TYPE@* array, uint16_t axis, AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_min_axes
+ * @param array
+ * @param num_axes
+ * @param axes
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_min_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_prod
+ * @param array
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_prod(AtArray_@AT_TYPE@* array, @AT_TYPE@* output);
+/**
+ * @brief at_array_@AT_TYPE@_prod_axis
+ * @param array
+ * @param axis
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_prod_axis(AtArray_@AT_TYPE@* array, uint16_t axis, AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_prod_axes
+ * @param array
+ * @param num_axes
+ * @param axes
+ * @param output
+ */
+void
+at_array_@AT_TYPE@_prod_axes(AtArray_@AT_TYPE@* array, uint16_t num_axes, uint16_t* axes, AtArray_@AT_TYPE@** output);
+/**
+ * @brief at_array_@AT_TYPE@_range_to
+ * @param output
+ * @param to
+ */
+void
+at_array_@AT_TYPE@_range_to(AtArray_@AT_TYPE@** output, @AT_TYPE@ to);
+/**
+ * @brief at_array_@AT_TYPE@_range_from_to
+ * @param output
+ * @param from
+ * @param to
+ */
+void
+at_array_@AT_TYPE@_range_from_to(AtArray_@AT_TYPE@** output, @AT_TYPE@ from, @AT_TYPE@ to);
+/**
+ * @brief at_array_@AT_TYPE@_range_from_to_step
+ * @param output
+ * @param from
+ * @param to
+ * @param step
+ */
+void
+at_array_@AT_TYPE@_range_from_to_step(AtArray_@AT_TYPE@** output, @AT_TYPE@ from, @AT_TYPE@ to, @AT_TYPE@ step);
+#if !@AT_TYPE_FLOAT@
+void
+at_array_@AT_TYPE@_bitwise_not(AtArray_@AT_TYPE@* array1, AtArray_@AT_TYPE@** output);
+#endif
+#endif

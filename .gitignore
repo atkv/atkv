@@ -41,3 +41,6 @@ include/at/*.h
 *.swp
 *.user
 external/
+array*t.[hc]
+array*float.[hc]
+array*double.[hc]
