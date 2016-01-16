@@ -18,7 +18,7 @@
 
 #ifndef AT_CORE_ARRAY_H
 #define AT_CORE_ARRAY_H
-
+#include <at/core.h>
 /*===========================================================================
  * MACROS, ENUMS AND TYPEDEFS
  *===========================================================================*/
@@ -178,5 +178,154 @@
  * We can simulate optional arguments
  * by these techniques
  *-----------------------------------*/
+#define SEVERAL_OP1I(OP,x) \
+  OP(uint8_t ,x), OP(uint16_t,x), OP(uint32_t,x), OP(uint64_t,x),\
+  OP(int8_t  ,x), OP(int16_t ,x), OP(int32_t ,x), OP(int64_t ,x)
+#define SEVERAL_OP1F(OP,x) OP(float   ,x), OP(double  ,x)
+#define SEVERAL_OP1(OP,x) SEVERAL_OP1I(OP,x), SEVERAL_OP1F(OP,x)
+
+#define SEVERAL_OP1R(OP,x) \
+  OP(uint8_t ,x), OP(uint16_t,x), OP(uint32_t,x), OP(uint64_t,x),\
+  OP(int8_t  ,x), OP(int16_t ,x), OP(int32_t ,x), OP(int64_t ,x),\
+  OP(float   ,x), OP(double  ,x)
+#define SEVERAL_OP2(OP,x,y) \
+  OP(uint8_t ,x,y), OP(uint16_t,x,y), OP(uint32_t,x,y), OP(uint64_t,x,y),\
+  OP(int8_t  ,x,y), OP(int16_t ,x,y), OP(int32_t ,x,y), OP(int64_t ,x,y),\
+  OP(float   ,x,y), OP(double  ,x,y)
+#define GENERIC_SEVERAL_OP1(item, OP, x)   _Generic((item), SEVERAL_OP1(OP, x))
+#define GENERIC_SEVERAL_OP1I(item, OP, x)  _Generic((item), SEVERAL_OP1I(OP, x))
+#define GENERIC_SEVERAL_OP2(item, OP, x,y) _Generic((item), SEVERAL_OP2(OP, x,y))
+#define GENERIC_SEVERAL_OP1R(item, OP, x)  _Generic((item), SEVERAL_OP1R(OP, x))
+
+
+#define EMPTY(...)
+#define DEFER(...) __VA_ARGS__ EMPTY()
+#define OBSTRUCT(...) __VA_ARGS__ DEFER(EMPTY)()
+#define EXPAND(...) __VA_ARGS__
+
+#define LINE_OP(type, op)   AtArray_##type **: at_array_##type##_##op
+#define LINE_OP2(type, op)   AtArray_##type *: at_array_##type##_##op
+#define LINE_NEW3(type, x, y) AtArray_##type **: _Generic((y),\
+  int: at_array_##type##_##x##_2D,\
+  uint64_t*: at_array_##type##_##x##_with_size\
+)
+#define LINE_NEW4(type, x, y) AtArray_##type **: _Generic((y),\
+  int: at_array_##type##_##x##_3D,\
+  uint64_t*: at_array_##type##_##x##_with_data\
+)
+#define LINE_NEW42(type, x, y) AtArray_##type **: _Generic((y),\
+  int: at_array_##type##_##x##_3D\
+)
+#define LINE_INDEX2(type, x) AtArray_##type *: _Generic((x),\
+  uint64_t*: at_array_##type##_get_index,\
+  uint64_t:  at_array_##type##_get_indices\
+)
+#define LINE_MOD(type, input) AtArray_##type *: _Generic((input), uint64_t*: at_array_##type##_mod_indices)
+#define LINE_SET(type, x) AtArray_##type *: _Generic((x),\
+  uint64_t*: at_array_##type##_set_by_indices,\
+  uint64_t:  at_array_##type##_set_by_index\
+)
+#define LINE_SET2(type,input) AtArray_##type*: _Generic((input),\
+  AtArray_##type*: at_array_##type##_set_array_##type##_to_##type,\
+  default: at_array_##type##_set_##type##_to_##type\
+)
+#define LINE_GET(type,x) AtArray_##type*: _Generic((x),\
+  uint64_t*: at_array_##type##_get_by_indices,\
+  uint64_t:  at_array_##type##_get_by_index,\
+  int:       at_array_##type##_get_by_index\
+)
+#define LINE_COPY2(type1,type2) AtArray_##type1 *: at_array_##type1##_copy_to_##type2
+#define LINE_COPY(type2,array) AtArray_##type2 **: GENERIC_SEVERAL_OP1R(array,LINE_COPY2,type2)
+#define LINE_OP22(type, input, op) AtArray_##type *: _Generic((input),\
+  AtArray_##type*: at_array_##type##_##op##_array_##type##_to_##type,\
+  default: at_array_##type##_##op##_##type##_to_##type\
+)
+#define LINE_OP23(input1, input2, op, output) _Generic((input1),\
+  AtArray_uint8_t*: _Generic((input2),\
+    AtArray_uint8_t*: _Generic((output),\
+      AtArray_uint8_t**: at_array_uint8_t_##op##_array_uint8_t_to_uint8_t\
+    ),\
+    uint8_t: _Generic((output),\
+      AtArray_uint8_t**: at_array_uint8_t_##op##_uint8_t_to_uint8_t\
+    ),\
+    default: _Generic((output),\
+      AtArray_uint8_t**: at_array_uint8_t_##op##_uint8_t_to_uint8_t\
+    )\
+  )\
+)(input1, input2, output)
+#define LINE_BITWISE3(input1, input2, output, op) _Generic((input1),\
+  AtArray_uint8_t*: _Generic((input2),\
+    AtArray_uint8_t*: _Generic((output),\
+      AtArray_uint8_t**: at_array_uint8_t_bitwise_##op##_array_uint8_t_to_uint8_t\
+    ),\
+    uint8_t: _Generic((output),\
+      AtArray_uint8_t**: at_array_uint8_t_bitwise_##op##_uint8_t_to_uint8_t\
+    ),\
+    default: _Generic((output),\
+      AtArray_uint8_t**: at_array_uint8_t_bitwise_##op##_uint8_t_to_uint8_t\
+    )\
+  )\
+)(input1, input2, output)
+
+#define at_array_new1(output)                             GENERIC_SEVERAL_OP1(output,LINE_OP,  new)   (output)
+#define at_array_new2(output,size1)                       GENERIC_SEVERAL_OP1(output,LINE_OP,  new_1D)(output,size1)
+#define at_array_new3(output,x, y)                        GENERIC_SEVERAL_OP2(output,LINE_NEW3,new,y) (output, x, y)
+#define at_array_new4(output,x, y, z)                     GENERIC_SEVERAL_OP2(output,LINE_NEW4,new,y) (output, x, y, z)
+#define at_array_new5(output,x, y, z, k)                  GENERIC_SEVERAL_OP1(output,LINE_OP,  new_4D)(output, x, y, z, k)
+#define at_array_get_dim1(array)                          at_array_base_get_dim(AT_ARRAY_BASE(array))
+#define at_array_get_num_elements1(array)                 at_array_base_get_num_elements(AT_ARRAY_BASE(array))
+#define at_array_get_elemsize1(array)                     at_array_base_get_elemsize(AT_ARRAY_BASE(array))
+#define at_array_get_num_bytes1(array)                    at_array_base_get_num_bytes(AT_ARRAY_BASE(array))
+#define at_array_get_contiguous1(array)                   at_array_base_get_contiguous(AT_ARRAY_BASE(array))
+#define at_array_get_size1(array)                         at_array_base_get_size(AT_ARRAY_BASE(array))
+#define at_array_get_size2(array,x)                       at_array_base_get_size_at(AT_ARRAY_BASE(array),x)
+#define at_array_get_step1(array)                         at_array_base_get_step(AT_ARRAY_BASE(array))
+#define at_array_get_step2(array,x)                       at_array_base_get_step_at(AT_ARRAY_BASE(array),x)
+#define at_array_is_empty1(array)                         GENERIC_SEVERAL_OP1(array, LINE_OP2, is_empty)(array)
+#define at_array_get_index3(array, i1, i2)                GENERIC_SEVERAL_OP1(array, LINE_INDEX2,i1)(array, i1, i2)
+#define at_array_mod3(array, input, output)               GENERIC_SEVERAL_OP1(array, LINE_MOD,input)(array, input, output)
+#define at_array_set3(array, x, y)                        GENERIC_SEVERAL_OP1(array, LINE_SET,x)(array, x, y)
+#define at_array_get2(array, x)                           GENERIC_SEVERAL_OP1(array, LINE_GET, x)(array,x)
+#define at_array_copy2(array, output)                     GENERIC_SEVERAL_OP1(output,LINE_COPY,array)(array,output)
+#define at_array_add2(array,input)                        GENERIC_SEVERAL_OP2(array, LINE_OP22,input,add) (array,input,&array)
+#define at_array_subtract2(array,input)                   GENERIC_SEVERAL_OP2(array, LINE_OP22,input,subtract) (array,input,&array)
+#define at_array_mult2(array,input)                       GENERIC_SEVERAL_OP2(array, LINE_OP22,input,mult) (array,input,&array)
+#define at_array_divide2(array,input)                     GENERIC_SEVERAL_OP2(array, LINE_OP22,input,divide) (array,input,&array)
+#define at_array_add3(input1, input2, output)             LINE_OP23(input1, input2, add, output)
+#define at_array_subtract3(input1, input2, output)        LINE_OP23(input1, input2, subtract, output)
+#define at_array_mult3(input1, input2, output)            LINE_OP23(input1, input2, mult, output)
+#define at_array_divide3(input1, input2, output)          LINE_OP23(input1, input2, divide, output)
+#define at_array_set2(array, input)                       GENERIC_SEVERAL_OP1(array, LINE_SET2,input)(array,input,&array)
+#define at_array_sub3(array, ranges, output)              GENERIC_SEVERAL_OP1(array, LINE_OP2, sub) (array, ranges, output)
+#define at_array_get_parent1(array)                       at_array_base_get_parent(AT_ARRAY_BASE(array))
+#define at_array_squeeze1(array)                          GENERIC_SEVERAL_OP1(array, LINE_OP2,squeeze)(array)
+#define at_array_map2(array, func)                        GENERIC_SEVERAL_OP1(array, LINE_OP2,map_inplace)(array,func)
+#define at_array_map3(array, func, output)                GENERIC_SEVERAL_OP1(array, LINE_OP2,map)(array,func,output)
+#define at_array_reduce5(array, func, axis, output,value) GENERIC_SEVERAL_OP1(array, LINE_OP2,reduce_1)(array,func,axis,output,value)
+#define at_array_reduce6(array, func, num_axes, axes, output,value) GENERIC_SEVERAL_OP1(array,LINE_OP2,reduce_N)(array,func,num_axes,axes, output,value)
+#define at_array_zeros2(output,size1)                     GENERIC_SEVERAL_OP1(output, LINE_OP,zeros_1D)(output,size1)
+#define at_array_zeros3(output,x, y)                      GENERIC_SEVERAL_OP2(output, LINE_NEW3,zeros,y)(output,x,y)
+#define at_array_zeros4(output,x,y,z)                     GENERIC_SEVERAL_OP2(output, LINE_NEW42,zeros,y)(output,x,y,z)
+#define at_array_zeros5(output,x,y,z,k)                   GENERIC_SEVERAL_OP1(output, LINE_OP, zeros_4D)(output,x,y,z,k)
+#define at_array_ones2(output,size1)                      GENERIC_SEVERAL_OP1(output, LINE_OP,    ones_1D)(output,size1)
+#define at_array_ones3(output,x, y)                       GENERIC_SEVERAL_OP2(output, LINE_NEW3,  ones,y)(output,x,y)
+#define at_array_ones4(output,x,y,z)                      GENERIC_SEVERAL_OP2(output, LINE_NEW42, ones,y)(output,x,y,z)
+#define at_array_ones5(output,x,y,z,k)                    GENERIC_SEVERAL_OP1(output, LINE_OP, ones_4D)(output,x,y,z,k)
+#define at_array_max2(array, output)                      GENERIC_SEVERAL_OP1(array,  LINE_OP2, max)(array,output)
+#define at_array_max3(array, axis, output)                GENERIC_SEVERAL_OP1(array,  LINE_OP2,max_axis)(array, axis, output)
+#define at_array_max4(array, num_axes, axes, output)      GENERIC_SEVERAL_OP1(array,  LINE_OP2,max_axes)(array, num_axes, axes, output)
+#define at_array_min2(array, output)                      GENERIC_SEVERAL_OP1(array,  LINE_OP2, min)(array,output)
+#define at_array_min3(array, axis, output)                GENERIC_SEVERAL_OP1(array,  LINE_OP2, min_axis)(array, axis, output)
+#define at_array_min4(array, num_axes, axes, output)      GENERIC_SEVERAL_OP1(array,  LINE_OP2, min_axes)(array, num_axes, axes, output)
+#define at_array_prod2(array, output)                     GENERIC_SEVERAL_OP1(array,  LINE_OP2, prod)(array,output)
+#define at_array_prod3(array, axis, output)               GENERIC_SEVERAL_OP1(array,  LINE_OP2, prod_axis)(array, axis, output)
+#define at_array_prod4(array, num_axes, axes, output)     GENERIC_SEVERAL_OP1(array,  LINE_OP2, prod_axes)(array, num_axes, axes, output)
+#define at_array_range2(output, to)                       GENERIC_SEVERAL_OP1(output, LINE_OP, range_to)(output, to)
+#define at_array_range3(output, x, y)                     GENERIC_SEVERAL_OP1(output, LINE_OP, range_from_to)(output, x,y)
+#define at_array_range4(output, x, y, z)                  GENERIC_SEVERAL_OP1(output, LINE_OP, range_from_to_step)(output, x,y,z)
+#define at_array_bitwise_and3(input1, input2, output)     LINE_BITWISE3(input1, input2, output, and)
+#define at_array_bitwise_or3(input1, input2, output)      LINE_BITWISE3(input1, input2, output, or)
+#define at_array_bitwise_xor3(input1, input2, output)     LINE_BITWISE3(input1, input2, output, xor)
+#define at_array_bitwise_not2(array1, output)             GENERIC_SEVERAL_OP1I(array1,LINE_OP2,bitwise_not)(array1, output)
 
 #endif

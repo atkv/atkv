@@ -73,7 +73,7 @@ foreach(TYPE_INDEX RANGE ${len2})
 endforeach()
 set(AT_CORE_HDRS type.h range.h macro.h config.h arraybase.h
     ${AT_ARRAY_TYPES_HDRS} array.h)
-set(AT_CORE_SRCS range.c ${AT_ARRAY_TYPES_SRCS})
+set(AT_CORE_SRCS range.c arraybase.c ${AT_ARRAY_TYPES_SRCS})
 set(AT_CORE_TESTS array)
 set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 

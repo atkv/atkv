@@ -29,7 +29,7 @@
 /*===========================================================================
  * CLASS DECLARATION
  *===========================================================================*/
-G_DECLARE_DERIVABLE_TYPE(AtArray_base, at_array_base, GRF, ARRAY_BASE, GObject)
+G_DECLARE_DERIVABLE_TYPE(AtArray_base, at_array_base, AT, ARRAY_BASE, GObject)
 typedef struct _AtArray_baseClass{
   GObjectClass parent_class;
 }AtArray_baseClass;

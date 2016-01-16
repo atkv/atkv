@@ -25,48 +25,48 @@
 #   License along with Grafeo.  If not, see
 #   <http://www.gnu.org/licenses/>.
 # ===================================================================*/
-#include <grf/core.h>
+#include <at/core.h>
 #include <stdlib.h>
 #include <string.h>
 
 /*===========================================================================
  * PRIVATE API
  *===========================================================================*/
- typedef struct _GrfArray_basePrivate GrfArray_basePrivate;
-struct _GrfArray_basePrivate{
+ typedef struct _AtArray_basePrivate AtArray_basePrivate;
+struct _AtArray_basePrivate{
   uint16_t      dim;
   uint64_t*     size;
   uint64_t*     step;
   uint64_t      num_elements;
   size_t        elemsize;
-  GrfDataType   datatype;
-  GrfArray_base* parent;
+  AtDataType   datatype;
+  AtArray_base* parent;
   gboolean      contiguous;
   uint8_t       alignment; // to align the structure
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE(GrfArray_base, grf_array_base, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(AtArray_base, at_array_base, G_TYPE_OBJECT)
 
 static void
-grf_array_base_dispose(GObject* object){
-  GrfArray_base* array = GRF_ARRAY_BASE(object);
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_dispose(GObject* object){
+  AtArray_base* array = AT_ARRAY_BASE(object);
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   g_clear_object(&priv->parent);
-  G_OBJECT_CLASS(grf_array_base_parent_class)->dispose(object);
+  G_OBJECT_CLASS(at_array_base_parent_class)->dispose(object);
 }
 
 static void
-grf_array_base_finalize(GObject* object){
-  GrfArray_base* array = GRF_ARRAY_BASE(object);
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_finalize(GObject* object){
+  AtArray_base* array = AT_ARRAY_BASE(object);
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   g_free(priv->size);
   g_free(priv->step);
-  G_OBJECT_CLASS(grf_array_base_parent_class)->finalize(object);
+  G_OBJECT_CLASS(at_array_base_parent_class)->finalize(object);
 }
 
 static void
-grf_array_base_init(GrfArray_base *self){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(self);
+at_array_base_init(AtArray_base *self){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(self);
   priv->dim        = 0;
   priv->size       = NULL;
   priv->step       = NULL;
@@ -77,16 +77,16 @@ grf_array_base_init(GrfArray_base *self){
   priv->num_elements = 0;
 }
 static void
-grf_array_base_class_init(GrfArray_baseClass *klass){
+at_array_base_class_init(AtArray_baseClass *klass){
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
-  object_class->finalize = grf_array_base_finalize;
-  object_class->dispose  = grf_array_base_dispose;
+  object_class->finalize = at_array_base_finalize;
+  object_class->dispose  = at_array_base_dispose;
 }
 
 static void
-grf_array_base_set_step(GrfArray_base* array, uint64_t* step){
+at_array_base_set_step(AtArray_base* array, uint64_t* step){
   uint64_t i;
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   priv->step = realloc(priv->step,priv->dim * sizeof(uint64_t));
   for(i = 0; i < priv->dim; i++){
     priv->step[i] = step[i];
@@ -97,8 +97,8 @@ grf_array_base_set_step(GrfArray_base* array, uint64_t* step){
  * PUBLIC API
  *===========================================================================*/
 void
-grf_array_base_set_size(GrfArray_base* array, uint16_t dim, uint64_t* size){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_set_size(AtArray_base* array, uint16_t dim, uint64_t* size){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   size_t dim_bytes = dim * sizeof(uint64_t);   // dim
   priv->dim = dim;                             // -
   priv->size = realloc(priv->size, dim_bytes); // size
@@ -114,38 +114,38 @@ grf_array_base_set_size(GrfArray_base* array, uint16_t dim, uint64_t* size){
 }
 
 void
-grf_array_base_set_type(GrfArray_base* array, size_t elemsize, GrfDataType data_type){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_set_type(AtArray_base* array, size_t elemsize, AtDataType data_type){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   priv->elemsize = elemsize;
   priv->datatype = data_type;
 }
 
 uint16_t
-grf_array_base_get_dim(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_dim(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return priv->dim;
 }
 uint64_t
-grf_array_base_get_num_elements(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_num_elements(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return priv->num_elements;
 }
 
 size_t
-grf_array_base_get_num_bytes(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_num_bytes(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return priv->elemsize * priv->num_elements;
 }
 
 size_t
-grf_array_base_get_elemsize(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_elemsize(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return priv->elemsize;
 }
 
 uint64_t*
-grf_array_base_get_size(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_size(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   if(priv->size == NULL) return NULL;
   size_t size_bytes = priv->dim * sizeof(uint64_t);
   uint64_t* size = (uint64_t*)malloc(size_bytes);
@@ -154,14 +154,14 @@ grf_array_base_get_size(GrfArray_base* array){
 }
 
 uint64_t
-grf_array_base_get_size_at(GrfArray_base* array, uint16_t index){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_size_at(AtArray_base* array, uint16_t index){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return (priv->dim == 0 || priv->size == NULL)?0:priv->size[index];
 }
 
 uint64_t*
-grf_array_base_get_step(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_step(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   if(priv->step == NULL) return NULL;
   size_t step_bytes = priv->dim * sizeof(uint64_t);
   uint64_t* step = (uint64_t*)malloc(step_bytes);
@@ -170,63 +170,63 @@ grf_array_base_get_step(GrfArray_base* array){
 }
 
 uint64_t
-grf_array_base_get_step_at(GrfArray_base* array, uint16_t index){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_step_at(AtArray_base* array, uint16_t index){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return (priv->dim == 0 || priv->step == NULL)?0:priv->step[index];
 }
 
-GrfArray_base*
-grf_array_base_get_parent(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+AtArray_base*
+at_array_base_get_parent(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return priv->parent;
 }
 
 gboolean
-grf_array_base_get_contiguous(GrfArray_base* array){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_get_contiguous(AtArray_base* array){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   return priv->contiguous;
 }
 
 
 gboolean
-grf_array_base_broadcast_is_valid(GrfArray_base* array1, GrfArray_base* array2){
-  uint16_t dim1 = grf_array_get_dim(array1);
-  uint16_t dim2 = grf_array_get_dim(array2);
+at_array_base_broadcast_is_valid(AtArray_base* array1, AtArray_base* array2){
+  uint16_t dim1 = at_array_get_dim(array1);
+  uint16_t dim2 = at_array_get_dim(array2);
   uint16_t min_dim = min(dim1,dim2);
   uint16_t i, i1, i2;
   uint64_t size1, size2;
   for(i = 0, i1 = dim1-1, i2 = dim2-1; i < min_dim; i++, i1--, i2--){
-    size1 = grf_array_get_size(array1,i1);
-    size2 = grf_array_get_size(array2,i2);
+    size1 = at_array_get_size(array1,i1);
+    size2 = at_array_get_size(array2,i2);
     if(size1 != size2 && size1 != 1 && size2 != 1) return FALSE;
   }
   return TRUE;
 }
 
 uint64_t*
-grf_array_base_broadcast_get_size(GrfArray_base* array1, GrfArray_base* array2){
-  uint16_t  dim1    = grf_array_get_dim(array1);
-  uint16_t  dim2    = grf_array_get_dim(array2);
+at_array_base_broadcast_get_size(AtArray_base* array1, AtArray_base* array2){
+  uint16_t  dim1    = at_array_get_dim(array1);
+  uint16_t  dim2    = at_array_get_dim(array2);
   uint16_t  max_dim = max(dim1, dim2);
   uint64_t* size    = g_malloc(max_dim * sizeof(uint64_t));
   uint16_t  i;
   for(i = 0; i < max_dim; i++){
-    if(i < max_dim - dim1) size[i] = grf_array_get_size(array2,i);
-    else if(i < max_dim - dim2) size[i] = grf_array_get_size(array1,i);
-    else size[i] = max(grf_array_get_size(array1,i - (max_dim - dim1)),grf_array_get_size(array2,i - (max_dim - dim2)));
+    if(i < max_dim - dim1) size[i] = at_array_get_size(array2,i);
+    else if(i < max_dim - dim2) size[i] = at_array_get_size(array1,i);
+    else size[i] = max(at_array_get_size(array1,i - (max_dim - dim1)),at_array_get_size(array2,i - (max_dim - dim2)));
   }
   return size;
 }
 
 uint16_t
-grf_array_base_broadcast_get_dim(GrfArray_base* array1, GrfArray_base* array2){
-  return max(grf_array_get_dim(array1), grf_array_get_dim(array2));
+at_array_base_broadcast_get_dim(AtArray_base* array1, AtArray_base* array2){
+  return max(at_array_get_dim(array1), at_array_get_dim(array2));
 }
 
 void
-grf_array_base_get_indices(GrfArray_base* array, uint64_t index, uint64_t* indices){
+at_array_base_get_indices(AtArray_base* array, uint64_t index, uint64_t* indices){
   uint16_t i;
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   for(i = 0; i < priv->dim; i++){
     indices[i] = index / priv->step[i];
     index     %= priv->step[i];
@@ -234,9 +234,9 @@ grf_array_base_get_indices(GrfArray_base* array, uint64_t index, uint64_t* indic
 }
 
 void
-grf_array_base_get_index(GrfArray_base* array, uint64_t* indices, uint64_t* index){
+at_array_base_get_index(AtArray_base* array, uint64_t* indices, uint64_t* index){
   uint16_t i;
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   *index = 0;
   for(i = 0; i < priv->dim; i++){
     *index += indices[i] * priv->step[i];
@@ -244,8 +244,8 @@ grf_array_base_get_index(GrfArray_base* array, uint64_t* indices, uint64_t* inde
 }
 
 void
-grf_array_base_mod_indices(GrfArray_base* array, uint64_t* indices, uint64_t* output){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_mod_indices(AtArray_base* array, uint64_t* indices, uint64_t* output){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   uint16_t i;
   for(i = 0; i < priv->dim; i++){
     output[i] = indices[i] % priv->size[i];
@@ -253,12 +253,12 @@ grf_array_base_mod_indices(GrfArray_base* array, uint64_t* indices, uint64_t* ou
 }
 
 uint64_t
-grf_array_base_sub(GrfArray_base* array, GrfRange* ranges, GrfArray_base* subarray){
-  GrfArray_basePrivate* priv    = grf_array_base_get_instance_private(array);
-  GrfArray_basePrivate* subpriv = grf_array_base_get_instance_private(subarray);
+at_array_base_sub(AtArray_base* array, AtRange* ranges, AtArray_base* subarray){
+  AtArray_basePrivate* priv    = at_array_base_get_instance_private(array);
+  AtArray_basePrivate* subpriv = at_array_base_get_instance_private(subarray);
   g_autofree uint64_t* size = malloc(sizeof(uint64_t) * priv->dim);
   uint64_t i, offset = 0, from, to;
-  for(i = 0; i < grf_array_base_get_dim(array); i++){
+  for(i = 0; i < at_array_base_get_dim(array); i++){
     // Convert negative values to positive ones
     if(ranges[i].to < 0)   ranges[i].to   += priv->size[i];
     if(ranges[i].from < 0) ranges[i].from += priv->size[i];
@@ -270,16 +270,16 @@ grf_array_base_sub(GrfArray_base* array, GrfRange* ranges, GrfArray_base* subarr
     size[i] = to-from;
     offset += from * priv->step[i];
   }
-  grf_array_base_set_size(subarray,priv->dim,size);
-  grf_array_base_set_step(subarray,priv->step);
+  at_array_base_set_size(subarray,priv->dim,size);
+  at_array_base_set_step(subarray,priv->step);
   subpriv->contiguous = FALSE;
   g_set_object(&subpriv->parent, array);
   return offset;
 }
 
 uint64_t
-grf_array_base_get_index_absolute(GrfArray_base* array, uint64_t index, uint64_t* indices_relative){
-  GrfArray_basePrivate* priv    = grf_array_base_get_instance_private(array);
+at_array_base_get_index_absolute(AtArray_base* array, uint64_t index, uint64_t* indices_relative){
+  AtArray_basePrivate* priv    = at_array_base_get_instance_private(array);
 
   uint64_t i, ir, index_absolute = 0;
 
@@ -295,8 +295,8 @@ grf_array_base_get_index_absolute(GrfArray_base* array, uint64_t index, uint64_t
 }
 
 void
-grf_array_base_squeeze(GrfArray_base* array){
-  GrfArray_basePrivate* priv    = grf_array_base_get_instance_private(array);
+at_array_base_squeeze(AtArray_base* array){
+  AtArray_basePrivate* priv    = at_array_base_get_instance_private(array);
   uint16_t k = 0;
   uint64_t i;
   for(i = 0; i < priv->dim; i++){
@@ -311,8 +311,8 @@ grf_array_base_squeeze(GrfArray_base* array){
 }
 
 void
-grf_array_base_squeeze_axes(GrfArray_base* array, uint16_t num_axes, uint16_t* axes){
-  GrfArray_basePrivate* priv = grf_array_base_get_instance_private(array);
+at_array_base_squeeze_axes(AtArray_base* array, uint16_t num_axes, uint16_t* axes){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
   uint16_t current_pos = axes[0], current_axis_pos = 0,i;
   for(i = current_pos; i < priv->dim; i++){
     // Copy whether non single-dimension or not indicated by axis

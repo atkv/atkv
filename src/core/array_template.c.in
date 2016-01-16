@@ -140,7 +140,7 @@ void
 at_array_@AT_TYPE@_zeros_with_size(AtArray_@AT_TYPE@** output, uint16_t dim, uint64_t* size){
   at_array_@AT_TYPE@_new_with_size(output,dim,size);
   AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(*output);
-  memset(priv->data,0,at_array_@AT_TYPE@_get_num_elements(*output)*sizeof(@AT_TYPE@));
+  memset(priv->data,0,at_array_get_num_elements(*output)*sizeof(@AT_TYPE@));
 }
 void
 at_array_@AT_TYPE@_zeros_1D(AtArray_@AT_TYPE@** output,
@@ -238,15 +238,15 @@ at_array_@AT_TYPE@_append(AtArray_@AT_TYPE@* output, @AT_TYPE@ value){
 void
 at_array_@AT_TYPE@_fill(AtArray_@AT_TYPE@* array, @AT_TYPE@ value){
   AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
-  uint64_t num_elements = at_array_@AT_TYPE@_get_num_elements(array);
+  uint64_t num_elements = at_array_get_num_elements(array);
   uint64_t i;
   // If it's contiguous, make a contiguous loop
-  if(at_array_@AT_TYPE@_get_contiguous(array))
+  if(at_array_get_contiguous(array))
     for(i = 0; i < num_elements; i++)
       priv->data[i] = value;
   else{
     // It's a subarray. We need to get the real index
-    uint64_t* relative = g_malloc(at_array_@AT_TYPE@_get_dim(array) * sizeof(uint64_t));
+    uint64_t* relative = g_malloc(at_array_get_dim(array) * sizeof(uint64_t));
     uint64_t index;
     for(i = 0; i < num_elements; i++){
       index = at_array_base_get_index_absolute(AT_ARRAY_BASE(array), i, relative);
@@ -268,7 +268,7 @@ at_array_@AT_TYPE@_get_by_index(AtArray_@AT_TYPE@* array, uint64_t index){
   if(at_array_base_get_contiguous(AT_ARRAY_BASE(array)))
     return priv->data[index];
   else{
-    indices_relative = g_malloc(at_array_@AT_TYPE@_get_dim(array) * sizeof(uint64_t));
+    indices_relative = g_malloc(at_array_get_dim(array) * sizeof(uint64_t));
     uint64_t index_abs = at_array_base_get_index_absolute(AT_ARRAY_BASE(array),index,indices_relative);
     return priv->data[index_abs];
   }
@@ -540,19 +540,19 @@ at_array_@AT_TYPE@_reduce_N(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ fun
   //   Ex:  17     =>      (2,1,2)
   //  So (0,0,0) will go to (0,0)
   //     (2,1,2) will go to (2,2)
-  g_autofree uint64_t* absolute = g_malloc(at_array_@AT_TYPE@_get_dim(array) * sizeof(uint64_t));
+  g_autofree uint64_t* absolute = g_malloc(at_array_get_dim(array) * sizeof(uint64_t));
   g_autofree uint64_t* indices_reduced = g_malloc(reduced_dim * sizeof(uint64_t));
   g_autofree uint64_t* relative = g_malloc(original_dim * sizeof(uint64_t));
   uint64_t *indices;
   uint64_t index_reduced;
   AtArray_@AT_TYPE@Private *priv = at_array_@AT_TYPE@_get_instance_private(array);
   AtArray_@AT_TYPE@Private *rpriv = at_array_@AT_TYPE@_get_instance_private(reduced);
-  uint64_t num_elements = at_array_@AT_TYPE@_get_num_elements(array);
+  uint64_t num_elements = at_array_get_num_elements(array);
 
   uint64_t index;
   for(i = 0; i < num_elements;i++){
     // Get ND indices (relative or absolute, according to array)
-    if(at_array_@AT_TYPE@_get_contiguous(array)) {
+    if(at_array_get_contiguous(array)) {
       index = i;
       at_array_@AT_TYPE@_get_indices(array,i,absolute);
       indices = absolute;
