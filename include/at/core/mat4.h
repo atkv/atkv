@@ -16,21 +16,47 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#ifndef AT_GL_MAT4_H
+#define AT_GL_MAT4_H
 #include <at/core.h>
-
-static void test_at_gl_vec7(void** state){
-
-}
-
-int main(int argc, char** argv){
-  (void)argc;
-  (void)argv;
-  const struct CMUnitTest tests[1]={
-    cmocka_unit_test(test_at_gl_vec7),
-  };
-  return cmocka_run_group_tests(tests,NULL,NULL);
-}
+typedef struct _AtMat4{
+  double data[16];
+}AtMat4;
+/**
+ * @brief at_mat4_eye
+ * @return
+ */
+AtMat4
+at_mat4_eye();
+/**
+ * @brief at_mat4_rotate_vec3
+ * @param vec
+ * @param angle
+ * @param axis
+ */
+void
+at_mat4_rotate_vec3(AtVec3* vec, double angle, AtVec3 axis);
+/**
+ * @brief at_mat4_rotate_mat4
+ * @param mat
+ * @param angle
+ * @param axis
+ */
+void
+at_mat4_rotate_mat4(AtMat4* mat, double angle, AtVec3 axis);
+/**
+ * @brief at_mat4_mult_vec3
+ * @param mat
+ * @param vec
+ */
+void
+at_mat4_mult_vec3(AtMat4* mat, AtVec3* vec);
+/**
+ * @brief at_mat4_mult_mat4
+ * @param mat1
+ * @param mat2
+ * @param output
+ */
+void
+at_mat4_mult_mat4(AtMat4* mat1, AtMat4* mat2, AtMat4* output);
+#endif

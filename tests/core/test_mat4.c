@@ -22,7 +22,7 @@
 #include <cmocka.h>
 #include <at/core.h>
 
-static void test_at_gl_vec7(void** state){
+static void test_at_gl_mat4(void** state){
 
 }
 
@@ -30,7 +30,7 @@ int main(int argc, char** argv){
   (void)argc;
   (void)argv;
   const struct CMUnitTest tests[1]={
-    cmocka_unit_test(test_at_gl_vec7),
+    cmocka_unit_test(test_at_gl_mat4),
   };
   return cmocka_run_group_tests(tests,NULL,NULL);
 }
