@@ -87,15 +87,15 @@ foreach(TYPE_INDEX RANGE ${len2})
 endforeach()
 # Vec
 foreach(AT_VEC_TYPE ${AT_VEC_TYPES})
-  list(APPEND AT_ARRAY_TYPES_HDRS vec${AT_VEC_TYPE}.h)
-  list(APPEND AT_ARRAY_TYPES_SRCS vec${AT_VEC_TYPE}.c)
+  list(APPEND AT_VEC_TYPES_HDRS vec${AT_VEC_TYPE}.h)
+  list(APPEND AT_VEC_TYPES_SRCS vec${AT_VEC_TYPE}.c)
   configure_file(${AT_INCLUDE_DIR}/at/core/vec_template.h.in ${AT_INCLUDE_DIR}/at/core/vec${AT_VEC_TYPE}.h)
   configure_file(${AT_SOURCE_DIR}/core/vec_template.c.in ${AT_SOURCE_DIR}/core/vec${AT_VEC_TYPE}.c)
 endforeach()
-set(AT_CORE_HDRS type.h range.h macro.h config.h ${AT_VEC_TYPES_HDRS} arraybase.h
+set(AT_CORE_HDRS type.h range.h macro.h config.h ${AT_VEC_TYPES_HDRS} mat4.h arraybase.h
     ${AT_ARRAY_TYPES_HDRS} array.h)
-set(AT_CORE_SRCS range.c arraybase.c ${AT_VEC_TYPES_SRCS} ${AT_ARRAY_TYPES_SRCS})
-set(AT_CORE_TESTS array vec3 vec4 vec6 vec7)
+set(AT_CORE_SRCS range.c ${AT_VEC_TYPES_SRCS} mat4.c arraybase.c ${AT_ARRAY_TYPES_SRCS})
+set(AT_CORE_TESTS array vec3 vec4 vec6 vec7 mat4)
 set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 
 # STUDIO
