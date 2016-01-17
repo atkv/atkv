@@ -166,6 +166,8 @@
 #define at_array_solve(...)            macro_dispatcher(at_array_solve,            __VA_ARGS__)(__VA_ARGS__)
 #define at_array_inv(...)              macro_dispatcher(at_array_inv,              __VA_ARGS__)(__VA_ARGS__)
 #define at_array_least_square(...)     macro_dispatcher(at_array_least_square,     __VA_ARGS__)(__VA_ARGS__)
+#define at_array_alloc_data(...)       macro_dispatcher(at_array_alloc_data,     __VA_ARGS__)(__VA_ARGS__)
+#define at_array_dealloc_data(...)     macro_dispatcher(at_array_dealloc_data,     __VA_ARGS__)(__VA_ARGS__)
 
 /* Variations
  * ----------------------------------
@@ -266,6 +268,9 @@
     )\
   )\
 )(input1, input2, output)
+#define LINE_GET_DATA(type, array) AtArray_##type* : at_array_##type##_get_data
+#define LINE_ALLOC_DATA(type, array) AtArray_##type* : at_array_##type##_alloc_data
+#define LINE_DEALLOC_DATA(type, array) AtArray_##type* : at_array_##type##_dealloc_data
 
 #define at_array_new1(output)                             GENERIC_SEVERAL_OP1(output,LINE_OP,  new)   (output)
 #define at_array_new2(output,size1)                       GENERIC_SEVERAL_OP1(output,LINE_OP,  new_1D)(output,size1)
@@ -285,6 +290,7 @@
 #define at_array_get_index3(array, i1, i2)                GENERIC_SEVERAL_OP1(array, LINE_INDEX2,i1)(array, i1, i2)
 #define at_array_mod3(array, input, output)               GENERIC_SEVERAL_OP1(array, LINE_MOD,input)(array, input, output)
 #define at_array_set3(array, x, y)                        GENERIC_SEVERAL_OP1(array, LINE_SET,x)(array, x, y)
+#define at_array_get1(array)                              GENERIC_SEVERAL_OP1(array, LINE_GET_DATA, array)(array)
 #define at_array_get2(array, x)                           GENERIC_SEVERAL_OP1(array, LINE_GET, x)(array,x)
 #define at_array_copy2(array, output)                     GENERIC_SEVERAL_OP1(output,LINE_COPY,array)(array,output)
 #define at_array_add2(array,input)                        GENERIC_SEVERAL_OP2(array, LINE_OP22,input,add) (array,input,&array)
@@ -327,5 +333,6 @@
 #define at_array_bitwise_or3(input1, input2, output)      LINE_BITWISE3(input1, input2, output, or)
 #define at_array_bitwise_xor3(input1, input2, output)     LINE_BITWISE3(input1, input2, output, xor)
 #define at_array_bitwise_not2(array1, output)             GENERIC_SEVERAL_OP1I(array1,LINE_OP2,bitwise_not)(array1, output)
-
+#define at_array_alloc_data3(array, dim, size)            GENERIC_SEVERAL_OP1(array, LINE_ALLOC_DATA, array)(array, dim, size)
+#define at_array_dealloc_data1(array)                     GENERIC_SEVERAL_OP1(array, LINE_DEALLOC_DATA, array)(array)
 #endif
