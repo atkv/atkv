@@ -42,6 +42,7 @@ FILE(READ "GPLHEADER" AT_GPL_HEADER)
 set(AT_TYPES uint8_t uint16_t uint32_t uint64_t
               int8_t  int16_t  int32_t  int64_t
               float  double)
+set(AT_VEC_TYPES 3 4 5 6 7)
 set(AT_TYPES_ENUM UINT8 UINT16 UINT32 UINT64
                    INT8  INT16  INT32  INT64
                   FLOAT DOUBLE)
@@ -59,6 +60,7 @@ set(AT_TYPES_MIN         0          0          0          0
 # ----------------
 list(LENGTH AT_TYPES len1)
 math(EXPR   len2 "${len1} - 1")
+# Array
 foreach(TYPE_INDEX RANGE ${len2})
   list(GET AT_TYPES      ${TYPE_INDEX} AT_TYPE)
   list(GET AT_TYPES_ENUM ${TYPE_INDEX} AT_TYPE_ENUM)
@@ -71,10 +73,17 @@ foreach(TYPE_INDEX RANGE ${len2})
   configure_file(${AT_INCLUDE_DIR}/at/core/array_template.h.in ${AT_INCLUDE_DIR}/at/core/array_${AT_TYPE}.h)
   configure_file(${AT_SOURCE_DIR}/core/array_template.c.in ${AT_SOURCE_DIR}/core/array_${AT_TYPE}.c)
 endforeach()
-set(AT_CORE_HDRS type.h range.h macro.h config.h arraybase.h
+# Vec
+foreach(AT_VEC_TYPE ${AT_VEC_TYPES})
+  list(APPEND AT_ARRAY_TYPES_HDRS vec${AT_VEC_TYPE}.h)
+  list(APPEND AT_ARRAY_TYPES_SRCS vec${AT_VEC_TYPE}.c)
+  configure_file(${AT_INCLUDE_DIR}/at/core/vec_template.h.in ${AT_INCLUDE_DIR}/at/core/vec${AT_VEC_TYPE}.h)
+  configure_file(${AT_SOURCE_DIR}/core/vec_template.c.in ${AT_SOURCE_DIR}/core/vec${AT_VEC_TYPE}.c)
+endforeach()
+set(AT_CORE_HDRS type.h range.h macro.h config.h ${AT_VEC_TYPES_HDRS} arraybase.h
     ${AT_ARRAY_TYPES_HDRS} array.h)
-set(AT_CORE_SRCS range.c arraybase.c ${AT_ARRAY_TYPES_SRCS})
-set(AT_CORE_TESTS array)
+set(AT_CORE_SRCS range.c arraybase.c ${AT_VEC_TYPES_SRCS} ${AT_ARRAY_TYPES_SRCS})
+set(AT_CORE_TESTS array vec3 vec4 vec6 vec7)
 set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 
 # STUDIO
