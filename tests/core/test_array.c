@@ -843,9 +843,21 @@ test_array_bitwise_ops(void** state){
 
 }
 
+static void
+test_array_alloc(void** state){
+  g_autoptr(AtArray(uint8_t)) array = NULL;
+  at_array_new(&array);
+  assert_true(at_array_is_empty(array));
+  uint64_t size[3] = {10,10,10};
+  at_array_alloc_data(array,3,size);
+  assert_false(at_array_is_empty(array));
+  at_array_dealloc_data(array);
+  assert_true(at_array_is_empty(array));
+}
+
 int
 main(){
-  const struct CMUnitTest tests[17]={
+  const struct CMUnitTest tests[18]={
     cmocka_unit_test(test_array_new),
     cmocka_unit_test(test_array_add),
     cmocka_unit_test(test_array_subtract),
@@ -864,6 +876,7 @@ main(){
     cmocka_unit_test(test_array_prod),
     cmocka_unit_test(test_array_range),
     cmocka_unit_test(test_array_bitwise_ops),
+    cmocka_unit_test(test_array_alloc),
 
   };
   return cmocka_run_group_tests(tests,NULL,NULL);

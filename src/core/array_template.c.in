@@ -449,6 +449,26 @@ at_array_@AT_TYPE@_get_parent(AtArray_@AT_TYPE@* array){
   return AT_ARRAY_@AT_TYPE@(at_array_base_get_parent(AT_ARRAY_BASE(array)));
 }
 
+@AT_TYPE@*
+at_array_@AT_TYPE@_get_data(AtArray_@AT_TYPE@* array){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  return priv->data;
+}
+
+void
+at_array_@AT_TYPE@_alloc_data(AtArray_@AT_TYPE@* array, uint16_t dim, uint64_t* size){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  at_array_base_set_size(AT_ARRAY_BASE(array), dim, size);
+  uint64_t num_bytes = at_array_base_get_num_bytes(AT_ARRAY_BASE(array));
+  priv->data = g_realloc(priv->data,num_bytes);
+}
+void
+at_array_@AT_TYPE@_dealloc_data(AtArray_@AT_TYPE@* array){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  if(priv->data) g_free(priv->data);
+  priv->data = NULL;
+}
+
 void
 at_array_@AT_TYPE@_map(AtArray(@AT_TYPE@)* array, AtMapFunc(@AT_TYPE@) func, AtArray(@AT_TYPE@)** output){
   if(*output == NULL) at_array_copy(array, output);

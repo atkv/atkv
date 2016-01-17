@@ -323,6 +323,26 @@ at_array_@AT_TYPE@_sub(AtArray_@AT_TYPE@* array, AtRange* ranges, AtArray_@AT_TY
  */
 AtArray_@AT_TYPE@*
 at_array_@AT_TYPE@_get_parent(AtArray_@AT_TYPE@* array);
+/**
+ * @brief Get data
+ * @param array the array
+ */
+@AT_TYPE@*
+at_array_@AT_TYPE@_get_data(AtArray_@AT_TYPE@* array);
+/**
+ * @brief Alloc data
+ * @param array
+ * @param dim
+ * @param size
+ */
+void
+at_array_@AT_TYPE@_alloc_data(AtArray_@AT_TYPE@* array, uint16_t dim, uint64_t* size);
+/**
+ * @brief Dealloc data
+ * @param array
+ */
+void
+at_array_@AT_TYPE@_dealloc_data(AtArray_@AT_TYPE@* array);
 
 /**
  * @brief at_array_@AT_TYPE@_map
