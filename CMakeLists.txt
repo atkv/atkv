@@ -3,6 +3,7 @@ project(atkv)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 # ===================================================================== OPTIONS
 option(BUILD_CORE "" ON)
+option(BUILD_IMGPROC "" ON)
 option(BUILD_STUDIO "" ON)
 option(BUILD_ML "" OFF)
 option(BUILD_MEDICAL "" OFF)
@@ -20,17 +21,28 @@ set(EXTERNAL_LIB_DIR ${CMAKE_SOURCE_DIR}/external/lib)
 include_directories(${EXTERNAL_INCLUDE_DIR} include)
 #================================================================= DEPENDENCIES
 find_package(PkgConfig REQUIRED)
+# ------------------
 # GObject
-# ----------------
+# ------------------
 pkg_check_modules(GOBJECT REQUIRED gobject-2.0)
 INCLUDE_DIRECTORIES(${GOBJECT_INCLUDE_DIRS})
 add_definitions(-DHAVE_GOBJECT)
 
+# ------------------
 # GTK 3
-# ----------------
+# ------------------
 if(BUILD_STUDIO)
   pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
   include_directories(${GTK3_INCLUDE_DIRS})
+endif()
+
+# ------------------
+# Zlib
+# ------------------
+if(BUILD_IMGPROC)
+    pkg_check_modules(ZLIB REQUIRED zlib)
+    INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIRS})
+    ADD_DEFINITIONS(-DHAVE_ZLIB)
 endif()
 
 # ===================================================================== MODULES
@@ -95,8 +107,9 @@ set(AT_MEDICAL_SRCS app.c window.c)
 
 # IMGPROC
 # ----------------
-set(AT_IMGPROC_HDRS app.h window.h)
-set(AT_IMGPROC_SRCS app.c window.c)
+set(AT_IMGPROC_HDRS znzfile.h nifti.h)
+set(AT_IMGPROC_SRCS znzfile.c nifti.c)
+set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES})
 
 # Compiling modules
 foreach(AT_MODULE ${AT_MODULES})

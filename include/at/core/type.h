@@ -41,4 +41,9 @@ typedef struct _AtArray_int32_t  AtArray_int32_t;
 typedef struct _AtArray_int64_t  AtArray_int64_t;
 typedef struct _AtArray_float    AtArray_float;
 typedef struct _AtArray_double   AtArray_double;
+
+typedef enum _AtEndianess{
+  AT_LITTLE_ENDIAN = 0,
+  AT_BIG_ENDIAN    = 1
+}AtEndianess;
 #endif
