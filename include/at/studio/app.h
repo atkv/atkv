@@ -18,4 +18,32 @@
 
 #ifndef AT_STUDIO_APP_H
 #define AT_STUDIO_APP_H
+#include <gtk/gtk.h>
+/* ============================================================================
+ * STRUCTURE
+ * ==========================================================================*/
+#define AT_TYPE_STUDIO_APP at_studio_app_get_type()
+G_DECLARE_DERIVABLE_TYPE(AtStudioApp, at_studio_app, AT, STUDIO_APP, GObject)
+typedef struct _AtStudioAppClass{
+  GObjectClass parent_class;
+}AtStudioAppClass;
+
+/* ============================================================================
+ * FUNCTIONS
+ * ==========================================================================*/
+/**
+ * @brief at_studio_app_new
+ * @return
+ */
+AtStudioApp*
+at_studio_app_new();
+/**
+ * @brief at_studio_app_run
+ * @param app
+ * @param argc
+ * @param argv
+ * @return
+ */
+int
+at_studio_app_run(AtStudioApp* app, int argc, char** argv);
 #endif
