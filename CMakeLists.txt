@@ -49,6 +49,19 @@ endif()
 set(AT_MODULES chart core gl ift imgproc medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(AT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+FOREACH(AT_MODULE ${AT_MODULES})
+  STRING(TOUPPER ${AT_MODULE} AT_MODULE_UPPER)
+  SET(AT_${AT_MODULE_UPPER}_INCLUDE_DIR ${AT_INCLUDE_DIR}/at/${AT_MODULE})
+  SET(AT_${AT_MODULE_UPPER}_SOURCE_DIR ${AT_SOURCE_DIR}/${AT_MODULE})
+ENDFOREACH()
+set(AT_VERSION_MAJOR 0)
+set(AT_VERSION_MINOR 0)
+set(AT_VERSION_PATCH 1)
+set(AT_VERSION_STRING ${AT_VERSION_MAJOR}.${AT_VERSION_MINOR}.${AT_VERSION_PATCH})
+set(AT_INSTALL_PATH "\"${CMAKE_INSTALL_PREFIX}\"")
+set(AT_RESOURCE_PATH "\"${CMAKE_INSTALL_PREFIX}/share/at\"")
+
+
 FILE(READ "GPLHEADER" AT_GPL_HEADER)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -95,9 +108,11 @@ foreach(AT_VEC_TYPE ${AT_VEC_TYPES})
 endforeach()
 set(AT_CORE_HDRS type.h range.h macro.h config.h ${AT_VEC_TYPES_HDRS} mat4.h arraybase.h
     ${AT_ARRAY_TYPES_HDRS} array.h)
-set(AT_CORE_SRCS range.c ${AT_VEC_TYPES_SRCS} mat4.c arraybase.c ${AT_ARRAY_TYPES_SRCS})
+set(AT_CORE_SRCS config.c range.c ${AT_VEC_TYPES_SRCS} mat4.c arraybase.c ${AT_ARRAY_TYPES_SRCS})
 set(AT_CORE_TESTS array vec3 vec4 vec6 vec7 mat4)
 set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
+CONFIGURE_FILE("${AT_CORE_INCLUDE_DIR}/config.h.in"
+               "${AT_CORE_INCLUDE_DIR}/config.h")
 
 # STUDIO
 # ----------------

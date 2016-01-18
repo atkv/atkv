@@ -45,3 +45,4 @@ array*t.[hc]
 vec[3-7].[hc]
 array*float.[hc]
 array*double.[hc]
+config.h
