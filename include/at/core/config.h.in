@@ -18,4 +18,25 @@
 
 #ifndef AT_CORE_CONFIG_H
 #define AT_CORE_CONFIG_H
+
+#define AT_VERSION_MAJOR @AT_VERSION_MAJOR@
+#define AT_VERSION_MINOR @AT_VERSION_MINOR@
+#define AT_VERSION_RELEASE @AT_VERSION_PATCH@
+#define AT_WEBSITE "http://atkv.io"
+#define AT_INSTALL_PATH @AT_INSTALL_PATH@
+#define AT_RESOURCE_PATH @AT_RESOURCE_PATH@
+#define GETTEXT_PACKAGE "atkv"
+#include <stdint.h>
+#include <at/core.h>
+const char* const* at_config_get_authors_names();
+const char* const* at_config_get_authors_emails();
+const char* at_config_get_license();
+const char* at_config_get_website();
+const char* at_config_get_copyright();
+const char* at_config_get_description();
+uint8_t at_config_get_version_major();
+uint8_t at_config_get_version_minor();
+uint8_t at_config_get_version_release();
+const char* at_config_get_install_path();
+const char* at_config_get_resource_path();
 #endif
