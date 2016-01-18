@@ -1,0 +1,83 @@
+/**
+ ** This file is part of the atkv project.
+ ** Copyright 2016 Anderson Tavares <nocturne.pe@gmail.com>.
+ **
+ ** This program is free software: you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License as published by
+ ** the Free Software Foundation, either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ **
+ ** You should have received a copy of the GNU General Public License
+ ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
+#include <at/core.h>
+void
+at_vec@AT_VEC_TYPE@_add(AtVec@AT_VEC_TYPE@* vec1, AtVec@AT_VEC_TYPE@* vec2){
+  uint8_t i;
+  for(i = 0; i < @AT_VEC_TYPE@; i++)
+    vec1->data[i] += vec2->data[i];
+}
+
+void
+at_vec@AT_VEC_TYPE@_subtract(AtVec@AT_VEC_TYPE@* vec1, AtVec@AT_VEC_TYPE@* vec2){
+  uint8_t i;
+  for(i = 0; i < @AT_VEC_TYPE@; i++)
+    vec1->data[i] -= vec2->data[i];
+}
+
+void
+at_vec@AT_VEC_TYPE@_multiply(AtVec@AT_VEC_TYPE@* vec1, AtVec@AT_VEC_TYPE@* vec2){
+  uint8_t i;
+  for(i = 0; i < @AT_VEC_TYPE@; i++)
+    vec1->data[i] *= vec2->data[i];
+}
+
+void
+at_vec@AT_VEC_TYPE@_divide(AtVec@AT_VEC_TYPE@* vec1, AtVec@AT_VEC_TYPE@* vec2){
+  uint8_t i;
+  for(i = 0; i < @AT_VEC_TYPE@; i++)
+    vec1->data[i] /= vec2->data[i];
+}
+
+double
+at_vec@AT_VEC_TYPE@_dot(AtVec@AT_VEC_TYPE@* vec1, AtVec@AT_VEC_TYPE@* vec2){
+  uint8_t i;
+  double sum = 0;
+  for(i = 0; i < @AT_VEC_TYPE@; i++)
+    sum += vec1->data[i]*vec2->data[i];
+  return sum;
+}
+void
+at_vec@AT_VEC_TYPE@_multiply_scalar(AtVec@AT_VEC_TYPE@* vec1, double scalar){
+  uint8_t i;
+  for(i = 0; i < @AT_VEC_TYPE@; i++)
+    vec1->data[i] /= scalar;
+}
+void
+at_vec@AT_VEC_TYPE@_normalize(AtVec@AT_VEC_TYPE@* vec){
+  double magnitude = at_vec@AT_VEC_TYPE@_get_magnitude(vec);
+  at_vec@AT_VEC_TYPE@_multiply_scalar(vec,1.0/magnitude);
+}
+double
+at_vec@AT_VEC_TYPE@_get_magnitude(AtVec@AT_VEC_TYPE@* vec){
+  return sqrt(at_vec@AT_VEC_TYPE@_dot(vec,vec));
+}
+#if @AT_VEC_TYPE@ == 3
+AtVec3
+at_vec3_cross(AtVec3* vec1, AtVec3* vec2){
+  double* d1 = vec1->data;
+  double* d2 = vec2->data;
+  AtVec3 result;
+  double* d = result.data;
+  d[0] = d1[1] * d2[2] - d2[1] * d1[2];
+  d[1] = d1[2] * d2[0] - d2[2] * d1[0];
+  d[2] = d1[0] * d2[1] - d2[0] * d1[1];
+  return result;
+}
+#endif

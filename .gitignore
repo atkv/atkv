@@ -42,5 +42,6 @@ include/at/*.h
 *.user
 external/
 array*t.[hc]
+vec[3-7].[hc]
 array*float.[hc]
 array*double.[hc]

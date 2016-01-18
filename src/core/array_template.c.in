@@ -1,30 +1,21 @@
-/* ===================================================================
-#   Copyright (C) 2015-2015
-#   Anderson Tavares <nocturne.pe at gmail.com> PK 0x38e7bfc5c2def8ff
-#   Lucy Mansilla    <lucyacm at gmail.com>
-#   Caio de Braz     <caiobraz at gmail.com>
-#   Hans Harley      <hansbecc at gmail.com>
-#   Paulo Miranda    <pavmbr at yahoo.com.br>
-#
-#   Institute of Mathematics and Statistics - IME
-#   University of Sao Paulo - USP
-#
-#   This file is part of Grafeo.
-#
-#   Grafeo is free software: you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License
-#   as published by the Free Software Foundation, either version
-#   3 of the License, or (at your option) any later version.
-#
-#   Grafeo is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty
-#   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#   See the GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public
-#   License along with Grafeo.  If not, see
-#   <http://www.gnu.org/licenses/>.
-# ===================================================================*/
+/**
+ ** This file is part of the atkv project.
+ ** Copyright 2016 Anderson Tavares <nocturne.pe@gmail.com>.
+ **
+ ** This program is free software: you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License as published by
+ ** the Free Software Foundation, either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ **
+ ** You should have received a copy of the GNU General Public License
+ ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
 #include <at/core.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,8 +34,10 @@ static void
 at_array_@AT_TYPE@_finalize(GObject* object){
   AtArray_@AT_TYPE@* array = AT_ARRAY_@AT_TYPE@(object);
   AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
-  if(at_array_base_get_contiguous(AT_ARRAY_BASE(array)))
-    g_free(priv->data);
+  if(at_array_base_get_contiguous(AT_ARRAY_BASE(array))){
+    if(priv->data)
+      g_free(priv->data);
+  }
   G_OBJECT_CLASS(at_array_@AT_TYPE@_parent_class)->finalize(object);
 }
 
@@ -456,6 +449,27 @@ at_array_@AT_TYPE@_sub(AtArray_@AT_TYPE@* array, AtRange* ranges, AtArray_@AT_TY
 AtArray_@AT_TYPE@*
 at_array_@AT_TYPE@_get_parent(AtArray_@AT_TYPE@* array){
   return AT_ARRAY_@AT_TYPE@(at_array_base_get_parent(AT_ARRAY_BASE(array)));
+}
+
+@AT_TYPE@*
+at_array_@AT_TYPE@_get_data(AtArray_@AT_TYPE@* array){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  return priv->data;
+}
+
+void
+at_array_@AT_TYPE@_alloc_data(AtArray_@AT_TYPE@* array, uint16_t dim, uint64_t* size){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  at_array_base_set_size(AT_ARRAY_BASE(array), dim, size);
+  at_array_base_set_type(AT_ARRAY_BASE(array), sizeof(@AT_TYPE@), AT_@AT_TYPE_ENUM@);
+  uint64_t num_bytes = at_array_base_get_num_bytes(AT_ARRAY_BASE(array));
+  priv->data = g_realloc(priv->data,num_bytes);
+}
+void
+at_array_@AT_TYPE@_dealloc_data(AtArray_@AT_TYPE@* array){
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  if(priv->data) g_free(priv->data);
+  priv->data = NULL;
 }
 
 void
