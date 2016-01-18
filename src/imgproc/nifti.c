@@ -2431,7 +2431,7 @@ size_t at_nifti_read_buffer(AtZnzFile* fp, AtNiftiImage *nim)
      return -1;
   }
 
-  void*  dataptr    = at_array_get_data(array);
+  void*  dataptr    = at_array_get(array);
   size_t ntot       = at_array_get_num_bytes(array);
   ii = at_znzfile_read(fp, dataptr, 1, ntot);             /* data input */
 
@@ -2519,7 +2519,7 @@ int at_nifti_image_load( AtNiftiImage *nim )
    AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(nim);
    AtArray_uint16_t* array = AT_ARRAY_uint16_t(nim);
    if(at_array_is_empty(array)){
-     uint32_t size[3] = {priv->nsize.data[0],priv->nsize.data[1],priv->nsize.data[2]};
+     uint64_t size[3] = {priv->nsize.data[0],priv->nsize.data[1],priv->nsize.data[2]};
      at_array_alloc_data(array,3,size);
      if(at_array_is_empty(array)){
        g_clear_object(&fp);
@@ -3282,4 +3282,46 @@ AtNiftiImage *at_nifti_image_read( const char *hname , gboolean read_data )
    }
 
    return nim ;
+}
+
+AtVec7
+at_nifti_image_get_nsize(AtNiftiImage* image){
+  AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(image);
+  return priv->nsize;
+}
+
+AtVec7
+at_nifti_image_get_dsize(AtNiftiImage* image){
+  AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(image);
+  return priv->dsize;
+}
+
+float
+at_nifti_image_get_qfac(AtNiftiImage* image){
+  AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(image);
+  return priv->qfac;
+}
+
+AtEndianess
+at_nifti_image_get_byteorder(AtNiftiImage* image){
+  AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(image);
+  return priv->byteorder;
+}
+
+AtNiftiFileType
+at_nifti_image_get_filetype(AtNiftiImage* image){
+  AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(image);
+  return priv->nifti_type;
+}
+
+int
+at_nifti_image_get_ndim(AtNiftiImage* image){
+  AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(image);
+  return priv->ndim;
+}
+size_t
+at_nifti_image_get_volsize(AtNiftiImage *nim)
+{
+  AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(nim);
+  return (size_t)(priv->nbyper) * (size_t)(priv->nvox) ; /* total bytes */
 }

@@ -118,7 +118,8 @@ set(AT_MEDICAL_SRCS app.c window.c)
 # ----------------
 set(AT_IMGPROC_HDRS znzfile.h nifti.h)
 set(AT_IMGPROC_SRCS znzfile.c nifti.c)
-set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES})
+set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES} ${ZLIB_LIBRARIES})
+set(AT_IMGPROC_TESTS nifti)
 
 # Compiling modules
 foreach(AT_MODULE ${AT_MODULES})
