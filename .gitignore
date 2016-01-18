@@ -47,3 +47,4 @@ array*float.[hc]
 array*double.[hc]
 *.~*
 *.*~
+config.h

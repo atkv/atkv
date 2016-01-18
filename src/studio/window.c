@@ -1,4 +1,5 @@
 #include <at/studio/window.h>
+#include <at/core.h>
 #include <glib/gi18n.h>
 /* ============================================================================
  * PRIVATE API
@@ -22,17 +23,17 @@ mnu_about_activate_cb(GtkMenuItem* item, gpointer user_data){
   AtStudioAppWindowPrivate* priv = at_studio_app_window_get_instance_private(app_window);
 
 
-  gtk_show_about_dialog(NULL,
+  gtk_show_about_dialog(GTK_WINDOW(priv->window),
                         "program-name","@Studio",
                         "title",_("About @Studio"),
                         "website","http://studio.atkv.io",
+                        "website-label","http://studio.atkv.io",
                         "copyright","All rights reserved",
                         "license-type",GTK_LICENSE_GPL_3_0,
-                        "version","0.0.1",
+                        "version",AT_VERSION_STRING,
                         "logo",priv->logo,
                         "artists",priv->artists,
                         "authors",priv->authors,
-
                         NULL);
 }
 
