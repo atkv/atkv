@@ -1,5 +1,5 @@
 #include <at/studio/window.h>
-#include <at/core.h>
+#include <at/imgproc.h>
 #include <glib/gi18n.h>
 /* ============================================================================
  * PRIVATE API
@@ -16,6 +16,19 @@ typedef struct _AtStudioAppWindowPrivate{
 }AtStudioAppWindowPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(AtStudioAppWindow, at_studio_app_window, G_TYPE_OBJECT)
+
+const char *get_filename_ext(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
+
+static void at_studio_app_window_open_file(AtStudioAppWindow* window, char* filename){
+  const char* extension = get_filename_ext(filename);
+  if(strcmp(extension,"nii.gz") == 0){
+    at_nifti_image_read(filename,TRUE);
+  }
+}
 
 void
 mnu_about_activate_cb(GtkMenuItem* item, gpointer user_data){
@@ -35,6 +48,40 @@ mnu_about_activate_cb(GtkMenuItem* item, gpointer user_data){
                         "artists",priv->artists,
                         "authors",priv->authors,
                         NULL);
+}
+void
+mnu_open_activate_cb(GtkMenuItem* item, gpointer user_data){
+  AtStudioAppWindow* app_window = user_data;
+  AtStudioAppWindowPrivate* priv = at_studio_app_window_get_instance_private(app_window);
+  GtkFileChooserDialog* dialog = GTK_FILE_CHOOSER_DIALOG(gtk_file_chooser_dialog_new(_("Open Image"),
+                                                         GTK_WINDOW(priv->window),
+                                                         GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                         _("Cancel"),GTK_RESPONSE_CANCEL,
+                                                         _("Open"),GTK_RESPONSE_ACCEPT,
+                                                         NULL));
+  GtkFileFilter* pixbuf_filter = gtk_file_filter_new();
+  GtkFileFilter* nifti_filter = gtk_file_filter_new();
+  gtk_file_filter_add_pixbuf_formats(pixbuf_filter);
+  gtk_file_filter_add_pattern(nifti_filter,"*.nii.gz");
+  gtk_file_filter_add_pattern(nifti_filter,"*.nii");
+  gtk_file_filter_set_name(nifti_filter, "Nifti files");
+  gtk_file_filter_set_name(pixbuf_filter, "Images");
+  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog),pixbuf_filter);
+  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog),nifti_filter);
+
+  int res = gtk_dialog_run(GTK_DIALOG(dialog));
+  if(res == GTK_RESPONSE_ACCEPT){
+    char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    at_studio_app_window_open_file(app_window,filename);
+    g_free(filename);
+  }
+  gtk_widget_destroy(GTK_WIDGET(dialog));
+}
+void
+mnu_quit_activate_cb(GtkMenuItem* item, gpointer user_data){
+  AtStudioAppWindow* app_window = user_data;
+  AtStudioAppWindowPrivate* priv = at_studio_app_window_get_instance_private(app_window);
+  g_application_quit(G_APPLICATION(priv->app));
 }
 
 static void
