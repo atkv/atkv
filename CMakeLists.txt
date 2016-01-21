@@ -114,12 +114,6 @@ set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 CONFIGURE_FILE("${AT_CORE_INCLUDE_DIR}/config.h.in"
                "${AT_CORE_INCLUDE_DIR}/config.h")
 
-# STUDIO
-# ----------------
-set(AT_STUDIO_HDRS app.h window.h)
-set(AT_STUDIO_SRCS app.c window.c main.c)
-set(AT_STUDIO_LIBRARIES ${AT_CORE_LIBRARIES} ${GTK3_LIBRARIES})
-
 # ML
 # ----------------
 set(AT_ML_HDRS app.h window.h)
@@ -139,6 +133,12 @@ set(AT_IMGPROC_TESTS nifti)
 
 # Compiling modules
 at_create_libraries("${AT_MODULES}")
+
+# STUDIO
+# ----------------
+set(AT_STUDIO_HDRS app.h window.h)
+set(AT_STUDIO_SRCS app.c window.c main.c)
+set(AT_STUDIO_LIBRARIES ${AT_IMGPROC_LIBRARIES} ${GTK3_LIBRARIES})
 
 # Studio Executable
 if(BUILD_STUDIO)

@@ -26,7 +26,7 @@ const char *get_filename_ext(const char *filename) {
 static void at_studio_app_window_open_file(AtStudioAppWindow* window, char* filename){
   const char* extension = get_filename_ext(filename);
   if(strcmp(extension,"nii.gz") == 0){
-    at_nifti_image_read(filename,TRUE);
+    //at_nifti_image_read(filename,TRUE);
   }
 }
 
