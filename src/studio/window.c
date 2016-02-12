@@ -92,7 +92,7 @@ at_studio_app_window_load_interface(AtStudioAppWindow* app_window,
   priv->css_provider = gtk_css_provider_new();
   priv->builder = gtk_builder_new_from_file(ui_filename);
   gtk_builder_connect_signals(priv->builder, app_window);
-  priv->logo = gdk_pixbuf_new_from_file("../data/icons/studio_logo.png",NULL);
+  priv->logo = gdk_pixbuf_new_from_file("../atkv/data/icons/studio_logo.png",NULL);
   gtk_css_provider_load_from_path(priv->css_provider,style_filename,NULL);
   priv->window = GTK_APPLICATION_WINDOW(gtk_builder_get_object(priv->builder, "at_studio_app_window"));
   priv->views = GTK_NOTEBOOK(gtk_notebook_new());
@@ -126,7 +126,7 @@ at_studio_app_window_load_interface(AtStudioAppWindow* app_window,
 
 static void
 at_studio_app_window_init(AtStudioAppWindow *self){
-  at_studio_app_window_load_interface(self, "../data/studio_main.ui", "../data/studio.css");
+  at_studio_app_window_load_interface(self, "../atkv/data/studio_main.ui", "../atkv/data/studio.css");
 }
 
 static void
