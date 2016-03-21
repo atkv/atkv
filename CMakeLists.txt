@@ -45,6 +45,24 @@ if(BUILD_IMGPROC)
     ADD_DEFINITIONS(-DHAVE_ZLIB)
 endif()
 
+# ------------------
+# JPEG
+# ------------------
+if(BUILD_IMGPROC)
+    find_package(JPEG QUIET)
+    INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIRS})
+    ADD_DEFINITIONS(-DHAVE_JPEG)
+endif()
+
+# ------------------
+# PNG
+# ------------------
+if(BUILD_IMGPROC)
+    find_package(PNG QUIET)
+    INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIRS})
+    ADD_DEFINITIONS(-DHAVE_PNG)
+endif()
+
 # ===================================================================== MODULES
 set(AT_MODULES chart core gl ift imgproc medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -132,10 +150,10 @@ set(AT_MEDICAL_SRCS app.c window.c)
 
 # IMGPROC
 # ----------------
-set(AT_IMGPROC_HDRS znzfile.h nifti.h)
-set(AT_IMGPROC_SRCS znzfile.c nifti.c)
-set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES} ${ZLIB_LIBRARIES})
-set(AT_IMGPROC_TESTS nifti)
+set(AT_IMGPROC_HDRS znzfile.h nifti.h image_io.h)
+set(AT_IMGPROC_SRCS znzfile.c nifti.c image_io.c)
+set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES} ${ZLIB_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES})
+set(AT_IMGPROC_TESTS nifti image_io)
 
 # Compiling modules
 at_create_libraries("${AT_MODULES}")
