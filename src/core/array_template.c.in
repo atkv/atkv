@@ -505,7 +505,7 @@ at_array_@AT_TYPE@_reduce_all(AtArray_@AT_TYPE@* array, AtReduceFunc_@AT_TYPE@ f
   uint64_t i, index;
   uint64_t num_elements = at_array_get_num_elements(AT_ARRAY_BASE(array));
 
-  uint64_t* relative = g_malloc(at_array_get_dim(array)*sizeof(uint64_t));
+  g_autofree uint64_t* relative = g_malloc(at_array_get_dim(array)*sizeof(uint64_t));
   for(i = 0; i < num_elements; i++){
     index = at_array_base_get_index_absolute(AT_ARRAY_BASE(array),i,relative);
     reduced = func(reduced, priv->data[index]);
