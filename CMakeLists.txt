@@ -7,7 +7,7 @@ option(BUILD_IMGPROC "" ON)
 option(BUILD_STUDIO "" ON)
 option(BUILD_ML "" OFF)
 option(BUILD_MEDICAL "" OFF)
-option(BUILD_IFT "" OFF)
+option(BUILD_IFT "" ON)
 option(BUILD_CHART "" OFF)
 option(BUILD_GL "" OFF)
 option(BUILD_TESTING "" ON)
@@ -124,10 +124,11 @@ foreach(AT_VEC_TYPE ${AT_VEC_TYPES})
   configure_file(${AT_INCLUDE_DIR}/at/core/vec_template.h.in ${AT_INCLUDE_DIR}/at/core/vec${AT_VEC_TYPE}.h)
   configure_file(${AT_SOURCE_DIR}/core/vec_template.c.in ${AT_SOURCE_DIR}/core/vec${AT_VEC_TYPE}.c)
 endforeach()
+
 set(AT_CORE_HDRS type.h range.h macro.h config.h ${AT_VEC_TYPES_HDRS} mat4.h arraybase.h
-    ${AT_ARRAY_TYPES_HDRS} array.h)
-set(AT_CORE_SRCS config.c range.c ${AT_VEC_TYPES_SRCS} mat4.c arraybase.c ${AT_ARRAY_TYPES_SRCS})
-set(AT_CORE_TESTS array vec3 vec4 vec6 vec7 mat4)
+    ${AT_ARRAY_TYPES_HDRS} array.h bucketqueue.h)
+set(AT_CORE_SRCS config.c range.c ${AT_VEC_TYPES_SRCS} mat4.c arraybase.c ${AT_ARRAY_TYPES_SRCS} bucketqueue.c)
+set(AT_CORE_TESTS array vec3 vec4 vec6 vec7 mat4 bucketqueue)
 set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 CONFIGURE_FILE("${AT_CORE_INCLUDE_DIR}/config.h.in"
                "${AT_CORE_INCLUDE_DIR}/config.h")
@@ -154,6 +155,14 @@ set(AT_IMGPROC_HDRS znzfile.h nifti.h dicom.h image_io.h)
 set(AT_IMGPROC_SRCS znzfile.c nifti.c dicom.c image_io.c)
 set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES} ${ZLIB_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES})
 set(AT_IMGPROC_TESTS nifti dicom image_io)
+
+# IFT
+# ----------------
+set(AT_IFT_HDRS ift.h)
+set(AT_IFT_SRCS ift.c)
+set(AT_IFT_LIBRARIES at_ift ${AT_CORE_LIBRARIES})
+set(AT_IFT_TESTS ift)
+
 
 # Compiling modules
 at_create_libraries("${AT_MODULES}")

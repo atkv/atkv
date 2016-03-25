@@ -328,3 +328,8 @@ at_array_base_squeeze_axes(AtArray_base* array, uint16_t num_axes, uint16_t* axe
   priv->size = realloc(priv->size, current_pos * sizeof(uint64_t));
 }
 
+void
+at_array_base_set_dim(AtArray_base* array, uint16_t dim){
+  AtArray_basePrivate* priv = at_array_base_get_instance_private(array);
+  priv->dim = dim;
+}

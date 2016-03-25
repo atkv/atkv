@@ -137,4 +137,7 @@ at_array_base_squeeze(AtArray_base* array);
 void
 at_array_base_squeeze_axes(AtArray_base* array, uint16_t num_axes, uint16_t* axes);
 
+
+void
+at_array_base_set_dim(AtArray_base* array, uint16_t dim);
 #endif
