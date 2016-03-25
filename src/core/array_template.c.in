@@ -421,7 +421,7 @@ at_array_@AT_TYPE@_set_by_indices(AtArray_@AT_TYPE@* array, uint64_t* indices, @
 }
 
 void
-at_array_@AT_TYPE@_t_set_by_index(AtArray_@AT_TYPE@* array, uint64_t index, @AT_TYPE@ value){
+at_array_@AT_TYPE@_set_by_index(AtArray_@AT_TYPE@* array, uint64_t index, @AT_TYPE@ value){
   AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
   priv->data[index] = value;
 }
