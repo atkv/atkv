@@ -103,7 +103,7 @@ int
 main(int argc, char** argv){
   (void)argc;
   (void)argv;
-  const struct CMUnitTest tests[2]={
+  const struct CMUnitTest tests[1]={
     cmocka_unit_test(test_at_ift_min_f_max_array),
   };
   return cmocka_run_group_tests(tests,NULL,NULL);
