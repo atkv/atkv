@@ -79,16 +79,7 @@ typedef struct _AtIFTArray_uint8_tPrivate{
   AtBucketQueue_uint64_t*    bucket_queue;
 }AtIFTArray_uint8_tPrivate;
 
-static uint8_t
-at_adjacency_to_int(AtAdjacency adjacency){
-  switch(adjacency){
-    case AT_ADJACENCY_4:  return 4;
-    case AT_ADJACENCY_8:  return 8;
-    case AT_ADJACENCY_6:  return 6;
-    case AT_ADJACENCY_18: return 18;
-    case AT_ADJACENCY_26: return 26;
-  }
-}
+
 
 
 G_DEFINE_TYPE_WITH_PRIVATE(AtIFTArray_uint8_t, at_ift_array_uint8_t, G_TYPE_OBJECT)

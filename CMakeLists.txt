@@ -3,6 +3,7 @@ project(atkv)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 # ===================================================================== OPTIONS
 option(BUILD_CORE "" ON)
+option(BUILD_GRAPH "" ON)
 option(BUILD_IMGPROC "" ON)
 option(BUILD_STUDIO "" ON)
 option(BUILD_ML "" OFF)
@@ -64,7 +65,7 @@ if(BUILD_IMGPROC)
 endif()
 
 # ===================================================================== MODULES
-set(AT_MODULES chart core gl ift imgproc medical ml)
+set(AT_MODULES chart core graph gl ift imgproc medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(AT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 FOREACH(AT_MODULE ${AT_MODULES})
@@ -156,11 +157,19 @@ set(AT_IMGPROC_SRCS znzfile.c nifti.c dicom.c image_io.c)
 set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES} ${ZLIB_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES})
 set(AT_IMGPROC_TESTS nifti dicom image_io)
 
+
+# GRAPH
+# ----------------
+set(AT_GRAPH_HDRS adjacency.h grapharray.h component.h)
+set(AT_GRAPH_SRCS adjacency.c grapharray.c component.c)
+set(AT_GRAPH_LIBRARIES at_graph ${AT_CORE_LIBRARIES})
+set(AT_GRAPH_TESTS component)
+
 # IFT
 # ----------------
 set(AT_IFT_HDRS ift.h)
 set(AT_IFT_SRCS ift.c)
-set(AT_IFT_LIBRARIES at_ift ${AT_CORE_LIBRARIES})
+set(AT_IFT_LIBRARIES at_ift ${AT_GRAPH_LIBRARIES})
 set(AT_IFT_TESTS ift)
 
 

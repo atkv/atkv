@@ -19,20 +19,13 @@
 #ifndef AT_IFT_IFT_H
 #define AT_IFT_IFT_H
 #include <at/ift.h>
-#include <at/core.h>
+#include <at/graph.h>
 G_BEGIN_DECLS
 
 /*===========================================================================
  * CONSTANTS, ENUMS AND MACROS
  *===========================================================================*/
-typedef enum{
-  AT_ADJACENCY_4,  // For 2D (d(x,y) <= 1)
-  AT_ADJACENCY_6,  // For 3D (d(x,y) <= 1)
-  AT_ADJACENCY_8,  // For 2D (d(x,y) <= sqrt(2))
-  AT_ADJACENCY_18, // For 3D (d(x,y) <= sqrt(2))
-  AT_ADJACENCY_26, // For 3D (d(x,y) <= sqrt(3))
-  AT_ADJACENCY_CUSTOM,
-}AtAdjacency;
+
 /*===========================================================================
  * CLASS DECLARATION
  *===========================================================================*/
