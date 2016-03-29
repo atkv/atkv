@@ -235,8 +235,11 @@ at_array_@AT_TYPE@_fill(AtArray_@AT_TYPE@* array, @AT_TYPE@ value){
   uint64_t i;
   // If it's contiguous, make a contiguous loop
   if(at_array_get_contiguous(array))
-    for(i = 0; i < num_elements; i++)
-      priv->data[i] = value;
+    if(value == 0)
+      memset(priv->data, 0, at_array_get_num_bytes(array));
+    else
+      for(i = 0; i < num_elements; i++)
+        priv->data[i] = value;
   else{
     // It's a subarray. We need to get the real index
     uint64_t* relative = g_malloc(at_array_get_dim(array) * sizeof(uint64_t));

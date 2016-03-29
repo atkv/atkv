@@ -16,17 +16,15 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef AT_GRAPH_COMPONENT_H
-#define AT_GRAPH_COMPONENT_H
-
-#include <at/core.h>
 #include <at/graph.h>
-G_BEGIN_DECLS
 
-void
-at_graph_component_from_grapharray(AtArray_uint16_t** component_label_ptr, AtGraphArray* grapharray);
-
-#undef at_stack_push
-
-G_END_DECLS
-#endif
+uint8_t
+at_adjacency_to_int(AtAdjacency adjacency){
+  switch(adjacency){
+    case AT_ADJACENCY_4:  return 4;
+    case AT_ADJACENCY_8:  return 8;
+    case AT_ADJACENCY_6:  return 6;
+    case AT_ADJACENCY_18: return 18;
+    case AT_ADJACENCY_26: return 26;
+  }
+}

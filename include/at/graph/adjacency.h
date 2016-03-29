@@ -16,17 +16,27 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef AT_GRAPH_COMPONENT_H
-#define AT_GRAPH_COMPONENT_H
+#ifndef AT_GRAPH_ADJACENCY_H
+#define AT_GRAPH_ADJACENCY_H
 
-#include <at/core.h>
 #include <at/graph.h>
-G_BEGIN_DECLS
+#include <stdint.h>
 
-void
-at_graph_component_from_grapharray(AtArray_uint16_t** component_label_ptr, AtGraphArray* grapharray);
+typedef enum{
+  AT_ADJACENCY_4,  // For 2D (d(x,y) <= 1)
+  AT_ADJACENCY_6,  // For 3D (d(x,y) <= 1)
+  AT_ADJACENCY_8,  // For 2D (d(x,y) <= sqrt(2))
+  AT_ADJACENCY_18, // For 3D (d(x,y) <= sqrt(2))
+  AT_ADJACENCY_26, // For 3D (d(x,y) <= sqrt(3))
+  AT_ADJACENCY_CUSTOM,
+}AtAdjacency;
 
-#undef at_stack_push
+/**
+ * @brief at_adjacency_to_int
+ * @param adjacency
+ * @return
+ */
+uint8_t
+at_adjacency_to_int(AtAdjacency adjacency);
 
-G_END_DECLS
 #endif

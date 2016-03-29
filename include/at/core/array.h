@@ -231,6 +231,7 @@
   AtArray_##type*: at_array_##type##_set_array_##type##_to_##type,\
   default: at_array_##type##_set_##type##_to_##type\
 )
+#define LINE_FILL(type, value) AtArray
 #define LINE_GET(type,x) AtArray_##type*: _Generic((x),\
   uint64_t*: at_array_##type##_get_by_indices,\
   uint64_t:  at_array_##type##_get_by_index,\
@@ -335,4 +336,5 @@
 #define at_array_bitwise_not2(array1, output)             GENERIC_SEVERAL_OP1I(array1,LINE_OP2,bitwise_not)(array1, output)
 #define at_array_alloc_data3(array, dim, size)            GENERIC_SEVERAL_OP1(array, LINE_ALLOC_DATA, array)(array, dim, size)
 #define at_array_dealloc_data1(array)                     GENERIC_SEVERAL_OP1(array, LINE_DEALLOC_DATA, array)(array)
+#define at_array_fill2(array, value)                      GENERIC_SEVERAL_OP1(array, LINE_OP2, fill)(array, value)
 #endif
