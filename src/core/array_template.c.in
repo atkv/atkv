@@ -75,6 +75,7 @@ at_array_reduce_prod_func(@AT_TYPE@ data1, @AT_TYPE@ data2){
 
 void
 at_array_@AT_TYPE@_new(AtArray_@AT_TYPE@** output){
+  g_clear_object(output);
   *output = g_object_new(AT_TYPE_ARRAY_@AT_TYPE@, NULL);
   at_array_base_set_type(AT_ARRAY_BASE(*output), sizeof(@AT_TYPE@),AT_@AT_TYPE_ENUM@);
 }

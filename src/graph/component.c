@@ -18,13 +18,13 @@
 
 #include <at/graph.h>
 #include <stdlib.h>
+#include <string.h>
 void
 at_graph_component_from_grapharray(AtArray_uint16_t** component_label_ptr, AtGraphArray* grapharray){
   AtArray(uint64_t)* neighbors       = at_grapharray_get_neighbors(grapharray);
   AtArray(uint8_t)*  neighbors_edges = at_grapharray_get_neighbors_edges(grapharray);
-  at_array_zeros(component_label_ptr, at_array_get_dim(neighbors)-1, at_array_get_size(neighbors));
-
-
+  g_autofree uint64_t* neighbors_size = at_array_get_size(neighbors);
+  at_array_zeros(component_label_ptr, at_array_get_dim(neighbors)-1, neighbors_size);
 
   AtArray(uint16_t)* component_label = *component_label_ptr;
 
@@ -33,56 +33,94 @@ at_graph_component_from_grapharray(AtArray_uint16_t** component_label_ptr, AtGra
 
   g_autoptr(AtArray(uint8_t)) on_stack = NULL;
   g_autoptr(AtArray(uint8_t)) indices = NULL;
-  at_array_zeros(&on_stack, at_array_get_dim(component_label), at_array_get_size(component_label));
-  at_array_zeros(&indices, at_array_get_dim(component_label), at_array_get_size(component_label));
+  g_autofree uint64_t* component_label_size = at_array_get_size(component_label);
+  at_array_zeros(&on_stack, at_array_get_dim(component_label), component_label_size);
+  at_array_zeros(&indices, at_array_get_dim(component_label), component_label_size);
 
-  g_autofree uint64_t* stack_v = malloc(sizeof(uint64_t) * at_array_get_num_elements(component_label));
-  g_autofree uint64_t* stack_w = malloc(sizeof(uint64_t) * at_array_get_num_elements(component_label));
-  uint64_t stack_pointer     = 0;
+  g_autofree uint64_t* stack_v   = malloc(sizeof(uint64_t) * (num_elements+1));
+  g_autofree uint64_t* stack_rec = malloc(sizeof(uint64_t) * (num_elements+1));
+  g_autofree uint64_t* stack_n   = malloc(sizeof(uint64_t) * (num_elements+1));
+  int64_t stack_pointer     = -1;
+  int64_t on_stack_pointer  = -1;
+  int64_t stack_rec_pointer = -1;
 
   uint16_t index = 1;
-  uint64_t vn, v, n, i;
+  uint64_t vn, v, n, i, ni;
+  uint16_t label;
   uint64_t w;
   uint8_t recursive;
-  for(i = 0; i < num_elements; v++){
+  for(i = 0; i < num_elements; i++){
     if(at_array_get(indices,i) == 0){
-
       v = i;
       recursive = TRUE;
-      while(recursive){
+      ni = 0;
+      stack_pointer = -1;
+      while(1){
         // strongconnect(v)
-        recursive = FALSE;
-        at_array_set(indices, v, index);
-        at_array_set(component_label, v, index);
-        index++;
-        at_array_set(on_stack, v, TRUE);
+        if(recursive){
+          at_array_set(indices, v, index);
+          at_array_set(component_label, v, index);
+          index++;
+          stack_pointer++;
+          stack_v[stack_pointer] = v;
+          on_stack_pointer = stack_pointer;
+          at_array_set(on_stack, v, TRUE);
+          recursive = FALSE;
+        }
 
         // Consider successors of i
         vn = v * num_neighbors;
-        for(n = 0; n < num_neighbors; n++){
+        for(n = ni; n < num_neighbors; n++){
           if(at_array_get(neighbors_edges,vn+n) == TRUE){
             w = at_array_get(neighbors,vn + n);
             if(at_array_get(indices, w) == 0){
               // strongconnect(v)
               recursive = TRUE;
-              stack_v[stack_pointer] = v;
-              stack_w[stack_pointer] = w;
-              stack_pointer++;
-              v = w;
+              stack_rec_pointer++;
+              stack_rec[stack_rec_pointer] = v;
+              stack_n[stack_rec_pointer] = n+1;
+              v  = w;
+              ni = 0;
               break;
             }else if(at_array_get(on_stack, w) == TRUE){
               at_array_set(component_label, v, min(at_array_get(component_label,v),at_array_get(indices,w)));
             }
           }
         }
-        if(!recursive && stack_pointer > 0){
-          stack_pointer--;
-          v = stack_v[stack_pointer];
-          w = stack_w[stack_pointer];
-          at_array_set(component_label, v, min(at_array_get(component_label,v),at_array_get(component_label,w)));
-          recursive = TRUE;
+        if(!recursive){
+          if(n == num_neighbors){
+            if(at_array_get(component_label, v) == at_array_get(indices, v)){
+              label = at_array_get(component_label, v);
+              do{
+                w = stack_v[stack_pointer];
+                at_array_set(on_stack, w, FALSE);
+                at_array_set(component_label,w,label);
+                stack_pointer--;
+              }while(w != v);
+            }
+            if(stack_rec_pointer >= 0){
+              w  = v;
+              v  = stack_rec[stack_rec_pointer];
+              ni = stack_n[stack_rec_pointer];
+              stack_rec_pointer--;
+
+              at_array_set(component_label, v, min(at_array_get(component_label,v),at_array_get(component_label,w)));
+            }
+            else break;
+          }
         }
       }
     }
+  }
+
+  // incremental label
+  memset(stack_v, 0, sizeof(uint64_t) * (num_elements+1));
+  index = 0;
+  for(i = 0; i < num_elements; i++){
+    v = at_array_get(component_label, i);
+    if(stack_v[v] == 0){
+      stack_v[v] = ++index;
+    }
+    at_array_set(component_label, i, (uint16_t)stack_v[v]);
   }
 }

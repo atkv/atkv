@@ -62,7 +62,7 @@ at_grapharray_create(AtGraphArray** grapharray,
   size_grapharray[dim] = at_adjacency_to_int(adjacency);
 
   // Create the grapharray object
-  g_set_object(grapharray, g_object_new(AT_TYPE_GRAPHARRAY, NULL));
+  *grapharray = g_object_new(AT_TYPE_GRAPHARRAY, NULL);
   AtGraphArrayPrivate *priv = at_grapharray_get_instance_private(*grapharray);
 
   // Create the arrays
@@ -85,8 +85,9 @@ at_grapharray_create(AtGraphArray** grapharray,
   uint64_t  num_elements = at_array_get_num_elements(priv->neighbors)/num_neighbors;
   g_autofree uint64_t* step = malloc(dim * sizeof(uint64_t));
   priv->num_neighbors = num_neighbors;
+  g_autofree uint64_t* neighbors_step = at_array_get_step(priv->neighbors);
   for(i = 0; i < dim; i++)
-    step[i] = at_array_get_step(priv->neighbors)[i]/num_neighbors;
+    step[i] = neighbors_step[i]/num_neighbors;
 
 
   if(dim == 3)
@@ -180,6 +181,22 @@ at_grapharray_set_edges(AtGraphArray* grapharray,
                         uint64_t*     edges,
                         uint64_t      num_edges){
 
+}
+
+/* ADDING ARCS AND EDGES
+ * ======================*/
+
+// ARCS
+void
+at_grapharray_add_arc(AtGraphArray* grapharray, uint64_t node1, uint64_t node2){
+  AtGraphArrayPrivate* priv = at_grapharray_get_instance_private(grapharray);
+  uint64_t vn = node1 * priv->num_neighbors;
+  uint64_t i;
+  for(i = 0; i < priv->num_neighbors; i++)
+    if(at_array_get(priv->neighbors,vn+i) == node2){
+      at_array_set(priv->neighbors_edges, vn+i, TRUE);
+      break;
+    }
 }
 
 AtArray_uint64_t*
