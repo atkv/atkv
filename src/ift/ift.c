@@ -377,6 +377,27 @@ at_ift_array_uint8_t_start_loop(AtIFTArray_uint8_t* ift){
     }
   }
 }
+void
+at_seeds_filter_by_label(AtArray_uint64_t** seeds_background,
+                         AtArray_uint64_t* seeds, uint64_t label){
+  g_autofree uint64_t* seeds_size = at_array_get_size(seeds);
+  g_autofree uint64_t* seeds_background_data = malloc(sizeof(uint64_t) * seeds_size[0] * 2);
+  uint64_t* data = at_array_uint64_t_get_data(seeds);
+  uint64_t  index = 0;
+  uint64_t  i;
+  uint64_t num_elements = seeds_size[0] << 1;
+  for(i = 0; i < num_elements; i += 2){
+    if(data[i+1] == label)
+    {
+      seeds_background_data[index] = data[i];
+      seeds_background_data[index+1] = data[i+1];
+      index += 2;
+    }
+  }
+  seeds_background_data = realloc(seeds_background_data,sizeof(uint64_t) * index);
+  seeds_size[0]         = index >> 1;
+  at_array_new(seeds_background,2,seeds_size,seeds_background_data);
+}
 
 /*===========================================================================
  * PUBLIC API
@@ -425,6 +446,100 @@ at_ift_apply_array_uint8_t(AtIFTArray_uint8_t**       ift,
 
   // Destroy bucket queue
   at_bucketqueue_destroy(&priv->bucket_queue);
+}
+
+void
+at_orfc_in_cut_apply_array_uint8_t(AtIFTArray_uint8_t** ift,
+                                   AtArray_uint8_t* image,
+                                   uint16_t map_dimension,
+                                   AtAdjacency adjacency,
+                                   AtOptimization optimization,
+                                   AtConnectivityFunc_uint8_t connectivity_func,
+                                   AtWeightingFunc_uint8_t weighting_func,
+                                   AtArray_uint64_t* seeds){
+  g_autoptr(AtArray(uint64_t)) seeds_background = NULL;
+  at_seeds_filter_by_label(&seeds_background, seeds, 0);
+  at_ift_apply_array_uint8_t(ift,image,map_dimension,adjacency,optimization,connectivity_func,weighting_func,seeds_background);
+
+  // Clonar o grapharray do IFT
+
+  // Inverter o dígrafo
+
+  // Para cada semente de objeto
+
+  // Preencha o DCC da semente com o rótulo
+
+  //
+}
+
+void
+at_orfc_out_cut_apply_array_uint8_t(AtIFTArray_uint8_t** ift,
+                                    AtArray_uint8_t* image,
+                                    uint16_t map_dimension,
+                                    AtAdjacency adjacency,
+                                    AtOptimization optimization,
+                                    AtConnectivityFunc_uint8_t connectivity_func,
+                                    AtWeightingFunc_uint8_t weighting_func,
+                                    AtArray_uint64_t* seeds){
+
+}
+
+AtArray_uint16_t*
+at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t** ift,
+                                   AtArray_uint8_t* image,
+                                   uint16_t map_dimension,
+                                   AtAdjacency adjacency,
+                                   AtOptimization optimization,
+                                   AtConnectivityFunc_uint8_t connectivity_func,
+                                   AtWeightingFunc_uint8_t weighting_func,
+                                   AtArray_uint64_t* seeds){
+  // Apply IFT to find Vb(si)
+  g_autoptr(AtArray(uint64_t)) seeds_background = NULL;
+  at_seeds_filter_by_label(&seeds_background, seeds, 0);
+  at_ift_apply_array_uint8_t(ift,image,map_dimension,adjacency,optimization,connectivity_func,weighting_func,seeds_background);
+
+  AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(*ift);
+
+  // Get objects seeds (we use just one in this function)
+  g_autoptr(AtArray(uint64_t)) seeds_object = NULL;
+  at_seeds_filter_by_label(&seeds_object, seeds, 1);
+
+  // Energy of object seed
+  uint64_t si_index = at_array_get(seeds_object, 0);
+  double vb_si = at_array_get(priv->connectivity, si_index);
+
+  // Create a grapharray
+  g_autoptr(AtGraphArray) grapharray = NULL;
+  g_autofree uint64_t* size = at_array_get_size(priv->original);
+  at_grapharray_new(&grapharray,map_dimension,size,adjacency);
+
+  uint64_t num_neighbors = at_grapharray_get_num_neighbors(grapharray);
+  uint64_t i, n, in,a,b;
+  double vb_a, vb_b;
+  uint64_t num_elements = at_array_get_num_elements(priv->original);
+
+  // Remove edges with different energies or lower weight values
+  AtArray(uint64_t)* neighbors = at_grapharray_get_neighbors(grapharray);
+  for(i = 0, in = 0; i < num_elements; i++){
+    for(n = 0; n < num_neighbors; n++, in++){
+      if(at_array_get(neighbors,in)==TRUE){
+        a = i;
+        b = at_array_get(neighbors,in);
+        vb_a = at_array_get(priv->connectivity, a);
+        vb_b = at_array_get(priv->connectivity, b);
+        if(at_array_get(priv->weights,in) <= vb_si ||
+           vb_a != vb_si || vb_b != vb_si || vb_a != vb_b){
+          at_grapharray_remove_arc_by_index(grapharray,in);
+        }
+      }
+    }
+  }
+
+  // Find Tarjan Components
+  AtArray(uint16_t)* component = NULL;
+  at_graph_component_from_grapharray(&component, grapharray);
+
+  return component;
 }
 
 double

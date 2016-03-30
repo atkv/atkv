@@ -215,3 +215,17 @@ at_grapharray_get_num_neighbors(AtGraphArray* grapharray){
   AtGraphArrayPrivate* priv = at_grapharray_get_instance_private(grapharray);
   return priv->num_neighbors;
 }
+
+void
+at_grapharray_remove_arc_by_index(AtGraphArray *grapharray, uint64_t arc_index){
+  AtGraphArrayPrivate* priv = at_grapharray_get_instance_private(grapharray);
+  at_array_set(priv->neighbors_edges, arc_index, FALSE);
+}
+void
+at_grapharray_remove_arcs_by_indices(AtGraphArray *grapharray, uint64_t* arc_indices, uint64_t num_indices){
+  AtGraphArrayPrivate* priv = at_grapharray_get_instance_private(grapharray);
+  uint64_t i;
+  for(i = 0; i < num_indices; i++){
+    at_array_set(priv->neighbors_edges, arc_indices[i], FALSE);
+  }
+}
