@@ -98,6 +98,20 @@ test_at_ift_min_f_max_array(void** state){
   }
 }
 
+test_orfc_core_array(void** state){
+  // Ler o círculo
+
+
+  // Definir as sementes
+
+
+  // Achar o núcleo do ORFC
+
+
+  // Salvar
+
+}
+
 
 int
 main(int argc, char** argv){
