@@ -106,7 +106,7 @@ at_imageviewer_get_name(AtImageViewer* imageviewer);
  * @param array
  */
 void
-at_imageviewer_show_uint8_t(AtImageViewer* imageviewer, AtArray_uint8_t* array);
+at_imageviewer_show_uint8_t(AtImageViewer* imageviewer, AtArray_uint8_t* array, AtColorFormat format);
 
 /**
  * @brief at_imageviewer_show_by_name

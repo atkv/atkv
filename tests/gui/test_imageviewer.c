@@ -13,7 +13,7 @@ key_cb(AtKeyEventType event, int key_val, void* user_data){
 int main(){
   g_autoptr(AtArray(uint8_t)) image = NULL;
   gtk_init(NULL,NULL);
-  at_image_read(&image, "circle.png");
+  at_image_read(&image, "circle_color.png");
   AtImageViewer* imageviewer = at_imageviewer_new_with_name("teste");
   at_imageviewer_set_mouse_callback(imageviewer, mouse_cb);
   at_imageviewer_set_key_callback(imageviewer, key_cb);

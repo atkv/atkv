@@ -25,6 +25,7 @@
 typedef struct _AtImageViewerPrivate{
 
   char*               name;
+  AtArray_uint8_t*    image;
   AtMouseCallbackFunc mouse_cb;
   AtKeyCallbackFunc   key_cb;
   gulong              destroy_id;
@@ -49,6 +50,8 @@ typedef struct _AtImageViewerPrivate{
   GtkWidget*          viewport;
   GtkWidget*          drawing_area;
   GtkWidget*          scrolled_window;
+
+  cairo_surface_t*    image_surface;
 }AtImageViewerPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(AtImageViewer, at_imageviewer, G_TYPE_OBJECT)
@@ -56,6 +59,7 @@ static void
 at_imageviewer_dispose(GObject* object){
   AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(AT_IMAGEVIEWER(object));
   g_clear_object(&priv->window);
+  cairo_surface_destroy(priv->image_surface);
   G_OBJECT_CLASS(at_imageviewer_parent_class)->dispose(object);
 }
 static void
@@ -69,6 +73,21 @@ static void
 at_imageviewer_class_init(AtImageViewerClass *klass){
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->dispose = at_imageviewer_dispose;
+}
+
+static gboolean
+at_imageviewer_drawing_area_draw_event(GtkWidget* widget,
+                                       cairo_t* cr,
+                                       gpointer user_data){
+  // Get ImageViewer
+  AtImageViewer* imageviewer = AT_IMAGEVIEWER(user_data);
+  AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(imageviewer);
+
+  // Draw the image into imageviewer drawing area
+  cairo_set_source_surface(cr, priv->image_surface,0,0);
+  cairo_paint(cr);
+
+  return FALSE;
 }
 
 static void
@@ -129,6 +148,27 @@ at_imageviewer_create_statusbar(AtImageViewer* self){
   gtk_box_pack_start(GTK_BOX(priv->statusbar_box),priv->statusbar_lbl,FALSE, FALSE, 0);
 }
 
+/**
+ * @brief Create Area for Rendering Image
+ * @param self
+ */
+static void
+at_imageviewer_create_drawing_area(AtImageViewer* self){
+  AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(self);
+  priv->drawing_area = gtk_drawing_area_new();
+  priv->scrolled_window = gtk_scrolled_window_new(NULL,NULL);
+  priv->viewport = gtk_viewport_new(NULL,NULL);
+  gtk_container_add(GTK_CONTAINER(priv->scrolled_window), priv->viewport);
+  gtk_container_add(GTK_CONTAINER(priv->viewport), priv->drawing_area);
+  gtk_box_pack_start(GTK_BOX(priv->vbox),priv->scrolled_window,TRUE,TRUE,0);
+
+  g_signal_connect(G_OBJECT(priv->drawing_area),
+                   "draw",
+                   G_CALLBACK(at_imageviewer_drawing_area_draw_event),
+                   self);
+
+}
+
 static void
 at_imageviewer_create_window(AtImageViewer* self){
   AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(self);
@@ -137,6 +177,7 @@ at_imageviewer_create_window(AtImageViewer* self){
   gtk_container_add(GTK_CONTAINER(priv->window),priv->vbox);
   at_imageviewer_quit_on_destroy(self,TRUE);
   at_imageviewer_create_toolbar(self);
+  at_imageviewer_create_drawing_area(self);
   at_imageviewer_create_statusbar(self);
 }
 
@@ -149,15 +190,39 @@ at_imageviewer_init(AtImageViewer *self){
   at_imageviewer_create_window(self);
 }
 
-static void
-at_imageviewer_create_drawing_area(AtImageViewer* self){
-  AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(self);
-  priv->drawing_area = gtk_drawing_area_new();
-  priv->scrolled_window = gtk_scrolled_window_new(NULL,NULL);
-  priv->viewport = gtk_viewport_new(NULL,NULL);
-  gtk_container_add(GTK_CONTAINER(priv->scrolled_window), priv->viewport);
-  gtk_container_add(GTK_CONTAINER(priv->viewport), priv->drawing_area);
-  gtk_box_pack_start(GTK_BOX(priv->vbox),priv->scrolled_window,TRUE,TRUE,0);
+static AtArray_uint8_t*
+at_cvt_color(AtArray_uint8_t* image, AtColorFormat from, AtColorFormat to){
+  AtArray_uint8_t* image_cvt = NULL;
+  // Get some image info
+  uint8_t* data = at_array_uint8_t_get_data(image);
+  g_autofree uint64_t* size = at_array_get_size(image);
+
+  uint64_t sizeimage[3] = {size[0],size[1],4};
+  at_array_zeros(&image_cvt, 3, sizeimage);
+
+  uint8_t* data_image = at_array_uint8_t_get_data(image_cvt);
+  uint64_t n, k, offset_image, offset;
+
+  if(from == AT_COLOR_GRAY && to == AT_COLOR_BGRA){
+    for(n = 0; n < size[0]*size[1]; n++){
+      offset_image = n*sizeimage[2];
+      offset = n*size[2];
+      for(k = 0; k < 3; k++){
+        data_image[offset_image+k] = data[offset];
+      }
+      data_image[offset_image+k] = 255;
+    }
+  }
+  else if(from == AT_COLOR_RGB && to == AT_COLOR_BGRA){
+    for(n = 0; n < size[0]*size[1]; n++){
+      offset_image = n*sizeimage[2];
+      offset = n*size[2];
+      for(k = 0; k < size[2]; k++){
+        data_image[offset_image+k] = data[offset+(2-k)];
+      }
+    }
+  }
+  return image_cvt;
 }
 
 /*===========================================================================
@@ -198,8 +263,19 @@ at_imageviewer_waitkey(){
 }
 
 void
-at_imageviewer_show_uint8_t(AtImageViewer* imageviewer, AtArray_uint8_t* array){
+at_imageviewer_show_uint8_t(AtImageViewer* imageviewer, AtArray_uint8_t* array, AtColorFormat format){
   AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(imageviewer);
+
+  // Get some image info
+  g_autofree uint64_t* size = at_array_get_size(array);
+
+  // Create the image in proper format
+  priv->image = at_cvt_color(array, format, AT_COLOR_BGRA);
+  uint8_t* data = at_array_uint8_t_get_data(priv->image);
+
+  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,size[1]);
+  priv->image_surface = cairo_image_surface_create_for_data(data,CAIRO_FORMAT_RGB24,size[1],size[0],stride);
+
   gtk_widget_show_all(GTK_WIDGET(priv->window));
 }
 
