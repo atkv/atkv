@@ -224,7 +224,13 @@ at_imageviewer_resize(AtImageViewer* imageviewer, int width, int height);
  */
 void
 at_imageviewer_move(AtImageViewer* imageviewer, int x, int y);
-
+/**
+ * @brief at_imageviewer_quit_on_destroy
+ * @param display
+ * @param value
+ */
+void
+at_imageviewer_quit_on_destroy(AtImageViewer* display, gboolean value);
 
 G_END_DECLS
 #endif
