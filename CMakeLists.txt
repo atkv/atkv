@@ -152,8 +152,8 @@ set(AT_MEDICAL_SRCS app.c window.c)
 
 # IMGPROC
 # ----------------
-set(AT_IMGPROC_HDRS znzfile.h nifti.h dicom.h image_io.h)
-set(AT_IMGPROC_SRCS znzfile.c nifti.c dicom.c image_io.c)
+set(AT_IMGPROC_HDRS znzfile.h nifti.h dicom.h image_io.h drawing.h)
+set(AT_IMGPROC_SRCS znzfile.c nifti.c dicom.c image_io.c drawing.c)
 set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES} ${ZLIB_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES})
 set(AT_IMGPROC_TESTS nifti dicom image_io)
 
