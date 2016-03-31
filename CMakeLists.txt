@@ -2,15 +2,16 @@ cmake_minimum_required(VERSION 2.8)
 project(atkv)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 # ===================================================================== OPTIONS
-option(BUILD_CORE "" ON)
-option(BUILD_GRAPH "" ON)
+option(BUILD_CORE    "" ON)
+option(BUILD_GRAPH   "" ON)
 option(BUILD_IMGPROC "" ON)
-option(BUILD_STUDIO "" ON)
-option(BUILD_ML "" OFF)
+option(BUILD_GUI     "" ON)
+option(BUILD_STUDIO  "" ON)
+option(BUILD_ML      "" OFF)
 option(BUILD_MEDICAL "" OFF)
-option(BUILD_IFT "" ON)
-option(BUILD_CHART "" OFF)
-option(BUILD_GL "" OFF)
+option(BUILD_IFT     "" ON)
+option(BUILD_CHART   "" OFF)
+option(BUILD_GL      "" OFF)
 option(BUILD_TESTING "" ON)
 option(BUILD_DOCS    "Build doxygen documentation" OFF)
 option(COVERALLS     "Generate coveralls data" OFF)
@@ -65,7 +66,7 @@ if(BUILD_IMGPROC)
 endif()
 
 # ===================================================================== MODULES
-set(AT_MODULES chart core graph gl ift imgproc medical ml)
+set(AT_MODULES chart core graph gl ift imgproc gui medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(AT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 FOREACH(AT_MODULE ${AT_MODULES})
@@ -134,11 +135,6 @@ set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 CONFIGURE_FILE("${AT_CORE_INCLUDE_DIR}/config.h.in"
                "${AT_CORE_INCLUDE_DIR}/config.h")
 
-# STUDIO
-# ----------------
-set(AT_STUDIO_HDRS app.h window.h)
-set(AT_STUDIO_SRCS app.c window.c main.c)
-set(AT_STUDIO_LIBRARIES ${AT_CORE_LIBRARIES} ${GTK3_LIBRARIES})
 
 # ML
 # ----------------
@@ -172,21 +168,21 @@ set(AT_IFT_SRCS ift.c)
 set(AT_IFT_LIBRARIES at_ift ${AT_GRAPH_LIBRARIES})
 set(AT_IFT_TESTS ift)
 
+# GUI
+# ----------------
+set(AT_GUI_HDRS imageviewer.h)
+set(AT_GUI_SRCS imageviewer.c)
+set(AT_GUI_LIBRARIES at_gui ${AT_IMGPROC_LIBRARIES} ${GTK3_LIBRARIES})
+
+# STUDIO
+# ----------------
+set(AT_STUDIO_HDRS app.h window.h)
+set(AT_STUDIO_SRCS app.c window.c main.c)
+set(AT_STUDIO_LIBRARIES ${AT_CORE_LIBRARIES} ${GTK3_LIBRARIES})
+
 
 # Compiling modules
 at_create_libraries("${AT_MODULES}")
-
-# Studio Executable
-if(BUILD_STUDIO)
-  foreach(AT_HDR ${AT_STUDIO_HDRS})
-    list(APPEND AT_STUDIO_HDRS_ABS ${AT_INCLUDE_DIR}/at/studio/${AT_HDR})
-  endforeach()
-  foreach(AT_SRC ${AT_STUDIO_SRCS})
-    list(APPEND AT_STUDIO_SRCS_ABS ${AT_SOURCE_DIR}/studio/${AT_SRC})
-  endforeach()
-  add_executable(at_studio ${AT_STUDIO_HDRS_ABS} ${AT_STUDIO_SRCS_ABS})
-  target_link_libraries(at_studio ${GTK3_LIBRARIES})
-endif()
 
 # ======================================================================= TESTS
 if(BUILD_TESTING)
@@ -214,4 +210,28 @@ if(BUILD_TESTING)
   Message(STATUS "Tests compilation configured...")
 endif(BUILD_TESTING)
 
+# ============================================================== DEMOS AND APPS
+
+# STUDIO
+# ----------------
+if(BUILD_STUDIO)
+  foreach(AT_HDR ${AT_STUDIO_HDRS})
+    list(APPEND AT_STUDIO_HDRS_ABS ${AT_INCLUDE_DIR}/at/studio/${AT_HDR})
+  endforeach()
+  foreach(AT_SRC ${AT_STUDIO_SRCS})
+    list(APPEND AT_STUDIO_SRCS_ABS ${AT_SOURCE_DIR}/studio/${AT_SRC})
+  endforeach()
+  add_executable(at_studio ${AT_STUDIO_HDRS_ABS} ${AT_STUDIO_SRCS_ABS})
+  target_link_libraries(at_studio ${GTK3_LIBRARIES})
+endif()
+
+# IMAGEVIEWER DEMO
+# -----------------
+if(BUILD_GUI)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+  add_executable(demo_imageviewer tests/gui/test_imageviewer.c)
+  target_link_libraries(demo_imageviewer ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
+endif()
 # ======================================================================== DOCS
