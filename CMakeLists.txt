@@ -228,7 +228,10 @@ endif()
 # IMAGEVIEWER DEMO
 # -----------------
 if(BUILD_GUI)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
   add_executable(demo_imageviewer tests/gui/test_imageviewer.c)
-  target_link_libraries(demo_imageviewer ${AT_GUI_LIBRARIES})
+  target_link_libraries(demo_imageviewer ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
 endif()
 # ======================================================================== DOCS

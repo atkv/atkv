@@ -32,14 +32,15 @@ typedef struct _AtImageViewerClass{
 
 typedef enum{
   // Mouse Buttons
-  AT_MOUSE_FLAG_LBUTTON  = 0,
-  AT_MOUSE_FLAG_RBUTTON  = 1,
-  AT_MOUSE_FLAG_MBUTTON  = 2,
+  AT_MOUSE_FLAG_NONE     = 0,
+  AT_MOUSE_FLAG_LBUTTON  = 1,
+  AT_MOUSE_FLAG_RBUTTON  = 2,
+  AT_MOUSE_FLAG_MBUTTON  = 4,
 
   // Modifiers
-  AT_MOUSE_FLAG_CTRLKEY  = 4,
-  AT_MOUSE_FLAG_SHIFTKEY = 8,
-  AT_MOUSE_FLAG_ALTKEY   = 16,
+  AT_MOUSE_FLAG_CTRLKEY  = 8,
+  AT_MOUSE_FLAG_SHIFTKEY = 16,
+  AT_MOUSE_FLAG_ALTKEY   = 32,
 } AtMouseEventFlags;
 
 typedef enum{
@@ -129,7 +130,7 @@ at_imageviewer_hide(AtImageViewer* imageviewer);
  * @param mouse_cb
  */
 void
-at_imageviewer_set_mouse_callback(AtImageViewer* imageviewer, AtMouseCallbackFunc mouse_cb);
+at_imageviewer_set_mouse_callback(AtImageViewer* imageviewer, AtMouseCallbackFunc mouse_cb, gpointer user_data);
 
 /**
  * @brief at_imageviewer_set_key_callback
@@ -137,12 +138,12 @@ at_imageviewer_set_mouse_callback(AtImageViewer* imageviewer, AtMouseCallbackFun
  * @param key_cb
  */
 void
-at_imageviewer_set_key_callback(AtImageViewer* imageviewer, AtKeyCallbackFunc key_cb);
+at_imageviewer_set_key_callback(AtImageViewer* imageviewer, AtKeyCallbackFunc key_cb, gpointer user_data);
 /**
  * @brief at_imageviewer_waitkey
  * @param imageviewer
  */
-void
+guint
 at_imageviewer_waitkey();
 
 /**
@@ -231,6 +232,11 @@ at_imageviewer_move(AtImageViewer* imageviewer, int x, int y);
  */
 void
 at_imageviewer_quit_on_destroy(AtImageViewer* display, gboolean value);
+
+
+AtArray_uint8_t*
+at_cvt_color(AtArray_uint8_t* image, AtColorFormat from, AtColorFormat to);
+
 
 G_END_DECLS
 #endif
