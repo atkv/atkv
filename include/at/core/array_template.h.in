@@ -516,6 +516,27 @@ at_array_@AT_TYPE@_range_to(AtArray_@AT_TYPE@** output, @AT_TYPE@ to);
 void
 at_array_@AT_TYPE@_range_from_to(AtArray_@AT_TYPE@** output, @AT_TYPE@ from, @AT_TYPE@ to);
 /**
+ * @brief Normalize an array of type @AT_TYPE@
+ * @param array
+ * @param output
+ * @param alpha
+ * @param beta
+ * @param norm_type
+ * @param mask
+ */
+void
+at_array_@AT_TYPE@_normalize(AtArray_@AT_TYPE@* array, AtArray_@AT_TYPE@** output, @AT_TYPE@ alpha, @AT_TYPE@ beta, AtNormType norm_type, AtArray_uint8_t* mask);
+
+/**
+ * @brief Get min and max locations and values
+ * @param smin
+ * @param smax
+ * @param min_ptr
+ * @param max_ptr
+ */
+void
+at_array_@AT_TYPE@_min_max(AtArray_@AT_TYPE@* array, @AT_TYPE@* smin, @AT_TYPE@* smax, uint64_t* min_ptr, uint64_t* max_ptr, AtArray_uint8_t* mask);
+/**
  * @brief at_array_@AT_TYPE@_range_from_to_step
  * @param output
  * @param from
