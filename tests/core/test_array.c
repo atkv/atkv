@@ -855,9 +855,24 @@ test_array_alloc(void** state){
   assert_true(at_array_is_empty(array));
 }
 
+static void
+test_array_normalize(void** state){
+  uint8_t data[9] = {253,253,253,254,254,254,255,255,255};
+  uint8_t data_gt[9] = {0,0,0,3,3,3,6,6,6};
+  uint64_t size[2] = {3,3};
+  g_autoptr(AtArray(uint8_t)) array = NULL;
+  g_autoptr(AtArray(uint8_t)) array_norm = NULL;
+  at_array_new(&array, 2, size, data);
+
+  at_array_normalize(array, &array_norm, 0, 6, AT_NORM_MINMAX, NULL);
+  uint64_t i;
+  for(i = 0; i < 9; i++)
+    assert_int_equal(at_array_get(array_norm, i), data_gt[i]);
+}
+
 int
 main(){
-  const struct CMUnitTest tests[18]={
+  const struct CMUnitTest tests[19]={
     cmocka_unit_test(test_array_new),
     cmocka_unit_test(test_array_add),
     cmocka_unit_test(test_array_subtract),
@@ -877,7 +892,7 @@ main(){
     cmocka_unit_test(test_array_range),
     cmocka_unit_test(test_array_bitwise_ops),
     cmocka_unit_test(test_array_alloc),
-
+    cmocka_unit_test(test_array_normalize),
   };
   return cmocka_run_group_tests(tests,NULL,NULL);
 }

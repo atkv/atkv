@@ -42,8 +42,15 @@ typedef struct _AtArray_int64_t  AtArray_int64_t;
 typedef struct _AtArray_float    AtArray_float;
 typedef struct _AtArray_double   AtArray_double;
 
-typedef enum _AtEndianess{
+typedef enum {
   AT_LITTLE_ENDIAN = 0,
   AT_BIG_ENDIAN    = 1
 }AtEndianess;
+
+typedef enum{
+  AT_NORM_L1,
+  AT_NORM_L2,
+  AT_NORM_INF,
+  AT_NORM_MINMAX
+}AtNormType;
 #endif
