@@ -174,8 +174,8 @@ set(AT_IFT_TESTS ift)
 
 # GUI
 # ----------------
-set(AT_GUI_HDRS imageviewer.h)
-set(AT_GUI_SRCS imageviewer.c)
+set(AT_GUI_HDRS imageviewer.h volumeviewer.h)
+set(AT_GUI_SRCS imageviewer.c volumeviewer.c)
 set(AT_GUI_LIBRARIES at_gui ${AT_IMGPROC_LIBRARIES} ${GTK3_LIBRARIES})
 
 # STUDIO
@@ -237,6 +237,16 @@ if(BUILD_GUI)
   SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
   add_executable(demo_imageviewer tests/gui/test_imageviewer.c)
   target_link_libraries(demo_imageviewer ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
+endif()
+
+# VOLUMEVIEWER DEMO
+# -----------------
+if(BUILD_GUI)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+  add_executable(demo_volumeviewer tests/gui/test_volumeviewer.c)
+  target_link_libraries(demo_volumeviewer ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
 endif()
 # ======================================================================== DOCS
 file(COPY ${CMAKE_SOURCE_DIR}/data/ DESTINATION ${CMAKE_BINARY_DIR})
