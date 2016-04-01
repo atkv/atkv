@@ -88,7 +88,7 @@ set(CMAKE_BUILD_TYPE Debug)
 set(AT_TYPES uint8_t uint16_t uint32_t uint64_t
               int8_t  int16_t  int32_t  int64_t
               float  double)
-set(AT_VEC_TYPES 3 4 5 6 7)
+set(AT_VEC_TYPES 2 3 4 5 6 7)
 set(AT_TYPES_ENUM UINT8 UINT16 UINT32 UINT64
                    INT8  INT16  INT32  INT64
                   FLOAT DOUBLE)
@@ -123,8 +123,12 @@ endforeach()
 foreach(AT_VEC_TYPE ${AT_VEC_TYPES})
   list(APPEND AT_VEC_TYPES_HDRS vec${AT_VEC_TYPE}.h)
   list(APPEND AT_VEC_TYPES_SRCS vec${AT_VEC_TYPE}.c)
+  list(APPEND AT_VEC_TYPES_HDRS vec${AT_VEC_TYPE}i.h)
+  list(APPEND AT_VEC_TYPES_SRCS vec${AT_VEC_TYPE}i.c)
   configure_file(${AT_INCLUDE_DIR}/at/core/vec_template.h.in ${AT_INCLUDE_DIR}/at/core/vec${AT_VEC_TYPE}.h)
   configure_file(${AT_SOURCE_DIR}/core/vec_template.c.in ${AT_SOURCE_DIR}/core/vec${AT_VEC_TYPE}.c)
+  configure_file(${AT_INCLUDE_DIR}/at/core/veci_template.h.in ${AT_INCLUDE_DIR}/at/core/vec${AT_VEC_TYPE}i.h)
+  configure_file(${AT_SOURCE_DIR}/core/veci_template.c.in ${AT_SOURCE_DIR}/core/vec${AT_VEC_TYPE}i.c)
 endforeach()
 
 set(AT_CORE_HDRS type.h range.h macro.h config.h ${AT_VEC_TYPES_HDRS} mat4.h arraybase.h
@@ -235,3 +239,4 @@ if(BUILD_GUI)
   target_link_libraries(demo_imageviewer ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
 endif()
 # ======================================================================== DOCS
+file(COPY ${CMAKE_SOURCE_DIR}/data/ DESTINATION ${CMAKE_BINARY_DIR})
