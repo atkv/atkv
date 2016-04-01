@@ -337,4 +337,6 @@
 #define at_array_alloc_data3(array, dim, size)            GENERIC_SEVERAL_OP1(array, LINE_ALLOC_DATA, array)(array, dim, size)
 #define at_array_dealloc_data1(array)                     GENERIC_SEVERAL_OP1(array, LINE_DEALLOC_DATA, array)(array)
 #define at_array_fill2(array, value)                      GENERIC_SEVERAL_OP1(array, LINE_OP2, fill)(array, value)
+#define at_array_normalize(array, output, alpha, beta, type, mask) GENERIC_SEVERAL_OP1(array, LINE_OP2, normalize)(array, output, alpha, beta, type, mask)
+#define at_array_min_max(array, smin, smax, min_ptr, max_ptr, mask) GENERIC_SEVERAL_OP1(array, LINE_OP2, min_max)(array, smin, smax, min_ptr, max_ptr, mask)
 #endif

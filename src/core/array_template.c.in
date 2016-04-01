@@ -674,6 +674,43 @@ at_array_@AT_TYPE@_range_from_to_step(AtArray_@AT_TYPE@** output, @AT_TYPE@ from
   at_array_@AT_TYPE@_new_with_data(output,1,&size,data);
 }
 
+void
+at_array_@AT_TYPE@_normalize(AtArray_@AT_TYPE@* array, AtArray_@AT_TYPE@** output, @AT_TYPE@ alpha, @AT_TYPE@ beta, AtNormType norm_type, AtArray_uint8_t* mask){
+  double scale = 1, shift = 0;
+  g_autofree uint64_t* size = at_array_get_size(array);
+  at_array_new(output, at_array_get_dim(array), size);
+  if(norm_type == AT_NORM_MINMAX){
+    @AT_TYPE@ smin = 0, smax = 0;
+    @AT_TYPE@ dmin = min(alpha, beta);
+    @AT_TYPE@ dmax = max(alpha, beta);
+    at_array_min_max(array, &smin, &smax, NULL, NULL, mask);
+    scale = (double)(dmax - dmin)*(smax - smin > DBL_EPSILON?1./(double)(smax-smin):0);
+    shift = dmin - (double)smin*scale;
+    if(at_array_get_contiguous(array)){
+      AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+      AtArray_@AT_TYPE@Private* priv_output = at_array_@AT_TYPE@_get_instance_private(*output);
+      uint64_t num_elements = at_array_get_num_elements(array);
+      uint64_t i;
+      for(i = 0; i < num_elements; i++){
+        priv_output->data[i] = (@AT_TYPE@)((double)priv->data[i] * scale + shift);
+      }
+    }
+  }
+}
+
+void
+at_array_@AT_TYPE@_min_max(AtArray_@AT_TYPE@* array, @AT_TYPE@* smin, @AT_TYPE@* smax, uint64_t* min_ptr, uint64_t* max_ptr, AtArray_uint8_t* mask){
+  uint64_t i;
+  *smin = @AT_TYPE_MAX@;
+  *smax = @AT_TYPE_MIN@;
+  AtArray_@AT_TYPE@Private* priv = at_array_@AT_TYPE@_get_instance_private(array);
+  uint64_t num_elements = at_array_get_num_elements(array);
+  for(i = 0; i < num_elements; i++){
+    if(priv->data[i] < *smin){ *smin = priv->data[i]; if(min_ptr)*min_ptr = i;}
+    if(priv->data[i] > *smax){ *smax = priv->data[i]; if(max_ptr)*max_ptr = i;}
+  }
+}
+
 #if !@AT_TYPE_FLOAT@
 void
 at_array_@AT_TYPE@_bitwise_not(AtArray_@AT_TYPE@* array1, AtArray_@AT_TYPE@** output){
