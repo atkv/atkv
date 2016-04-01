@@ -1,0 +1,100 @@
+/**
+ ** This file is part of the atkv project.
+ ** Copyright 2016 Anderson Tavares <nocturne.pe@gmail.com>.
+ **
+ ** This program is free software: you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License as published by
+ ** the Free Software Foundation, either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ **
+ ** You should have received a copy of the GNU General Public License
+ ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
+#ifndef AT_VEC@AT_VEC_TYPE@i_H
+#define AT_VEC@AT_VEC_TYPE@i_H
+#include <math.h>
+
+typedef struct _AtVec@AT_VEC_TYPE@i{
+  int data[@AT_VEC_TYPE@];
+}AtVec@AT_VEC_TYPE@i;
+
+/**
+ * @brief at_vec@AT_VEC_TYPE@_add
+ * @param vec1
+ * @param vec2
+ */
+void
+at_vec@AT_VEC_TYPE@i_add(AtVec@AT_VEC_TYPE@i* vec1, AtVec@AT_VEC_TYPE@i* vec2);
+
+/**
+ * @brief at_vec@AT_VEC_TYPE@_subtract
+ * @param vec1
+ * @param vec2
+ */
+void
+at_vec@AT_VEC_TYPE@i_subtract(AtVec@AT_VEC_TYPE@i* vec1, AtVec@AT_VEC_TYPE@i* vec2);
+
+/**
+ * @brief at_vec@AT_VEC_TYPE@_multiply
+ * @param vec1
+ * @param vec2
+ */
+void
+at_vec@AT_VEC_TYPE@i_multiply(AtVec@AT_VEC_TYPE@i* vec1, AtVec@AT_VEC_TYPE@i* vec2);
+
+/**
+ * @brief at_vec@AT_VEC_TYPE@_divide
+ * @param vec1
+ * @param vec2
+ */
+void
+at_vec@AT_VEC_TYPE@i_divide(AtVec@AT_VEC_TYPE@i* vec1, AtVec@AT_VEC_TYPE@i* vec2);
+
+/**
+ * @brief at_vec@AT_VEC_TYPE@_dot
+ * @param vec1
+ * @param vec2
+ * @return
+ */
+int
+at_vec@AT_VEC_TYPE@i_dot(AtVec@AT_VEC_TYPE@i* vec1, AtVec@AT_VEC_TYPE@i* vec2);
+
+/**
+ * @brief at_vec@AT_VEC_TYPE@_multiply_scalar
+ * @param vec1
+ * @param scalar
+ */
+void
+at_vec@AT_VEC_TYPE@i_multiply_scalar(AtVec@AT_VEC_TYPE@i* vec1, double scalar);
+/**
+ * @brief at_vec@AT_VEC_TYPE@_normalize
+ * @param vec
+ */
+void
+at_vec@AT_VEC_TYPE@i_normalize(AtVec@AT_VEC_TYPE@i* vec);
+/**
+ * @brief at_vec@AT_VEC_TYPE@_get_magnitude
+ * @param vec
+ * @return
+ */
+double
+at_vec@AT_VEC_TYPE@i_get_magnitude(AtVec@AT_VEC_TYPE@i* vec);
+
+#if @AT_VEC_TYPE@ == 3
+/**
+ * @brief Cross product between two vectors
+ */
+AtVec3i
+at_vec@AT_VEC_TYPE@i_cross(AtVec@AT_VEC_TYPE@i* vec1, AtVec@AT_VEC_TYPE@i* vec2);
+#endif
+
+AtVec@AT_VEC_TYPE@i
+AtVec@AT_VEC_TYPE@i_to_double(AtVec@AT_VEC_TYPE@i* vec);
+
+#endif

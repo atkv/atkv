@@ -234,8 +234,7 @@ void
 at_imageviewer_quit_on_destroy(AtImageViewer* display, gboolean value);
 
 
-AtArray_uint8_t*
-at_cvt_color(AtArray_uint8_t* image, AtColorFormat from, AtColorFormat to);
+
 
 
 G_END_DECLS
