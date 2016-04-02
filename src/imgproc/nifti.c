@@ -2427,7 +2427,7 @@ size_t at_nifti_read_buffer(AtZnzFile* fp, AtNiftiImage *nim)
 
   AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(nim);
   AtArray_uint16_t* array = AT_ARRAY_uint16_t(nim);
-  if(!at_array_is_empty(array)){
+  if(at_array_is_empty(array)){
      return -1;
   }
 
@@ -2519,7 +2519,7 @@ int at_nifti_image_load( AtNiftiImage *nim )
    AtNiftiImagePrivate* priv = at_nifti_image_get_instance_private(nim);
    AtArray_uint16_t* array = AT_ARRAY_uint16_t(nim);
    if(at_array_is_empty(array)){
-     uint64_t size[3] = {priv->nsize.data[0],priv->nsize.data[1],priv->nsize.data[2]};
+     uint64_t size[3] = {priv->nsize.data[2],priv->nsize.data[1],priv->nsize.data[0]};
      at_array_alloc_data(array,3,size);
      if(at_array_is_empty(array)){
        g_clear_object(&fp);

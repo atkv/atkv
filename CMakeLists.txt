@@ -65,6 +65,15 @@ if(BUILD_IMGPROC)
     ADD_DEFINITIONS(-DHAVE_PNG)
 endif()
 
+# ------------------
+# EPOXY
+# ------------------
+if(BUILD_GUI)
+    pkg_check_modules(EPOXY REQUIRED epoxy)
+    INCLUDE_DIRECTORIES(${EPOXY_INCLUDE_DIRS})
+    ADD_DEFINITIONS(-DHAVE_EPOXY)
+endif()
+
 # ===================================================================== MODULES
 set(AT_MODULES chart core graph gl ift imgproc gui medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -176,7 +185,7 @@ set(AT_IFT_TESTS ift)
 # ----------------
 set(AT_GUI_HDRS imageviewer.h volumeviewer.h)
 set(AT_GUI_SRCS imageviewer.c volumeviewer.c)
-set(AT_GUI_LIBRARIES at_gui ${AT_IMGPROC_LIBRARIES} ${GTK3_LIBRARIES})
+set(AT_GUI_LIBRARIES at_gui ${AT_IMGPROC_LIBRARIES} ${GTK3_LIBRARIES} ${EPOXY_LIBRARIES})
 
 # STUDIO
 # ----------------

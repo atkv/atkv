@@ -1073,11 +1073,13 @@ at_cvt_color(AtArray_uint8_t* image, AtColorFormat from, AtColorFormat to){
 
   uint8_t* data_image = at_array_uint8_t_get_data(image_cvt);
   uint64_t n, k, offset_image, offset;
+  uint16_t dim = at_array_get_dim(image);
+  uint64_t size2 = dim > 2? size[2]:1;
 
   if(from == AT_COLOR_GRAY && to == AT_COLOR_BGRA){
     for(n = 0; n < size[0]*size[1]; n++){
       offset_image = n*sizeimage[2];
-      offset = n*size[2];
+      offset = n*size2;
       for(k = 0; k < 3; k++){
         data_image[offset_image+k] = data[offset];
       }

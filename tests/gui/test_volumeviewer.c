@@ -31,7 +31,7 @@ key_cb(AtKeyEventType event, int key_val, void* user_data){
 int main(int argc, char** argv){
   char* name = "MRHead.nii.gz";
   if(argc > 1)
-    name = argv[2];
+    name = argv[1];
   gtk_init(&argc, &argv);
   AtVolumeViewer* volumeviewer = at_volumeviewer_new_with_name("name");
 

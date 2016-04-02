@@ -477,9 +477,9 @@ at_imageviewer_update_image_surface(AtImageViewer* imageviewer){
   uint8_t* data       = at_array_uint8_t_get_data(priv->image_scaled);
 
   // Create cairo surface based on scaled image
-  int stride          = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,size[1]);
+  int stride          =   cairo_format_stride_for_width(CAIRO_FORMAT_RGB24,size[1]);
   if(priv->image_surface) cairo_surface_destroy(priv->image_surface);
-  priv->image_surface = cairo_image_surface_create_for_data(data,CAIRO_FORMAT_RGB24,size[1],size[0],stride);
+  priv->image_surface =   cairo_image_surface_create_for_data(data,CAIRO_FORMAT_RGB24,size[1],size[0],stride);
 }
 
 static void
