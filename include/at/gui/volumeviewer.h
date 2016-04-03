@@ -141,6 +141,5 @@ at_volumeviewer_zoom_reset(AtVolumeViewer* volumeviewer, AtSliceSide slice_side)
 
 
 
-
 G_END_DECLS
 #endif

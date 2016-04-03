@@ -50,6 +50,16 @@ typedef struct _AtVolumeViewerSliceConf{
   AtRotationMode      rotation_mode;
 }AtVolumeViewerSliceConf;
 
+typedef struct _AtGlAreaConf{
+  guint               vao;
+  guint               vbo;
+
+  double              cuboid_pos[24];
+  guint               cuboid_lines[16];
+  guint               cuboid_pos_buffer;
+  guint               cuboid_lines_buffer;
+}AtGlAreaConf;
+
 typedef struct _AtVolumeViewerPrivate{
   AtNiftiImage*       nifti_image;
   AtArray_uint8_t*    nifti_array;
@@ -67,6 +77,7 @@ typedef struct _AtVolumeViewerPrivate{
   GtkWidget*          left_vbox;
 
   GtkWidget*          gl_area;
+  AtGlAreaConf        gl_conf;
 }AtVolumeViewerPrivate;
 static guint key;
 
@@ -192,15 +203,46 @@ at_volumeviewer_index_slider_changed_event(GtkRange* range, gpointer user_data){
 
 static void
 at_volumeviewer_gl_area_init_buffers(AtVolumeViewer* volumeviewer){
-//  glGenVertexArrays(1, &vao);
-//  glBindVertexArray(vao);
-//  glGenBuffers(1, &buffer);
+  AtVolumeViewerPrivate* priv = at_volumeviewer_get_instance_private(volumeviewer);
+
+  // Create buffers
+  glGenVertexArrays(1, &priv->gl_conf.vao);
+  glBindVertexArray(priv->gl_conf.vao);
+  glGenBuffers(1, &priv->gl_conf.cuboid_pos_buffer);
+
+  // Data in CPU
+  guint cuboid_lines[16] = {0,1,2,3, // Bottom edges (4 lines) line_loop
+                            4,5,6,7, // Upper edges (4 lines) line_loop
+                            0,4,1,5,2,6,3,7};// Side edges (4 lines) lines
+  memcpy(priv->gl_conf.cuboid_lines, cuboid_lines, sizeof(priv->gl_conf.cuboid_lines));
+  guint cuboid_pos[24] = {-1,-1,-1, -1,-1, 1, // 4 bottom vertices
+                           1,-1, 1,  1,-1,-1,
+
+                          -1, 1,-1, -1, 1, 1, // 4 upper vertices
+                           1, 1, 1,  1, 1,-1 };
+  memcpy(priv->gl_conf.cuboid_pos, cuboid_pos, 24 * sizeof(guint));
+
+  // Upload data to GPU
+  glBindBuffer(GL_ARRAY_BUFFER,priv->gl_conf.cuboid_pos_buffer);
+  glBufferData(GL_ARRAY_BUFFER,sizeof(priv->gl_conf.cuboid_pos),priv->gl_conf.cuboid_pos,GL_STATIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,priv->gl_conf.cuboid_lines_buffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(priv->gl_conf.cuboid_lines),priv->gl_conf.cuboid_lines,GL_STATIC_DRAW);
+
+  // Reset the state
+  glBindBuffer(GL_ARRAY_BUFFER,0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+  glBindVertexArray(0);
+}
+
+static void
+at_volumeviewer_gl_area_create_shader(AtVolumeViewer* volumeviewer){
 
 }
 
 static void
 at_volumeviewer_gl_area_realize_event(GtkGLArea* area, AtVolumeViewer* volumeviewer){
   AtVolumeViewerPrivate* priv = at_volumeviewer_get_instance_private(volumeviewer);
+
   gtk_gl_area_make_current(GTK_GL_AREA(priv->gl_area));
   if(gtk_gl_area_get_error(area)!=NULL) return;
   at_volumeviewer_gl_area_init_buffers(volumeviewer);
@@ -213,6 +255,61 @@ at_volumeviewer_gl_area_render_event(GtkGLArea* area, GdkGLContext *context, AtV
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   return TRUE;
 }
+
+// Potencial função para a futura classe base dos viewers
+static void
+at_send_mouse_event(AtVolumeViewer* volumeviewer, AtSliceSide side, AtMouseEventType mouse_event, GdkEventButton* event, int x, int y){
+  AtVolumeViewerPrivate* priv = at_volumeviewer_get_instance_private(volumeviewer);
+  //priv->last_x = x;
+  //priv->last_y = y;
+  //if(priv->mouse_cb)
+  //  priv->mouse_cb(mouse_event, x, y, at_get_mouse_flag(event->button, event->state), priv->mouse_cb_data);
+}
+
+// Alguns eventos são comuns entre viewers que contém drawing areas
+static gboolean
+at_volumeviewer_drawing_area_button_press_event(GtkWidget* widget,
+                                                GdkEventButton *event,
+                                                AtVolumeViewer* volumeviewer){
+  AtVolumeViewerPrivate* priv = at_volumeviewer_get_instance_private(volumeviewer);
+  return TRUE;
+}
+
+static gboolean
+at_volumeviewer_drawing_area_button_release_event(GtkWidget* widget,
+                                                  GdkEventButton* event,
+                                                  gpointer user_data){
+  return TRUE;
+}
+
+static gboolean
+at_volumeviewer_drawing_area_scroll_event(GtkWidget* widget,
+                                            GdkEventScroll* event,
+                                            gpointer user_data){
+  return FALSE;
+}
+
+static gboolean
+at_volumeviewer_drawing_area_motion_event(GtkWidget* widget,
+                                          GdkEventMotion* event,
+                                          gpointer user_data){
+
+}
+
+static gboolean
+at_volumeviewer_key_press_event(GtkWidget* widget,
+                                GdkEventKey* event,
+                                gpointer user_data){
+
+}
+static gboolean
+at_volumeviewer_key_release_event(GtkWidget* widget,
+                                GdkEventKey* event,
+                                gpointer user_data){
+
+}
+
+
 
 static void
 at_volumeviewer_create_gl_area(AtVolumeViewer* volumeviewer){
@@ -240,8 +337,29 @@ at_volumeviewer_create_slice(AtVolumeViewer* volumeviewer, uint8_t i){
   gtk_box_pack_start(GTK_BOX(current_slice->main_box),current_slice->drawing_area,TRUE,TRUE,0);
   gtk_box_pack_start(GTK_BOX(current_slice->main_box),current_slice->index_slider,FALSE,FALSE,0);
 
+  // Registering events
   gtk_widget_add_events(current_slice->drawing_area, GDK_BUTTON_PRESS_MASK|GDK_SCROLL_MASK|GDK_POINTER_MOTION_MASK|GDK_BUTTON_RELEASE_MASK);
-  g_signal_connect(current_slice->drawing_area, "draw",G_CALLBACK(at_volumeviewer_drawing_area_draw_event),volumeviewer);
+  g_signal_connect(current_slice->drawing_area,
+                   "draw",
+                   G_CALLBACK(at_volumeviewer_drawing_area_draw_event),
+                   volumeviewer);
+  g_signal_connect(current_slice->drawing_area,
+                   "button-press-event",
+                   G_CALLBACK(at_volumeviewer_drawing_area_button_press_event),
+                   volumeviewer);
+  g_signal_connect(current_slice->drawing_area,
+                   "button-release-event",
+                   G_CALLBACK(at_volumeviewer_drawing_area_button_release_event),
+                   volumeviewer);
+  g_signal_connect(current_slice->drawing_area,
+                   "scroll-event",
+                   G_CALLBACK(at_volumeviewer_drawing_area_scroll_event),
+                   volumeviewer);
+  g_signal_connect(current_slice->drawing_area,
+                   "motion-notify-event",
+                   G_CALLBACK(at_volumeviewer_drawing_area_motion_event),
+                   volumeviewer);
+
 
   gtk_box_pack_start(GTK_BOX(priv->left_vbox), current_slice->main_box,FALSE,FALSE,0);
 }
@@ -250,7 +368,7 @@ static void
 at_volumeviewer_create_window(AtVolumeViewer* volumeviewer){
   AtVolumeViewerPrivate* priv = at_volumeviewer_get_instance_private(volumeviewer);
   priv->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  g_signal_connect(priv->window, "destroy", G_CALLBACK(gtk_main_quit), volumeviewer);
+
   priv->grid = gtk_grid_new();
   priv->main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
   priv->left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
@@ -268,6 +386,21 @@ at_volumeviewer_create_window(AtVolumeViewer* volumeviewer){
 
   // Create gl_area
   at_volumeviewer_create_gl_area(volumeviewer);
+
+  // Window events
+  g_signal_connect(priv->window,
+                   "destroy",
+                   G_CALLBACK(gtk_main_quit),
+                   volumeviewer);
+  g_signal_connect(priv->window,
+                   "key-press-event",
+                   G_CALLBACK(at_volumeviewer_key_press_event),
+                   volumeviewer);
+  g_signal_connect(priv->window,
+                   "key-release-event",
+                   G_CALLBACK(at_volumeviewer_key_release_event),
+                   volumeviewer);
+
 }
 
 static void
