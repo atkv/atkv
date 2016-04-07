@@ -40,8 +40,11 @@ gl_area_realize_event(GtkGLArea* area, gpointer user_data){
 
   g_autoptr(AtGLMesh)   object = at_gl_mesh_new_from_file("cube.obj");
   g_autoptr(AtGLScene)  scene  = at_gl_scene_new();
+  g_autoptr(AtGLMesh)   sphere = at_gl_mesh_new_from_file("sphere.obj");
   at_gl_scene_add_mesh(scene, object);
   assert_int_equal(at_gl_container_get_num_children(AT_GL_CONTAINER(scene)), 1);
+  at_gl_scene_add_mesh(scene, sphere);
+  assert_int_equal(at_gl_container_get_num_children(AT_GL_CONTAINER(scene)), 2);
 }
 
 static void
@@ -52,6 +55,7 @@ test_at_gl_init(void** state){
   GtkWidget* gl_area = gtk_gl_area_new();
   g_signal_connect(gl_area, "realize", G_CALLBACK(gl_area_realize_event), NULL);
   g_signal_connect(gl_area, "render", G_CALLBACK(gl_area_render_event), NULL);
+  g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
   gtk_container_add(GTK_CONTAINER(window), gl_area);
   gtk_widget_show_all(window);
   gtk_main();

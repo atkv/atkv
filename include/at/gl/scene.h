@@ -25,9 +25,9 @@ G_BEGIN_DECLS
  * CLASS DECLARATION
  *===========================================================================*/
 #define AT_TYPE_GL_SCENE at_gl_scene_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLScene, at_gl_scene, AT, GL_SCENE, GObject)
+G_DECLARE_DERIVABLE_TYPE(AtGLScene, at_gl_scene, AT, GL_SCENE, AtGLContainer)
 typedef struct _AtGLSceneClass{
-  GObjectClass parent_class;
+  AtGLContainerClass parent_class;
 }AtGLSceneClass;
 
 /*===========================================================================

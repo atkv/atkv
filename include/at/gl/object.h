@@ -22,15 +22,17 @@
 G_BEGIN_DECLS
 
 /*===========================================================================
- * CLASS DECLARATION
+ * INTERFACE DECLARATION
  *===========================================================================*/
 #define AT_TYPE_GL_OBJECT at_gl_object_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLObject, at_gl_object, AT, GL_OBJECT, GObject)
+G_DECLARE_INTERFACE(AtGLObject, at_gl_object, AT, GL_OBJECT, GObject)
+typedef struct _AtGLObjectInterface{
+  GTypeInterface parent_iface;
+}AtGLObjectInterface;
 
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
-
 
 G_END_DECLS
 #endif

@@ -4,7 +4,8 @@
  * PUBLIC API
  *===========================================================================*/
 typedef struct _AtGLProgramPrivate{
-
+  AtGLShader* vertex_shader;
+  AtGLShader* fragment_shader;
 }AtGLProgramPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(AtGLProgram, at_gl_program, G_TYPE_OBJECT)
@@ -14,7 +15,9 @@ at_gl_program_class_init(AtGLProgramClass *klass){
 }
 static void
 at_gl_program_init(AtGLProgram *self){
-
+  AtGLProgramPrivate* priv = at_gl_program_get_instance_private(self);
+  priv->fragment_shader = NULL;
+  priv->vertex_shader = NULL;
 }
 
 /*===========================================================================

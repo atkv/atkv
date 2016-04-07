@@ -32,9 +32,28 @@ typedef struct _AtGLContainerClass{
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
-
+/**
+ * @brief at_gl_container_get_num_children
+ * @param container
+ * @return
+ */
 uint8_t
 at_gl_container_get_num_children(AtGLContainer* container);
+/**
+ * @brief at_gl_container_index_of
+ * @param container
+ * @param object
+ * @return
+ */
+int32_t
+at_gl_container_index_of(AtGLContainer* container, AtGLObject* object);
+/**
+ * @brief at_gl_container_add_object
+ * @param container
+ * @param object
+ */
+void
+at_gl_container_add_object(AtGLContainer* container, AtGLObject* object);
 
 G_END_DECLS
 #endif

@@ -16,20 +16,31 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 #include <at/gl.h>
+#include <at/core.h>
 /*===========================================================================
  * PRIVATE API
  *===========================================================================*/
 typedef struct _AtGLMeshPrivate{
-
+  AtGLGeometry* geometry;
+  AtGLMaterial* material;
 }AtGLMeshPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE(AtGLMesh, at_gl_mesh, G_TYPE_OBJECT)
+static void
+at_gl_mesh_object_interface_init(AtGLObject *iface);
+
+G_DEFINE_TYPE_WITH_PRIVATE_AND_CODE(AtGLMesh, at_gl_mesh, G_TYPE_OBJECT,G_IMPLEMENT_INTERFACE(AT_TYPE_GL_OBJECT,at_gl_mesh_object_interface_init))
 static void
 at_gl_mesh_class_init(AtGLMeshClass *klass){
 
 }
 static void
 at_gl_mesh_init(AtGLMesh *self){
+  AtGLMeshPrivate* priv = at_gl_mesh_get_instance_private(self);
+  priv->geometry = NULL;
+  priv->material = NULL;
+}
+static void
+at_gl_mesh_object_interface_init(AtGLObject *iface){
 
 }
 
