@@ -11,7 +11,7 @@ option(BUILD_ML      "" OFF)
 option(BUILD_MEDICAL "" OFF)
 option(BUILD_IFT     "" ON)
 option(BUILD_CHART   "" OFF)
-option(BUILD_GL      "" OFF)
+option(BUILD_GL      "" ON)
 option(BUILD_TESTING "" ON)
 option(BUILD_DOCS    "Build doxygen documentation" OFF)
 option(COVERALLS     "Generate coveralls data" OFF)
@@ -63,6 +63,15 @@ if(BUILD_IMGPROC)
     find_package(PNG QUIET)
     INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIRS})
     ADD_DEFINITIONS(-DHAVE_PNG)
+endif()
+
+# ------------------
+# EPOXY
+# ------------------
+if(BUILD_GL)
+    pkg_check_modules(EPOXY REQUIRED epoxy)
+    INCLUDE_DIRECTORIES(${EPOXY_INCLUDE_DIRS})
+    ADD_DEFINITIONS(-DHAVE_EPOXY)
 endif()
 
 # ===================================================================== MODULES
@@ -171,6 +180,13 @@ set(AT_IFT_HDRS ift.h)
 set(AT_IFT_SRCS ift.c)
 set(AT_IFT_LIBRARIES at_ift ${AT_GRAPH_LIBRARIES})
 set(AT_IFT_TESTS ift)
+
+# GL
+# ----------------
+set(AT_GL_HDRS shader.h program.h object.h container.h camera.h material.h geometry.h mesh.h renderer.h scene.h texturematerial.h colormaterial.h engine.h )
+set(AT_GL_SRCS shader.c program.c object.c container.c camera.c material.c geometry.c mesh.c renderer.c scene.c texturematerial.c colormaterial.c engine.c )
+set(AT_GL_LIBRARIES at_gl ${EPOXY_LIBRARIES} ${GTK3_LIBRARIES})
+set(AT_GL_TESTS gl)
 
 # GUI
 # ----------------
