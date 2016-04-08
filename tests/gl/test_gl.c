@@ -19,10 +19,30 @@
 #include <setjmp.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <cmocka.h>
 #include <at/gl.h>
 #include <epoxy/gl.h>
 #include <gtk/gtk.h>
+#include <locale.h>
+
+/*===========================================================================
+ * HELPERS
+ *===========================================================================*/
+typedef struct{
+  AtGLShader*  vertexShader;
+  AtGLShader*  fragmentShader;
+  AtGLProgram* programShader;
+}TestAtGLFixture;
+
+static void
+test_at_gl_fixture_set_up(TestAtGLFixture* fixture,
+                          gconstpointer user_data){
+
+}
+static void
+test_at_gl_fixture_tear_down(TestAtGLFixture* fixture,
+                             gconstpointer user_data){
+
+}
 
 static gboolean
 gl_area_render_event(GtkGLArea* area, GdkGLContext* context, gpointer user_data){
@@ -34,39 +54,87 @@ static void
 gl_area_realize_event(GtkGLArea* area, gpointer user_data){
   gtk_gl_area_make_current(area);
   if(gtk_gl_area_get_error(area) != NULL) return;
-  g_autoptr(AtGLShader)  vshader = at_gl_shader_new_from_file("test_gl_vertex.glsl");
-  g_autoptr(AtGLShader)  fshader = at_gl_shader_new_from_file("test_gl_frag.glsl");
-  g_autoptr(AtGLProgram) program = at_gl_program_new_from_shaders(vshader, fshader);
+  GError* error = NULL;
 
-  g_autoptr(AtGLMesh)   object = at_gl_mesh_new_from_file("cube.obj");
-  g_autoptr(AtGLScene)  scene  = at_gl_scene_new();
-  g_autoptr(AtGLMesh)   sphere = at_gl_mesh_new_from_file("sphere.obj");
-  at_gl_scene_add_mesh(scene, object);
-  assert_int_equal(at_gl_container_get_num_children(AT_GL_CONTAINER(scene)), 1);
-  at_gl_scene_add_mesh(scene, sphere);
-  assert_int_equal(at_gl_container_get_num_children(AT_GL_CONTAINER(scene)), 2);
+  // Compiling a vertex shader
+  g_autoptr(AtGLShader)  vshader = at_gl_shader_new_from_file(GL_VERTEX_SHADER,   "test_gl_vertex.glsl", &error);
+  g_assert_no_error(error);
+  g_assert_nonnull(vshader);
+  // Compiling a vertex shader
+  g_autoptr(AtGLShader)  fshader = at_gl_shader_new_from_file(GL_FRAGMENT_SHADER, "test_gl_frag.glsl" , &error);
+  g_assert_no_error(error);
+  g_assert_nonnull(fshader);
+  // Compiling a program
+  g_autoptr(AtGLProgram) program = at_gl_program_new_from_shaders(vshader, fshader, &error);
+  g_assert_no_error(error);
+  g_assert_nonnull(program);
+
+  g_assert_true(at_gl_shader_is_compiled(vshader));
+  g_assert_true(at_gl_shader_is_compiled(fshader));
+  g_assert_true(at_gl_program_is_linked(program));
 }
-
+/*===========================================================================
+ * TEST CASES
+ *===========================================================================*/
+/**
+ * @brief test_at_gl_shader_program
+ */
 static void
-test_at_gl_init(void** state){
+test_at_gl_shader_program(){
   // Obter o contexto WebGL
   gtk_init(NULL,NULL);
   GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   GtkWidget* gl_area = gtk_gl_area_new();
   g_signal_connect(gl_area, "realize", G_CALLBACK(gl_area_realize_event), NULL);
-  g_signal_connect(gl_area, "render", G_CALLBACK(gl_area_render_event), NULL);
-  g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+  g_signal_connect(gl_area, "render",  G_CALLBACK(gl_area_render_event), NULL);
+  g_signal_connect(window, "destroy",  G_CALLBACK(gtk_main_quit), NULL);
   gtk_container_add(GTK_CONTAINER(window), gl_area);
   gtk_widget_show_all(window);
   gtk_main();
 }
 
+/**
+ * @brief test_at_gl_shader_program
+ */
+static void
+test_at_gl_scene(TestAtGLFixture* fixture, gconstpointer user_data){
+  GError* error = NULL;
+  g_autoptr(AtGLMesh)   cube   = at_gl_mesh_new_from_file("cube.obj"      , &error);
+  g_autoptr(AtGLMesh)   octa   = at_gl_mesh_new_from_file("octahedron.obj", &error);
+  g_autoptr(AtGLScene)  scene  = at_gl_scene_new();
+
+  g_assert_cmpuint(at_gl_mesh_get_num_vertices(cube),==,8); // 8 vertices
+  g_assert_cmpuint(at_gl_mesh_get_num_faces(cube)   ,==,12);// 12 triangles (6 squares)
+  g_assert_cmpuint(at_gl_mesh_get_num_normals(cube) ,==,8); // 1 normal per vertex
+  g_assert_cmpuint(at_gl_mesh_get_num_uvs(cube)     ,==,0); // we still don't use texture
+
+  g_assert_cmpuint(at_gl_mesh_get_num_vertices(octa),==,6); // 4 base + 2 up/down
+  g_assert_cmpuint(at_gl_mesh_get_num_faces(octa)   ,==,8); // 2 pyramids (2 x 4)
+  g_assert_cmpuint(at_gl_mesh_get_num_normals(octa) ,==,6); // 1 normal per vertex
+  g_assert_cmpuint(at_gl_mesh_get_num_uvs(octa)     ,==,6); // we still don't use texture
+
+  at_gl_scene_add_mesh(scene, cube);
+  g_assert_cmpuint(at_gl_container_get_num_children(AT_GL_CONTAINER(scene)),=, 1);
+  at_gl_scene_add_mesh(scene, octa);
+  g_assert_cmpuint(at_gl_container_get_num_children(AT_GL_CONTAINER(scene)),=, 2);
+
+
+}
+
 int
 main(int argc, char** argv){
-  (void)argc;
-  (void)argv;
-  const struct CMUnitTest tests[1]={
-    cmocka_unit_test(test_at_gl_init),
-  };
-  return cmocka_run_group_tests(tests,NULL,NULL);
+  setlocale(LC_ALL, "");
+  g_test_init(&argc, &argv, NULL);
+  g_test_bug_base("http://github.com/atkv/atkv/issues/");
+
+  g_test_add_func("/at_gl/test_at_gl_shader_program",
+                  test_at_gl_shader_program);
+
+  g_test_add("/at_gl/test_at_scene",
+             TestAtGLFixture,
+             NULL,
+             test_at_gl_fixture_set_up,
+             test_at_gl_scene,
+             test_at_gl_fixture_tear_down);
+  return g_test_run();
 }

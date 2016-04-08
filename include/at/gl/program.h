@@ -49,7 +49,37 @@ at_gl_program_new();
  */
 AtGLProgram*
 at_gl_program_new_from_shaders(AtGLShader* vertexShader,
-                               AtGLShader* fragmentShader);
+                               AtGLShader* fragmentShader, GError** error);
+
+/**
+ * @brief at_gl_program_link
+ * @param program
+ * @param error
+ */
+void
+at_gl_program_link(AtGLProgram* program, GError** error);
+
+/**
+ * @brief at_gl_program_is_linked
+ * @param program
+ * @return
+ */
+gboolean
+at_gl_program_is_linked(AtGLProgram* program);
+
+/*===========================================================================
+ * ERROR HANDLING
+ *===========================================================================*/
+
+#define AT_GL_PROGRAM_ERROR at_gl_program_error_quark()
+
+typedef enum {
+  AT_GL_PROGRAM_ERROR_LINK   = 102,
+}AtGLProgramError;
+
+GQuark
+at_gl_program_error_quark(void);
+
 
 G_END_DECLS
 #endif

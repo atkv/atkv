@@ -33,8 +33,61 @@ typedef struct _AtGLMeshClass{
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
+/**
+ * @brief at_gl_mesh_new
+ * @return
+ */
 AtGLMesh*
-at_gl_mesh_new_from_file(char* file);
+at_gl_mesh_new();
+/**
+ * @brief at_gl_mesh_new_from_file
+ * @param file
+ * @param error
+ * @return
+ */
+AtGLMesh*
+at_gl_mesh_new_from_file(char* file, GError** error);
+/**
+ * @brief at_gl_mesh_get_num_vertices
+ * @param mesh
+ * @return
+ */
+uint32_t
+at_gl_mesh_get_num_vertices(AtGLMesh* mesh);
+/**
+ * @brief at_gl_mesh_get_num_faces
+ * @param mesh
+ * @return
+ */
+uint32_t
+at_gl_mesh_get_num_faces(AtGLMesh* mesh);
+/**
+ * @brief at_gl_mesh_get_num_normals
+ * @param mesh
+ * @return
+ */
+uint32_t
+at_gl_mesh_get_num_normals(AtGLMesh* mesh);
+/**
+ * @brief at_gl_mesh_get_num_uvs
+ * @param mesh
+ * @return
+ */
+uint32_t
+at_gl_mesh_get_num_uvs(AtGLMesh* mesh);
+
+/*===========================================================================
+ * ERROR HANDLING
+ *===========================================================================*/
+
+#define AT_GL_MESH_ERROR at_gl_mesh_error_quark()
+
+typedef enum {
+  AT_GL_MESH_ERROR_FILE_OPEN   = 103,
+}AtGLMeshError;
+
+GQuark
+at_gl_mesh_error_quark(void);
 
 G_END_DECLS
 #endif

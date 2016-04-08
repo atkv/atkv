@@ -42,10 +42,11 @@ typedef struct _AtGLShaderClass{
 /**
  * @brief at_gl_shader_new_from_file
  * @param file
+ * @param error
  * @return
  */
 AtGLShader*
-at_gl_shader_new_from_file(char* file);
+at_gl_shader_new_from_file(int32_t type, char* file, GError** error);
 
 /**
  * @brief at_gl_shader_new_from_text
@@ -73,8 +74,48 @@ at_gl_shader_set_text(AtGLShader* shader, char* text);
 /**
  * @brief at_gl_shader_compile
  * @param shader
+ * @param error
  */
 void
-at_gl_shader_compile(AtGLShader* shader);
+at_gl_shader_compile(AtGLShader* shader, GError** error);
+
+/**
+ * @brief at_gl_shader_is_compiled
+ * @param shader
+ * @return
+ */
+gboolean
+at_gl_shader_is_compiled(AtGLShader* shader);
+
+/**
+ * @brief at_gl_shader_get_id
+ * @param shader
+ * @return
+ */
+gint
+at_gl_shader_get_id(AtGLShader* shader);
+
+/**
+ * @brief at_gl_shader_get_shader_type
+ * @param shader
+ * @return
+ */
+int32_t
+at_gl_shader_get_shader_type(AtGLShader* shader);
+
+/*===========================================================================
+ * ERROR HANDLING
+ *===========================================================================*/
+
+#define AT_GL_SHADER_ERROR at_gl_shader_error_quark()
+
+typedef enum {
+  AT_GL_SHADER_ERROR_COMPILE   = 100,
+  AT_GL_SHADER_ERROR_OPEN_FILE = 101,
+}AtGLShaderError;
+
+GQuark
+at_gl_shader_error_quark(void);
+
 G_END_DECLS
 #endif
