@@ -24,17 +24,20 @@ G_BEGIN_DECLS
 /*===========================================================================
  * CLASS DECLARATION
  *===========================================================================*/
-
-#define AT_TYPE_GL_CAMERA at_gl_camera_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLCamera, at_gl_camera, AT, GL_CAMERA, GObject)
-typedef struct _AtGLCameraClass{
-  GObjectClass object_class;
-}AtGLCameraClass;
+#define AT_TYPE_GL_PERSPECTIVECAMERA at_gl_perspectivecamera_get_type()
+G_DECLARE_DERIVABLE_TYPE(AtGLPerspectiveCamera,
+                         at_gl_perspectivecamera,
+                         AT, GL_PERSPECTIVECAMERA,
+                         AtGLCamera)
+typedef struct _AtGLPerspectiveCameraClass{
+  AtGLCameraClass parent_class;
+}AtGLPerspectiveCameraClass;
 
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
-
+void
+at_gl_perspectivecamera_set(double fov, double aspect, double near, double far);
 
 
 

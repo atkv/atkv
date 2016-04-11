@@ -16,8 +16,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef AT_GL_CAMERA_H
-#define AT_GL_CAMERA_H
+#ifndef AT_GL_ORTHOGRAPHICCAMERA_H
+#define AT_GL_ORTHOGRAPHICCAMERA_H
 #include <at/gl.h>
 G_BEGIN_DECLS
 
@@ -25,11 +25,14 @@ G_BEGIN_DECLS
  * CLASS DECLARATION
  *===========================================================================*/
 
-#define AT_TYPE_GL_CAMERA at_gl_camera_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLCamera, at_gl_camera, AT, GL_CAMERA, GObject)
-typedef struct _AtGLCameraClass{
-  GObjectClass object_class;
-}AtGLCameraClass;
+#define AT_TYPE_GL_ORTHOGRAPHICCAMERA at_gl_orthographiccamera_get_type()
+G_DECLARE_DERIVABLE_TYPE(AtGLOrthographicCamera,
+                         at_gl_orthographiccamera,
+                         AT, GL_ORTHOGRAPHICCAMERA,
+                         AtGLCamera)
+typedef struct _AtGLOrthographicCameraClass{
+  AtGLOrthographicCameraClass object_class;
+}AtGLOrthographicCameraClass;
 
 /*===========================================================================
  * PUBLIC API

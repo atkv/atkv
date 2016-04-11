@@ -183,8 +183,8 @@ set(AT_IFT_TESTS ift)
 
 # GL
 # ----------------
-set(AT_GL_HDRS shader.h program.h object.h container.h camera.h material.h geometry.h mesh.h renderer.h scene.h texturematerial.h colormaterial.h engine.h )
-set(AT_GL_SRCS shader.c program.c object.c container.c camera.c material.c geometry.c mesh.c renderer.c scene.c texturematerial.c colormaterial.c engine.c )
+set(AT_GL_HDRS shader.h program.h object.h container.h camera.h perspectivecamera.h orthographiccamera.h light.h pointlight.h directionallight.h material.h geometry.h mesh.h renderer.h scene.h texturematerial.h colormaterial.h engine.h )
+set(AT_GL_SRCS shader.c program.c object.c container.c camera.c perspectivecamera.c orthographiccamera.c light.c pointlight.c directionallight.c material.c geometry.c mesh.c renderer.c scene.c texturematerial.c colormaterial.c engine.c )
 set(AT_GL_LIBRARIES at_gl ${EPOXY_LIBRARIES} ${GTK3_LIBRARIES})
 set(AT_GL_TESTS gl)
 
