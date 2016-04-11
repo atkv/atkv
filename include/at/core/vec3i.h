@@ -86,15 +86,27 @@ at_vec3i_normalize(AtVec3i* vec);
 double
 at_vec3i_get_magnitude(AtVec3i* vec);
 
+/**
+ * @brief negate a vertex
+ */
+void
+at_vec3i_negate(AtVec3i* vec);
+
 #if 3 == 3
 /**
  * @brief Cross product between two vectors
  */
 AtVec3i
 at_vec3i_cross(AtVec3i* vec1, AtVec3i* vec2);
+AtVec3i
+at_vec3i_x();
+AtVec3i
+at_vec3i_y();
+AtVec3i
+at_vec3i_z();
 #endif
 
-AtVec3i
+AtVec3
 AtVec3i_to_double(AtVec3i* vec);
 
 #endif

@@ -16,8 +16,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef AT_GL_CAMERA_H
-#define AT_GL_CAMERA_H
+#ifndef AT_GL_PERSPECTIVECAMERA_H
+#define AT_GL_PERSPECTIVECAMERA_H
 #include <at/gl.h>
 G_BEGIN_DECLS
 
@@ -25,10 +25,7 @@ G_BEGIN_DECLS
  * CLASS DECLARATION
  *===========================================================================*/
 #define AT_TYPE_GL_PERSPECTIVECAMERA at_gl_perspectivecamera_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLPerspectiveCamera,
-                         at_gl_perspectivecamera,
-                         AT, GL_PERSPECTIVECAMERA,
-                         AtGLCamera)
+G_DECLARE_DERIVABLE_TYPE(AtGLPerspectiveCamera, at_gl_perspectivecamera, AT, GL_PERSPECTIVECAMERA, AtGLCamera)
 typedef struct _AtGLPerspectiveCameraClass{
   AtGLCameraClass parent_class;
 }AtGLPerspectiveCameraClass;
@@ -37,7 +34,8 @@ typedef struct _AtGLPerspectiveCameraClass{
  * PUBLIC API
  *===========================================================================*/
 void
-at_gl_perspectivecamera_set(double fov, double aspect, double near, double far);
+at_gl_perspectivecamera_set(AtGLPerspectiveCamera* camera,
+                            double fov, double aspect, double near, double far);
 
 
 

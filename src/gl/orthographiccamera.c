@@ -17,6 +17,8 @@
  **/
 
 #include <at/gl.h>
+#include <at/core.h>
+#include <string.h>
 
 /*===========================================================================
  * PRIVATE API
@@ -52,10 +54,23 @@ at_gl_orthographiccamera_set(AtGLOrthographicCamera* camera,
                              double bottom, double top,
                              double near,   double far){
   AtGLOrthographicCameraPrivate* priv = at_gl_orthographiccamera_get_instance_private(camera);
-  priv->left = left;
-  priv->right = right;
+  priv->left   = left;
+  priv->right  = right;
   priv->bottom = bottom;
-  priv->top = top;
-  priv->near = near;
-  priv->far = far;
+  priv->top    = top;
+  priv->near   = near;
+  priv->far    = far;
+
+  double rml = right - left;
+  double tmb = top   - bottom;
+  double fmn = far   - near;
+  double rpl = right + left;
+  double tpb = top   + bottom;
+  double fpn = far   + near;
+
+  AtMat4 mat4 = {2.0/rml,  0.0,       0.0,     0.0,
+                 0.0,      2.0/tmb,   0.0,     0.0,
+                 0.0,      0.0,      -2.0/fmn, 0.0,
+                 -rpl/rml, -tpb/tmb, -fpn/fmn, 1.0};
+  memcpy(at_gl_camera_get_projectionmatrix_ptr(AT_GL_CAMERA(camera)),&mat4,sizeof(AtMat4));
 }

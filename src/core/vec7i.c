@@ -68,6 +68,15 @@ double
 at_vec7i_get_magnitude(AtVec7i* vec){
   return sqrt((double)at_vec7i_dot(vec,vec));
 }
+
+
+void
+at_vec7i_negate(AtVec7i* vec){
+  uint8_t i;
+  for(i = 0; i < 7; i++)
+    vec->data[i] = -vec->data[i];
+}
+
 #if 7 == 3
 AtVec3i
 at_vec3i_cross(AtVec3i* vec1, AtVec3i* vec2){
@@ -80,11 +89,24 @@ at_vec3i_cross(AtVec3i* vec1, AtVec3i* vec2){
   d[2] = d1[0] * d2[1] - d2[0] * d1[1];
   return result;
 }
+
+AtVec3i
+at_vec3i_x(){
+  return (AtVec3i){1,0,0};
+}
+AtVec3i
+at_vec3i_y(){
+  return (AtVec3i){0,1,0};
+}
+AtVec3i
+at_vec3i_z(){
+  return (AtVec3i){0,0,1};
+}
 #endif
 
-AtVec7i
+AtVec7
 AtVec7i_to_double(AtVec7i* vec){
-  AtVec7i vecd;
+  AtVec7 vecd;
   uint8_t i;
   for(i = 0; i < 7; i++)
     vecd.data[i] = vec->data[i];

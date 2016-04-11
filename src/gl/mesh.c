@@ -27,6 +27,7 @@
 typedef struct _AtGLMeshPrivate{
   AtGLGeometry* geometry;
   AtGLMaterial* material;
+  AtMat4 normalmatrix;
 }AtGLMeshPrivate;
 
 static void
@@ -243,4 +244,12 @@ at_gl_mesh_get_num_uvs(AtGLMesh* mesh){
 GQuark
 at_gl_mesh_error_quark(void){
   return g_quark_from_static_string("at-gl-mesh-error-quark");
+}
+
+at_gl_mesh_calculate_normalmatrix(AtGLMesh* mesh, AtMat4* viewmatrix){
+  AtGLMeshPrivate* priv = at_gl_mesh_get_instance_private()
+  at_mat4_set(&priv->normalmatrix, viewmatrix);
+  at_mat4_premultiply(&priv->normalmatrix, at_gl_movableobject_get_modelmatrix_ptr(AT_GL_MOVABLEOBJECT(mesh)));
+  at_mat4_inverse(&priv->normalmatrix);
+  at_mat4_transpose(&priv->normalmatrix);
 }

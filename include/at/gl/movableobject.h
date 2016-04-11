@@ -16,34 +16,33 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef AT_GL_ORTHOGRAPHICCAMERA_H
-#define AT_GL_ORTHOGRAPHICCAMERA_H
+#ifndef AT_GL_MOVABLEOBJECT_H
+#define AT_GL_MOVABLEOBJECT_H
 #include <at/gl.h>
+
 G_BEGIN_DECLS
-
 /*===========================================================================
- * CLASS DECLARATION
+ * CLASS STRUCTURE
  *===========================================================================*/
+G_DECLARE_DERIVABLE_TYPE(AtGLMovableObject, at_gl_movableobject, AT, 
+                         GL_MOVABLEOBJECT, GObject)
+typedef structure _AtGLMovableObjectClass{
 
-#define AT_TYPE_GL_ORTHOGRAPHICCAMERA at_gl_orthographiccamera_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLOrthographicCamera,
-                         at_gl_orthographiccamera,
-                         AT, GL_ORTHOGRAPHICCAMERA,
-                         AtGLCamera)
-typedef struct _AtGLOrthographicCameraClass{
-  AtGLCameraClass object_class;
-}AtGLOrthographicCameraClass;
-
+}AtGLMovableObjectClass;
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
 
+void
+at_gl_object_reset_matrix(AtGLMovableObject* object);
 
 void
-at_gl_orthographiccamera_set(AtGLOrthographicCamera* camera,
-                             double left,   double right,
-                             double bottom, double top,
-                             double near,   double far);
+at_gl_object_translate(AtGLMovableObject* object, AtVec3* vector);
 
-G_END_DECLS
-#endif
+void
+at_gl_object_rotate(AtGLMovableObject* object, double angle, AtVec3* axis);
+
+void
+at_gl_object_scale(AtGLMovableObject* object, AtVec3* vector);
+
+G_END_DECLS 

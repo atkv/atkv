@@ -86,12 +86,24 @@ at_vec2_normalize(AtVec2* vec);
 double
 at_vec2_get_magnitude(AtVec2* vec);
 
+/**
+ * @brief Negate a vertex
+ */
+void
+at_vec2_negate(AtVec2* vec);
+
 #if 2 == 3
 /**
  * @brief Cross product between two vectors
  */
 AtVec3
 at_vec2_cross(AtVec2* vec1, AtVec2* vec2);
+AtVec3
+at_vec3_x();
+AtVec3
+at_vec3_y();
+AtVec3
+at_vec3_z();
 #endif
 
 #endif

@@ -19,6 +19,7 @@
 #ifndef AT_GL_CAMERA_H
 #define AT_GL_CAMERA_H
 #include <at/gl.h>
+#include <at/core.h>
 G_BEGIN_DECLS
 
 /*===========================================================================
@@ -34,6 +35,120 @@ typedef struct _AtGLCameraClass{
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
+/**
+ * @brief at_gl_camera_reset_viewmatrix
+ * @param camera
+ */
+void
+at_gl_camera_reset_viewmatrix(AtGLCamera* camera);
+
+/**
+ * @brief at_gl_camera_update_viewmatrix
+ * @param camera
+ */
+void
+at_gl_camera_update_viewmatrix(AtGLCamera* camera);
+
+/**
+ * @brief at_gl_camera_move_right
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_move_right(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_move_left
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_move_left(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_move_forward
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_move_forward(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_move_backwards
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_move_backwards(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_move_up
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_move_up(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_move_bottom
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_move_bottom(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_yaw
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_yaw(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_pitch
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_pitch(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_roll
+ * @param camera
+ * @param units
+ */
+void
+at_gl_camera_roll(AtGLCamera* camera, double units);
+
+/**
+ * @brief at_gl_camera_lookat
+ * @param camera
+ * @param position
+ * @param to
+ * @param up
+ */
+void
+at_gl_camera_lookat(AtGLCamera *camera,
+                    AtVec3* position,
+                    AtVec3* to,
+                    AtVec3* up);
+
+/**
+ * @brief at_gl_camera_get_projectionmatrix_ptr
+ * @param camera
+ * @return
+ */
+AtMat4*
+at_gl_camera_get_projectionmatrix_ptr(AtGLCamera* camera);
+/**
+ * @brief at_gl_camera_get_viewmatrix_ptr
+ * @param camera
+ * @return
+ */
+AtMat4*
+at_gl_camera_get_viewmatrix_ptr(AtGLCamera* camera);
+
 
 
 

@@ -46,25 +46,24 @@ at_gl_perspectivecamera_init(AtGLPerspectiveCamera *self){
 
 static void
 at_gl_perspectivecamera_frustrum(AtGLPerspectiveCamera* camera,
-                                 double xmin, double xmax,
-                                 double ymin, double ymax,
-                                 double near, double far){
+                                 double left  , double right,
+                                 double bottom, double top,
+                                 double near  , double far){
   AtGLPerspectiveCameraPrivate* priv = at_gl_perspectivecamera_get_instance_private(camera);
 
-  var te = at_gl_camera_get_projection_matrix(camera);
-  var x = 2 * near / ( right - left );
-  var y = 2 * near / ( top - bottom );
+  double* te = at_gl_camera_get_projectionmatrix_ptr(AT_GL_CAMERA(camera))->data;
+  double x = 2 * near / ( right - left );
+  double y = 2 * near / ( top - bottom );
 
-  var a = ( right + left ) / ( right - left );
-  var b = ( top + bottom ) / ( top - bottom );
-  var c = - ( far + near ) / ( far - near );
-  var d = - 2 * far * near / ( far - near );
+  double a = ( right + left ) / ( right - left );
+  double b = ( top + bottom ) / ( top - bottom );
+  double c = - ( far + near ) / ( far - near );
+  double d = - 2 * far * near / ( far - near );
 
   te[ 0 ] = x;  te[ 4 ] = 0;  te[ 8 ] = a;  te[ 12 ] = 0;
   te[ 1 ] = 0;  te[ 5 ] = y;  te[ 9 ] = b;  te[ 13 ] = 0;
   te[ 2 ] = 0;  te[ 6 ] = 0;  te[ 10 ] = c; te[ 14 ] = d;
   te[ 3 ] = 0;  te[ 7 ] = 0;  te[ 11 ] = - 1; te[ 15 ] = 0;
-  return te;
 }
 
 /*===========================================================================
@@ -74,12 +73,12 @@ at_gl_perspectivecamera_frustrum(AtGLPerspectiveCamera* camera,
 void
 at_gl_perspectivecamera_set(AtGLPerspectiveCamera* camera,
                             double fov, double aspect, double near, double far){
-  var zoom     = 1;
-  var new_fov  = radToDeg(2 * Math.atan(Math.tan(degToRad(fov) * 0.5)/zoom));
-  var ymax     = near * Math.tan(degToRad(new_fov * 0.5));
-  var ymin     = - ymax;
-  var xmin     = ymin * aspect;
-  var xmax     = ymax * aspect;
+  double zoom     = 1;
+  double new_fov_r= atan(tan(fov/360.0 * M_PI)/zoom);
+  double ymax     = near * tan(new_fov_r);
+  double ymin     = - ymax;
+  double xmin     = ymin * aspect;
+  double xmax     = ymax * aspect;
   return at_gl_perspectivecamera_frustrum(camera, xmin, xmax, ymin, ymax, near, far);
 }
 
