@@ -19,30 +19,34 @@
 #ifndef AT_GL_MOVABLEOBJECT_H
 #define AT_GL_MOVABLEOBJECT_H
 #include <at/gl.h>
-
+#include <at/core.h>
 G_BEGIN_DECLS
 /*===========================================================================
  * CLASS STRUCTURE
  *===========================================================================*/
 G_DECLARE_DERIVABLE_TYPE(AtGLMovableObject, at_gl_movableobject, AT, 
                          GL_MOVABLEOBJECT, GObject)
-typedef structure _AtGLMovableObjectClass{
-
+typedef struct _AtGLMovableObjectClass{
+  GObjectClass parent_class;
 }AtGLMovableObjectClass;
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
 
 void
-at_gl_object_reset_matrix(AtGLMovableObject* object);
+at_gl_movableobject_reset_matrix(AtGLMovableObject* object);
 
 void
-at_gl_object_translate(AtGLMovableObject* object, AtVec3* vector);
+at_gl_movableobject_translate(AtGLMovableObject* object, AtVec3* vector);
 
 void
-at_gl_object_rotate(AtGLMovableObject* object, double angle, AtVec3* axis);
+at_gl_movableobject_rotate(AtGLMovableObject* object, double angle, AtVec3* axis);
 
 void
-at_gl_object_scale(AtGLMovableObject* object, AtVec3* vector);
+at_gl_movableobject_scale(AtGLMovableObject* object, AtVec3* vector);
+
+AtMat4*
+at_gl_movableobject_get_modelmatrix_ptr(AtGLMovableObject* object);
 
 G_END_DECLS 
+#endif

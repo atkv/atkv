@@ -75,6 +75,8 @@ at_array_##type1##_copy_to_##type2 (AtArray_##type1 * array, AtArray_##type2 ** 
   at_array_##type2##_new_with_data(output,dim,size,data);\
 }
 #define G_DEFINE_TYPE_WITH_PRIVATE_AND_CODE(TN, t_n, T_P, _C_) _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, 0) {G_ADD_PRIVATE (TN);_C_;} _G_DEFINE_TYPE_EXTENDED_END()
+#define G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE_AND_CODE(TN, t_n, T_P, _C_) _G_DEFINE_TYPE_EXTENDED_BEGIN (TN, t_n, T_P, G_TYPE_FLAG_ABSTRACT) {G_ADD_PRIVATE (TN);_C_;} _G_DEFINE_TYPE_EXTENDED_END()
+
 #include <glib-object.h>
 #if !GLIB_CHECK_VERSION(2,44,0)
   #define G_DECLARE_DERIVABLE_TYPE(ModuleObjName, module_obj_name, MODULE, OBJ_NAME, ParentName) \

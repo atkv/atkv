@@ -35,7 +35,7 @@ at_mat4_eye();
  * @param axis
  */
 void
-at_mat4_rotate_vec3(AtVec3* vec, double angle, AtVec3 axis);
+at_mat4_rotate_vec3(AtVec3* vec, double angle, AtVec3* axis);
 /**
  * @brief at_mat4_rotate_mat4
  * @param mat
@@ -43,7 +43,7 @@ at_mat4_rotate_vec3(AtVec3* vec, double angle, AtVec3 axis);
  * @param axis
  */
 void
-at_mat4_rotate_mat4(AtMat4* mat, double angle, AtVec3 axis);
+at_mat4_rotate_mat4(AtMat4* mat, double angle, AtVec3* axis);
 /**
  * @brief at_mat4_mult_vec3
  * @param mat
@@ -59,4 +59,51 @@ at_mat4_mult_vec3(AtMat4* mat, AtVec3* vec);
  */
 void
 at_mat4_mult_mat4(AtMat4* mat1, AtMat4* mat2, AtMat4* output);
+
+/**
+ * @brief at_mat4_set
+ * @param mat
+ * @param output
+ */
+void
+at_mat4_set(AtMat4* mat, AtMat4* output);
+/**
+ * @brief at_mat4_inverse
+ * @param mat
+ * @param output
+ * @return
+ */
+gboolean
+at_mat4_inverse(AtMat4* mat, AtMat4* output);
+/**
+ * @brief at_mat4_transpose
+ * @param mat
+ * @param output
+ */
+void
+at_mat4_transpose(AtMat4* mat, AtMat4* output);
+
+/**
+ * @brief at_mat4_translate
+ * @param mat
+ * @param vector
+ */
+void
+at_mat4_translate(AtMat4* mat, AtVec3* vector);
+
+/**
+ * @brief at_mat4_to_eye
+ * @param mat
+ */
+void
+at_mat4_to_eye(AtMat4* mat);
+
+/**
+ * @brief at_mat4_scale
+ * @param mat
+ * @param vector
+ */
+void
+at_mat4_scale(AtMat4* mat, AtVec3* vector);
+
 #endif

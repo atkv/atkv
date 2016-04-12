@@ -17,19 +17,20 @@
  **/
 
 #include <at/core.h>
+#include <string.h>
 /*===========================================================================
  * PRIVATE API
  *===========================================================================*/
 #define at_to_rad(angle) (angle / 180.0 * M_PI  )
 #define at_to_deg(angle) (angle * 180.0 * M_1_PI)
 static void
-at_gl_create_rotation_matrix(AtMat4* rotation, double angle, AtVec3 axis){
+at_gl_create_rotation_matrix(AtMat4* rotation, double angle, AtVec3* axis){
   double a            = at_to_rad(angle);
   double c            = cos(a);
   double cc           = 1-c;
   double s            = sin(a);
 
-  at_vec3_normalize(&axis);
+  at_vec3_normalize(axis);
 
   //uint32_t  size     = 3;
   //uint32_t  sizes[2] = {4,4};
@@ -37,9 +38,9 @@ at_gl_create_rotation_matrix(AtMat4* rotation, double angle, AtVec3 axis){
   //AtNDArray* axisn    = at_ndarray_from_data(ve,1,&size,AT_double);
   //AtNDArray* axis     = at_ndarray_normalize(axisn);
 
-  double u  = axis.data[0];
-  double v  = axis.data[1];
-  double w  = axis.data[2];
+  double u  = axis->data[0];
+  double v  = axis->data[1];
+  double w  = axis->data[2];
   double u2 = u*u;
   double v2 = v*v;
   double w2 = w*w;
@@ -68,14 +69,14 @@ at_mat4_eye(){
 }
 
 void
-at_mat4_rotate_vec3(AtVec3* vec, double angle, AtVec3 axis){
+at_mat4_rotate_vec3(AtVec3* vec, double angle, AtVec3* axis){
   AtMat4 rotation = at_mat4_eye();
   at_gl_create_rotation_matrix(&rotation,angle,axis);
   at_mat4_mult_vec3(&rotation,vec);
 }
 
 void
-at_mat4_rotate_mat4(AtMat4* mat, double angle, AtVec3 axis){
+at_mat4_rotate_mat4(AtMat4* mat, double angle, AtVec3* axis){
   AtMat4 rotation = at_mat4_eye();
   at_gl_create_rotation_matrix(&rotation,angle,axis);
   at_mat4_mult_mat4(&rotation,mat,mat);
@@ -105,4 +106,139 @@ at_mat4_mult_mat4(AtMat4* mat1, AtMat4* mat2, AtMat4* output){
   for(j = 0; j < 4; j++)
     for(i = 0; i < 4; i++, k++)
       output->data[k] = at_vec4_dot(&rows1[i],&columns2[j]);
+}
+
+void
+at_mat4_set(AtMat4* mat, AtMat4* output){
+  memcpy(output, mat, sizeof(AtMat4));
+}
+
+gboolean
+at_mat4_inverse(AtMat4* mat, AtMat4* output){
+  AtMat4 inv_mat;
+  double* inv = inv_mat.data;
+  double det;
+  uint8_t i;
+  double* m = mat->data;
+
+  inv[0]  =  m[5]  * m[10] * m[15] - m[5]  * m[11] * m[14] -
+             m[9]  * m[6]  * m[15] + m[9]  * m[7]  * m[14] +
+             m[13] * m[6]  * m[11] - m[13] * m[7]  * m[10];
+
+  inv[4]  = -m[4]  * m[10] * m[15] + m[4]  * m[11] * m[14] +
+             m[8]  * m[6]  * m[15] - m[8]  * m[7]  * m[14] -
+             m[12] * m[6]  * m[11] + m[12] * m[7]  * m[10];
+
+  inv[8]  =  m[4]  * m[9]  * m[15] - m[4]  * m[11] * m[13] -
+             m[8]  * m[5]  * m[15] + m[8]  * m[7]  * m[13] +
+             m[12] * m[5]  * m[11] - m[12] * m[7]  * m[9];
+
+  inv[12] = -m[4]  * m[9] * m[14]  + m[4]  * m[10] * m[13] +
+             m[8]  * m[5] * m[14]  - m[8]  * m[6] * m[13]  -
+             m[12] * m[5] * m[10]  + m[12] * m[6] * m[9];
+
+  inv[1]  = -m[1]  * m[10] * m[15] + m[1]  * m[11] * m[14] +
+             m[9]  * m[2] * m[15]  - m[9]  * m[3] * m[14]  -
+             m[13] * m[2] * m[11]  + m[13] * m[3] * m[10];
+
+  inv[5]  =  m[0]  * m[10] * m[15] - m[0]  * m[11] * m[14] -
+             m[8]  * m[2] * m[15]  + m[8]  * m[3] * m[14]  +
+             m[12] * m[2] * m[11]  - m[12] * m[3] * m[10];
+
+  inv[9]  = -m[0]  * m[9] * m[15]  + m[0]  * m[11] * m[13] +
+             m[8]  * m[1] * m[15]  - m[8]  * m[3] * m[13]  -
+             m[12] * m[1] * m[11]  + m[12] * m[3] * m[9];
+
+  inv[13] =  m[0]  * m[9] * m[14]  - m[0]  * m[10] * m[13] -
+             m[8]  * m[1] * m[14]  + m[8]  * m[2] * m[13]  +
+             m[12] * m[1] * m[10]  - m[12] * m[2] * m[9];
+
+  inv[2]  =  m[1]  * m[6] * m[15]  - m[1]  * m[7] * m[14] -
+             m[5]  * m[2] * m[15]  + m[5]  * m[3] * m[14] +
+             m[13] * m[2] * m[7]   - m[13] * m[3] * m[6];
+
+  inv[6]  = -m[0]  * m[6] * m[15]  + m[0]  * m[7] * m[14] +
+             m[4]  * m[2] * m[15]  - m[4]  * m[3] * m[14] -
+             m[12] * m[2] * m[7]   + m[12] * m[3] * m[6];
+
+  inv[10] =  m[0]  * m[5] * m[15]  - m[0]  * m[7] * m[13] -
+             m[4]  * m[1] * m[15]  + m[4]  * m[3] * m[13] +
+             m[12] * m[1] * m[7]   - m[12] * m[3] * m[5];
+
+  inv[14] = -m[0]  * m[5] * m[14]  + m[0]  * m[6] * m[13] +
+             m[4]  * m[1] * m[14]  - m[4]  * m[2] * m[13] -
+             m[12] * m[1] * m[6]   + m[12] * m[2] * m[5];
+
+  inv[3]  = -m[1] * m[6] * m[11]   + m[1] * m[7] * m[10] +
+             m[5] * m[2] * m[11]   - m[5] * m[3] * m[10] -
+             m[9] * m[2] * m[7]    + m[9] * m[3] * m[6];
+
+  inv[7]  =  m[0] * m[6] * m[11]   - m[0] * m[7] * m[10] -
+             m[4] * m[2] * m[11]   + m[4] * m[3] * m[10] +
+             m[8] * m[2] * m[7]    - m[8] * m[3] * m[6];
+
+  inv[11] = -m[0] * m[5] * m[11]   + m[0] * m[7] * m[9]  +
+             m[4] * m[1] * m[11]   - m[4] * m[3] * m[9]  -
+             m[8] * m[1] * m[7]    + m[8] * m[3] * m[5];
+
+  inv[15] =  m[0] * m[5] * m[10]   - m[0] * m[6] * m[9]  -
+             m[4] * m[1] * m[10]   + m[4] * m[2] * m[9]  +
+             m[8] * m[1] * m[6]    - m[8] * m[2] * m[5];
+
+  det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+  if (det == 0)
+    return FALSE;
+
+  det = 1.0 / det;
+
+  for (i = 0; i < 16; i++)
+    output->data[i] = inv[i] * det;
+
+  return TRUE;
+}
+
+void
+at_mat4_transpose(AtMat4* mat, AtMat4* output){
+  double t;
+  double* m = mat->data;
+  double* o = output->data;
+  if(output != mat){
+    o[0]  = m[0];
+    o[5]  = m[5];
+    o[10] = m[10];
+    o[15] = m[15];
+  }
+
+  t = m[1 ]; o[1 ] = m[4 ]; o[4 ] = t;
+  t = m[2 ]; o[2 ] = m[8 ]; o[8 ] = t;
+  t = m[3 ]; o[3 ] = m[12]; o[12] = t;
+  t = m[6 ]; o[6 ] = m[9 ]; o[9 ] = t;
+  t = m[7 ]; o[7 ] = m[13]; o[13] = t;
+  t = m[11]; o[11] = m[14]; o[14] = t;
+}
+
+void
+at_mat4_translate(AtMat4* mat, AtVec3* vector){
+  double* m = mat->data;
+  double* v = vector->data;
+  m[12] += v[0];
+  m[13] += v[1];
+  m[14] += v[2];
+}
+
+void
+at_mat4_to_eye(AtMat4* mat){
+  double* m = mat->data;
+  memset(mat, 0, sizeof(AtMat4));
+  m[0] = m[5] = m[10] = m[15] = 1;
+}
+
+void
+at_mat4_scale(AtMat4* mat, AtVec3* vector){
+  double* m = mat->data;
+  double* v = vector->data;
+  m[0] *= v[0];
+  m[5] *= v[1];
+  m[10] *= v[2];
 }

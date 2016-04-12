@@ -246,10 +246,13 @@ at_gl_mesh_error_quark(void){
   return g_quark_from_static_string("at-gl-mesh-error-quark");
 }
 
+void
 at_gl_mesh_calculate_normalmatrix(AtGLMesh* mesh, AtMat4* viewmatrix){
-  AtGLMeshPrivate* priv = at_gl_mesh_get_instance_private()
+  AtGLMeshPrivate* priv = at_gl_mesh_get_instance_private(mesh);
   at_mat4_set(&priv->normalmatrix, viewmatrix);
-  at_mat4_premultiply(&priv->normalmatrix, at_gl_movableobject_get_modelmatrix_ptr(AT_GL_MOVABLEOBJECT(mesh)));
-  at_mat4_inverse(&priv->normalmatrix);
-  at_mat4_transpose(&priv->normalmatrix);
+  at_mat4_mult_mat4(&priv->normalmatrix,
+                    at_gl_movableobject_get_modelmatrix_ptr(AT_GL_MOVABLEOBJECT(mesh)),
+                    &priv->normalmatrix);
+  at_mat4_inverse(&priv->normalmatrix, &priv->normalmatrix);
+  at_mat4_transpose(&priv->normalmatrix, &priv->normalmatrix);
 }
