@@ -49,14 +49,89 @@ at_gl_mesh_object_interface_init(AtGLObject *iface){
 
 }
 
+/**
+ * @brief Converter 3 índices em 1
+ * @param indices ponteiro para o vetor de índices
+ * @param num_components
+ * @param num_indices
+ * @param num_indices_alloc
+ */
 static void
 at_gl_mesh_pack_indices(uint32_t **indices, uint8_t num_components, uint32_t *num_indices, uint32_t* num_indices_alloc){
 
 }
 
+
+// SOME MACROS TO FILL LIST
+// ----------------------------
+#define COMMAND_IS(type,n) strncmp(line, type, n) == 0
+#define FIX_LIST_SIZE(list, size, typesize, num_vertices, num_vertices_alloc) \
+if(vertices == NULL){ \
+ vertices = malloc(size * typesize); \
+ num_vertices_alloc = 1; \
+}else if(num_vertices == num_vertices_alloc){ \
+ num_vertices_alloc <<= 1; \
+ list = realloc(list, num_vertices_alloc * size * typesize); \
+}
+#define FILL_LIST(list,size,typesize,num_vertices,num_vertices_alloc) \
+FIX_LIST_SIZE(list,size,typesize,num_vertices,num_vertices_alloc) \
+for(vi = 0; vi < size; vi++){ \
+ vertices[size*num_vertices+vi] = strtof(p1, &p2); \
+ p1 = p2; \
+} \
+num_vertices++;
+
+
 static void
 at_gl_mesh_read_mtl(char* material_filename){
+  FILE* fp = fopen(material_filename, "r");
+  if(!fp){
+    g_set_error(error,AT_GL_MESH_ERROR, AT_GL_MESH_ERROR_FILE_OPEN,
+                "Couldn't load Material: could not open file %s for reading",
+                material_filename);
+    return NULL;
+  }
+  // PARSING THE OBJ FILE
+  // ----------------------------
+  char *p1, *p2;
+  while((read = getline(&line,&len,fp)) != -1){
+    p1 = line;
+    p2 = strchr(p1,' ');p1 = p2 + 1;
 
+    // It's a material filename
+    if(COMMAND_IS("newmtl",6)){
+
+    }else
+
+    if(COMMAND_IS("Ns",2)){
+
+    }else
+
+    if(COMMAND_IS("Ka",2)){
+
+    }else
+
+    if(COMMAND_IS("Kd",2)){
+
+    }else
+
+    if(COMMAND_IS("Ks",2)){
+
+    }else
+
+    if(COMMAND_IS("Ni",2)){
+
+    }else
+
+    if(COMMAND_IS("d",1)){
+
+    }else
+
+    if(COMMAND_IS("illum",5)){
+
+    }
+
+  }
 }
 
 static AtGLMesh*
@@ -85,26 +160,6 @@ at_gl_mesh_new_from_file_obj(char* filename, GError** error){
   char     seps[3] = "// ";
 
   char    *oldLocale = setlocale(LC_NUMERIC, NULL);
-
-  // SOME MACROS TO FILL LIST
-  // ----------------------------
-#define COMMAND_IS(type,n) strncmp(line, type, n) == 0
-#define FIX_LIST_SIZE(list, size, typesize, num_vertices, num_vertices_alloc) \
- if(vertices == NULL){ \
-   vertices = malloc(size * typesize); \
-   num_vertices_alloc = 1; \
- }else if(num_vertices == num_vertices_alloc){ \
-   num_vertices_alloc <<= 1; \
-   list = realloc(list, num_vertices_alloc * size * typesize); \
- }
-#define FILL_LIST(list,size,typesize,num_vertices,num_vertices_alloc) \
- FIX_LIST_SIZE(list,size,typesize,num_vertices,num_vertices_alloc) \
- for(vi = 0; vi < size; vi++){ \
-   vertices[size*num_vertices+vi] = strtof(p1, &p2); \
-   p1 = p2; \
- } \
- num_vertices++;
-
 
   // LOCALE FOR DOT AS DECIMAL POINT
   // ----------------------------
@@ -200,14 +255,16 @@ at_gl_mesh_new_from_file_obj(char* filename, GError** error){
       }
     }
   }
-#undef COMMAND_IS
-#undef FILL_LIST
-#undef FIX_LIST_SIZE
 
   at_gl_mesh_pack_indices(&indices, 3, &num_indices, &num_indices_alloc);
   at_gl_mesh_read_mtl(material_filename);
   setlocale(LC_NUMERIC,oldLocale);
 }
+
+#undef COMMAND_IS
+#undef FILL_LIST
+#undef FIX_LIST_SIZE
+
 
 /*===========================================================================
  * PUBLIC API
