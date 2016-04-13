@@ -23,10 +23,17 @@
  *===========================================================================*/
 typedef struct _AtGLMovableObjectPrivate{
   AtMat4 model_matrix;
+  char* name;
 }AtGLMovableObjectPrivate;
 
 static void
-at_gl_movableobject_object_interface_init (AtGLObject *iface);
+at_gl_movableobject_object_interface_init (AtGLObjectInterface *iface);
+
+static void
+at_gl_movableobject_set_name(AtGLObject* object, char* name);
+
+static char*
+at_gl_movableobject_get_name(AtGLObject *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE_AND_CODE(
   AtGLMovableObject, at_gl_movableobject, G_TYPE_OBJECT,
@@ -37,8 +44,9 @@ G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE_AND_CODE(
 )
 
 static void
-at_gl_movableobject_object_interface_init (AtGLObject *iface){
-
+at_gl_movableobject_object_interface_init (AtGLObjectInterface *iface){
+  iface->get_name = at_gl_movableobject_get_name;
+  iface->set_name = at_gl_movableobject_set_name;
 }
 static void
 at_gl_movableobject_class_init(AtGLMovableObjectClass *klass){
@@ -48,6 +56,20 @@ static void
 at_gl_movableobject_init(AtGLMovableObject *self){
 
 }
+
+static void
+at_gl_movableobject_set_name(AtGLObject* object, char* name){
+  AtGLMovableObjectPrivate* priv = at_gl_movableobject_get_instance_private(AT_GL_MOVABLEOBJECT(object));
+  if(priv->name) g_free(priv->name);
+  priv->name = g_strdup(name);
+}
+
+static char*
+at_gl_movableobject_get_name(AtGLObject *object){
+  AtGLMovableObjectPrivate* priv = at_gl_movableobject_get_instance_private(AT_GL_MOVABLEOBJECT(object));
+  return priv->name;
+}
+
 
 
 /*===========================================================================
@@ -82,3 +104,4 @@ at_gl_movableobject_get_modelmatrix_ptr(AtGLMovableObject* object){
   AtGLMovableObjectPrivate* priv = at_gl_movableobject_get_instance_private(object);
   return &priv->model_matrix;
 }
+

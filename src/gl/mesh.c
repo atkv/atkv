@@ -30,10 +30,8 @@ typedef struct _AtGLMeshPrivate{
   AtMat4 normalmatrix;
 }AtGLMeshPrivate;
 
-static void
-at_gl_mesh_object_interface_init(AtGLObject *iface);
 
-G_DEFINE_TYPE_WITH_PRIVATE_AND_CODE(AtGLMesh, at_gl_mesh, G_TYPE_OBJECT,G_IMPLEMENT_INTERFACE(AT_TYPE_GL_OBJECT,at_gl_mesh_object_interface_init))
+G_DEFINE_TYPE_WITH_PRIVATE(AtGLMesh, at_gl_mesh, AT_TYPE_GL_MOVABLEOBJECT)
 static void
 at_gl_mesh_class_init(AtGLMeshClass *klass){
 
@@ -44,226 +42,218 @@ at_gl_mesh_init(AtGLMesh *self){
   priv->geometry = NULL;
   priv->material = NULL;
 }
-static void
-at_gl_mesh_object_interface_init(AtGLObject *iface){
 
-}
-
-/**
- * @brief Converter 3 índices em 1
- * @param indices ponteiro para o vetor de índices
- * @param num_components
- * @param num_indices
- * @param num_indices_alloc
- */
-static void
-at_gl_mesh_pack_indices(uint32_t **indices, uint8_t num_components, uint32_t *num_indices, uint32_t* num_indices_alloc){
-
-}
-
-
-// SOME MACROS TO FILL LIST
-// ----------------------------
-#define COMMAND_IS(type,n) strncmp(line, type, n) == 0
-#define FIX_LIST_SIZE(list, size, typesize, num_vertices, num_vertices_alloc) \
-if(vertices == NULL){ \
- vertices = malloc(size * typesize); \
- num_vertices_alloc = 1; \
-}else if(num_vertices == num_vertices_alloc){ \
- num_vertices_alloc <<= 1; \
- list = realloc(list, num_vertices_alloc * size * typesize); \
-}
-#define FILL_LIST(list,size,typesize,num_vertices,num_vertices_alloc) \
-FIX_LIST_SIZE(list,size,typesize,num_vertices,num_vertices_alloc) \
-for(vi = 0; vi < size; vi++){ \
- vertices[size*num_vertices+vi] = strtof(p1, &p2); \
- p1 = p2; \
-} \
-num_vertices++;
+//// SOME MACROS TO FILL LIST
+//// ----------------------------
+//#define COMMAND_IS(type,n) strncmp(line, type, n) == 0
+//#define FIX_LIST_SIZE(list, size, typesize, num_vertices, num_vertices_alloc) \
+//if(vertices == NULL){ \
+// vertices = malloc(size * typesize); \
+// num_vertices_alloc = 1; \
+//}else if(num_vertices == num_vertices_alloc){ \
+// num_vertices_alloc <<= 1; \
+// list = realloc(list, num_vertices_alloc * size * typesize); \
+//}
+//#define FILL_LIST(list,size,typesize,num_vertices,num_vertices_alloc) \
+//FIX_LIST_SIZE(list,size,typesize,num_vertices,num_vertices_alloc) \
+//for(vi = 0; vi < size; vi++){ \
+// vertices[size*num_vertices+vi] = strtof(p1, &p2); \
+// p1 = p2; \
+//} \
+//num_vertices++;
 
 
-static void
-at_gl_mesh_read_mtl(char* material_filename){
-  FILE* fp = fopen(material_filename, "r");
-  if(!fp){
-    g_set_error(error,AT_GL_MESH_ERROR, AT_GL_MESH_ERROR_FILE_OPEN,
-                "Couldn't load Material: could not open file %s for reading",
-                material_filename);
-    return NULL;
-  }
-  // PARSING THE OBJ FILE
-  // ----------------------------
-  char *p1, *p2;
-  while((read = getline(&line,&len,fp)) != -1){
-    p1 = line;
-    p2 = strchr(p1,' ');p1 = p2 + 1;
+//static void
+//at_gl_mesh_read_mtl(char* material_filename){
+//  uint8_t num_materials = 10;
+//  uint8_t cur_material_index = 0;
+//  AtGLMaterial** materials = malloc(sizeof(AtGLMaterial*) * num_materials);
+//  AtGLMaterial* cur_material = NULL;
 
-    // It's a material filename
-    if(COMMAND_IS("newmtl",6)){
+//  FILE* fp = fopen(material_filename, "r");
+//  if(!fp){
+//    g_set_error(error,AT_GL_MESH_ERROR, AT_GL_MESH_ERROR_FILE_OPEN,
+//                "Couldn't load Material: could not open file %s for reading",
+//                material_filename);
+//    return NULL;
+//  }
+//  // PARSING THE OBJ FILE
+//  // ----------------------------
+//  char *p1, *p2;
+//  while((read = getline(&line,&len,fp)) != -1){
+//    p1 = line;
+//    p2 = strchr(p1,' ');p1 = p2 + 1;
 
-    }else
+//    // It's a material filename
+//    if(COMMAND_IS("newmtl",6)){
+//      if(cur_material){
+//        g_set_object(materials + cur_material_index, cur_material);
+//        materials[cur_material_index++] = cur_material;
+//      }
+//      cur_material = at_gl_colormaterial_new();
+//    }else
 
-    if(COMMAND_IS("Ns",2)){
+//    if(COMMAND_IS("Ns",2)){
 
-    }else
+//    }else
 
-    if(COMMAND_IS("Ka",2)){
+//    if(COMMAND_IS("Ka",2)){
 
-    }else
+//    }else
 
-    if(COMMAND_IS("Kd",2)){
+//    if(COMMAND_IS("Kd",2)){
 
-    }else
+//    }else
 
-    if(COMMAND_IS("Ks",2)){
+//    if(COMMAND_IS("Ks",2)){
 
-    }else
+//    }else
 
-    if(COMMAND_IS("Ni",2)){
+//    if(COMMAND_IS("Ni",2)){
 
-    }else
+//    }else
 
-    if(COMMAND_IS("d",1)){
+//    if(COMMAND_IS("d",1)){
 
-    }else
+//    }else
 
-    if(COMMAND_IS("illum",5)){
+//    if(COMMAND_IS("illum",5)){
 
-    }
+//    }
 
-  }
-}
+//  }
+//}
 
-static AtGLMesh*
-at_gl_mesh_new_from_file_obj(char* filename, GError** error){
-  // LISTS AND VARIABLES
-  // ----------------------------
-  g_autofree char* line = g_malloc(256 * sizeof(char)); // string of line of OBJ file
-  size_t   len;  // number of chars in `line`
-  ssize_t  read; // read
-  uint8_t  has_uv = FALSE;
+//static AtGLMesh*
+//at_gl_mesh_new_from_file_obj(char* filename, GError** error){
+//  // LISTS AND VARIABLES
+//  // ----------------------------
+//  g_autofree char* line = g_malloc(256 * sizeof(char)); // string of line of OBJ file
+//  size_t   len;  // number of chars in `line`
+//  ssize_t  read; // read
+//  uint8_t  has_uv = FALSE;
 
-  char     object_name[256]; // o <object_name>
-  char     material_name[128]; // usemtl <material_name>
-  char     material_filename[128]; // mtllib <material_name>
+//  char     object_name[256]; // o <object_name>
+//  char     material_name[128]; // usemtl <material_name>
+//  char     material_filename[128]; // mtllib <material_name>
 
-  uint8_t  vi,k;
-  char    *p1, *p2; // start and end of a token
+//  uint8_t  vi,k;
+//  char    *p1, *p2; // start and end of a token
 
-  // Mesh data
-  float   *vertices = NULL       , *texcoords=NULL      , *normals=NULL;
-  uint32_t num_vertices       = 0, num_texcoords      =0, num_normals      =0;
-  uint32_t num_vertices_alloc = 0, num_texcoords_alloc=0, num_normals_alloc=0;
-  uint32_t*indices=NULL, num_indices=0, num_indices_alloc=0;
+//  // Mesh data
+//  float   *vertices = NULL       , *texcoords=NULL      , *normals=NULL;
+//  uint32_t num_vertices       = 0, num_texcoords      =0, num_normals      =0;
+//  uint32_t num_vertices_alloc = 0, num_texcoords_alloc=0, num_normals_alloc=0;
+//  uint32_t*indices=NULL, num_indices=0, num_indices_alloc=0;
 
-  char     index[8]; // index in string
-  char     seps[3] = "// ";
+//  char     index[8]; // index in string
+//  char     seps[3] = "// ";
 
-  char    *oldLocale = setlocale(LC_NUMERIC, NULL);
+//  char    *oldLocale = setlocale(LC_NUMERIC, NULL);
 
-  // LOCALE FOR DOT AS DECIMAL POINT
-  // ----------------------------
-  setlocale(LC_NUMERIC,"C");
+//  // LOCALE FOR DOT AS DECIMAL POINT
+//  // ----------------------------
+//  setlocale(LC_NUMERIC,"C");
 
-  // OPENING FILE
-  // ----------------------------
-  g_return_val_if_fail(error == NULL || *error == NULL, NULL);
+//  // OPENING FILE
+//  // ----------------------------
+//  g_return_val_if_fail(error == NULL || *error == NULL, NULL);
 
-  FILE* fp = fopen(filename, "r");
-  if(!fp){
-    g_set_error(error,AT_GL_MESH_ERROR, AT_GL_MESH_ERROR_FILE_OPEN,
-                "Couldn't load OBJ mesh: could not open file %s for reading",
-                filename);
-    return NULL;
-  }
+//  FILE* fp = fopen(filename, "r");
+//  if(!fp){
+//    g_set_error(error,AT_GL_MESH_ERROR, AT_GL_MESH_ERROR_FILE_OPEN,
+//                "Couldn't load OBJ mesh: could not open file %s for reading",
+//                filename);
+//    return NULL;
+//  }
 
-  // PARSING THE OBJ FILE
-  // ----------------------------
-  while((read = getline(&line,&len,fp)) != -1){
-    p1 = line;
-    p2 = strchr(p1,' ');p1 = p2 + 1;
+//  // PARSING THE OBJ FILE
+//  // ----------------------------
+//  while((read = getline(&line,&len,fp)) != -1){
+//    p1 = line;
+//    p2 = strchr(p1,' ');p1 = p2 + 1;
 
-    // It's a material filename
-    if(COMMAND_IS("mtllib",6)){
-      p2 = strchr(p1,'\n');
-      memcpy(material_filename,p1,p2-p1);
-      material_filename[p2-p1] = 0;
-    }else
+//    // It's a material filename
+//    if(COMMAND_IS("mtllib",6)){
+//      p2 = strchr(p1,'\n');
+//      memcpy(material_filename,p1,p2-p1);
+//      material_filename[p2-p1] = 0;
+//    }else
 
-    // It's an object name
-    if(COMMAND_IS("o",1)){
-      p2 = strchr(p1,'\n');
-      memcpy(object_name,p1,p2-p1);
-      object_name[p2-p1] = 0;
-    }else
+//    // It's an object name
+//    if(COMMAND_IS("o",1)){
+//      p2 = strchr(p1,'\n');
+//      memcpy(object_name,p1,p2-p1);
+//      object_name[p2-p1] = 0;
+//    }else
 
-    // It's an a vertex position
-    if(COMMAND_IS("v ",2)){
-      FILL_LIST(vertices, 3, sizeof(float), num_vertices, num_vertices_alloc);
-    }else
+//    // It's an a vertex position
+//    if(COMMAND_IS("v ",2)){
+//      FILL_LIST(vertices, 3, sizeof(float), num_vertices, num_vertices_alloc);
+//    }else
 
-    // It's a vertex texture
-    if(COMMAND_IS("vt",2)){  // If it's a vertex texture uv coord
-      FILL_LIST(texcoords, 2, sizeof(float), num_texcoords, num_texcoords_alloc);
-      has_uv = TRUE;
-    }else
+//    // It's a vertex texture
+//    if(COMMAND_IS("vt",2)){  // If it's a vertex texture uv coord
+//      FILL_LIST(texcoords, 2, sizeof(float), num_texcoords, num_texcoords_alloc);
+//      has_uv = TRUE;
+//    }else
 
-    // It's a vertex normal
-    if(COMMAND_IS("vn",2)){ // It's a vertex normal data
-      FILL_LIST(normals, 3, sizeof(float), num_normals, num_normals_alloc);
-    }else
+//    // It's a vertex normal
+//    if(COMMAND_IS("vn",2)){ // It's a vertex normal data
+//      FILL_LIST(normals, 3, sizeof(float), num_normals, num_normals_alloc);
+//    }else
 
-    // It's a material name used by the current object
-    if(COMMAND_IS("usemtl",6)){ // It's a material name
-      p2 = strchr(p1,'\n');
-      memcpy(material_name,p1,p2-p1);
-      material_name[p2-p1] = 0;
-    }else
+//    // It's a material name used by the current object
+//    if(COMMAND_IS("usemtl",6)){ // It's a material name
+//      p2 = strchr(p1,'\n');
+//      memcpy(material_name,p1,p2-p1);
+//      material_name[p2-p1] = 0;
+//    }else
 
-    // It's a shadow parameter
-    if(COMMAND_IS("s",1)){
+//    // It's a shadow parameter
+//    if(COMMAND_IS("s",1)){
 
-    }else
+//    }else
 
-    // It's a face
-    if(COMMAND_IS("f",1)){ // It's a face (9 numbers)
-      // Fix list
-      if(indices == NULL){
-        num_indices_alloc = 3;
-        indices = g_malloc(num_indices_alloc * 3 *sizeof(uint32_t));
-      }
-      else if(num_indices == num_indices_alloc){
-        num_indices_alloc <<= 1;
-        indices = g_realloc(indices,num_indices_alloc * 3 * sizeof(uint32_t));
-      }
+//    // It's a face
+//    if(COMMAND_IS("f",1)){ // It's a face (9 numbers)
+//      // Fix list
+//      if(indices == NULL){
+//        num_indices_alloc = 3;
+//        indices = g_malloc(num_indices_alloc * 3 *sizeof(uint32_t));
+//      }
+//      else if(num_indices == num_indices_alloc){
+//        num_indices_alloc <<= 1;
+//        indices = g_realloc(indices,num_indices_alloc * 3 * sizeof(uint32_t));
+//      }
 
-      for(vi = 0; vi < 3; vi++){
-        for(k = 0; k < 3; k++){
-          if(vi == 2 && k == 2)
-            p2 = strchr(p1,'\n');
-          else
-            p2 = strchr(p1,seps[k]);
+//      for(vi = 0; vi < 3; vi++){
+//        for(k = 0; k < 3; k++){
+//          if(vi == 2 && k == 2)
+//            p2 = strchr(p1,'\n');
+//          else
+//            p2 = strchr(p1,seps[k]);
 
-          memcpy(index, p1, p2-p1);
-          index[p2-p1] = 0;
-          if(p1 == p2) p1+=2;
-          else p1 = p2;
+//          memcpy(index, p1, p2-p1);
+//          index[p2-p1] = 0;
+//          if(p1 == p2) p1+=2;
+//          else p1 = p2;
 
-          indices[3*num_indices+k] = strtoul(index, NULL,10);
-        }
-        num_indices++;
-      }
-    }
-  }
+//          indices[3*num_indices+k] = strtoul(index, NULL,10);
+//        }
+//        num_indices++;
+//      }
+//    }
+//  }
 
-  at_gl_mesh_pack_indices(&indices, 3, &num_indices, &num_indices_alloc);
-  at_gl_mesh_read_mtl(material_filename);
-  setlocale(LC_NUMERIC,oldLocale);
-}
+//  at_gl_mesh_pack_indices(&indices, 3, &num_indices, &num_indices_alloc);
+//  at_gl_mesh_read_mtl(material_filename);
+//  setlocale(LC_NUMERIC,oldLocale);
+//}
 
-#undef COMMAND_IS
-#undef FILL_LIST
-#undef FIX_LIST_SIZE
+//#undef COMMAND_IS
+//#undef FILL_LIST
+//#undef FIX_LIST_SIZE
 
 
 /*===========================================================================
@@ -273,11 +263,7 @@ AtGLMesh*
 at_gl_mesh_new(){
   return g_object_new(AT_TYPE_GL_MESH, NULL);
 }
-AtGLMesh*
-at_gl_mesh_new_from_file(char* file, GError** error){
-  g_return_val_if_fail(error == NULL || *error == NULL, NULL);
-  return at_gl_mesh_new_from_file_obj(file, error);
-}
+
 uint32_t
 at_gl_mesh_get_num_vertices(AtGLMesh* mesh){
   return 0;
@@ -298,9 +284,9 @@ at_gl_mesh_get_num_uvs(AtGLMesh* mesh){
   return 0;
 }
 
-GQuark
-at_gl_mesh_error_quark(void){
-  return g_quark_from_static_string("at-gl-mesh-error-quark");
+void
+at_gl_mesh_pack_indices(AtGLMesh* mesh){
+
 }
 
 void
@@ -312,4 +298,9 @@ at_gl_mesh_calculate_normalmatrix(AtGLMesh* mesh, AtMat4* viewmatrix){
                     &priv->normalmatrix);
   at_mat4_inverse(&priv->normalmatrix, &priv->normalmatrix);
   at_mat4_transpose(&priv->normalmatrix, &priv->normalmatrix);
+}
+
+GQuark
+at_gl_mesh_error_quark(void){
+  return g_quark_from_static_string("at-gl-mesh-error-quark");
 }

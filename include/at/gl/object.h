@@ -28,11 +28,30 @@ G_BEGIN_DECLS
 G_DECLARE_INTERFACE(AtGLObject, at_gl_object, AT, GL_OBJECT, GObject)
 typedef struct _AtGLObjectInterface{
   GTypeInterface parent_iface;
+
+  void (*set_name) (AtGLObject* self, char* name);
+  char*(*get_name) (AtGLObject* self);
+
 }AtGLObjectInterface;
 
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
+/**
+ * @brief Set name of the object
+ * @param object
+ * @param name
+ */
+void
+at_gl_object_set_name(AtGLObject* object, char* name);
+
+/**
+ * @brief Get the object name
+ * @param object
+ * @return
+ */
+char*
+at_gl_object_get_name(AtGLObject* object);
 
 G_END_DECLS
 #endif

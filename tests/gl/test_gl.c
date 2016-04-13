@@ -99,9 +99,10 @@ test_at_gl_shader_program(){
 static void
 test_at_gl_scene(TestAtGLFixture* fixture, gconstpointer user_data){
   GError* error = NULL;
-  g_autoptr(AtGLMesh)   cube   = at_gl_mesh_new_from_file("cube.obj"      , &error);
-  g_autoptr(AtGLMesh)   octa   = at_gl_mesh_new_from_file("octahedron.obj", &error);
-  g_autoptr(AtGLScene)  scene  = at_gl_scene_new();
+
+  g_autoptr(AtGLContainer) cube   = at_gl_loader_read("cube.obj", &error);
+  g_autoptr(AtGLContainer) octa   = at_gl_mesh_new_from_file("octahedron.obj", &error);
+  g_autoptr(AtGLScene)     scene  = at_gl_scene_new();
 
   g_assert_cmpuint(at_gl_mesh_get_num_vertices(cube),==,8); // 8 vertices
   g_assert_cmpuint(at_gl_mesh_get_num_faces(cube)   ,==,12);// 12 triangles (6 squares)

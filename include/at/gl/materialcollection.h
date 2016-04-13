@@ -16,51 +16,48 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef AT_GL_CONTAINER_H
-#define AT_GL_CONTAINER_H
+#ifndef AT_GL_MATERIALCOLLECTION_H
+#define AT_GL_MATERIALCOLLECTION_H
+
 #include <at/gl.h>
-#include <stdint.h>
 G_BEGIN_DECLS
+
 /*===========================================================================
  * CLASS DECLARATION
  *===========================================================================*/
-#define AT_TYPE_GL_CONTAINER at_gl_container_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLContainer, at_gl_container, AT, GL_CONTAINER, AtGLMovableObject)
-typedef struct _AtGLContainerClass{
-  AtGLMovableObjectClass parent_class;
-}AtGLContainerClass;
+#define AT_TYPE_GL_MATERIALCOLLECTION at_gl_materialcollection_get_type()
+G_DECLARE_DERIVABLE_TYPE(AtGLMaterialCollection, at_gl_materialcollection,
+                         AT, GL_MATERIALCOLLECTION,GObject)
+typedef struct _AtGLMaterialCollectionClass{
+  GObjectClass parent_class;
+}AtGLMaterialCollectionClass;
+
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
-/**
- * @brief at_gl_container_new
- * @return
- */
-AtGLContainer*
-at_gl_container_new();
+AtGLMaterialCollection*
+at_gl_materialcollection_new();
 
-/**
- * @brief at_gl_container_get_num_children
- * @param container
- * @return
- */
-uint8_t
-at_gl_container_get_num_children(AtGLContainer* container);
-/**
- * @brief at_gl_container_index_of
- * @param container
- * @param object
- * @return
- */
-int32_t
-at_gl_container_index_of(AtGLContainer* container, AtGLObject* object);
-/**
- * @brief at_gl_container_add_object
- * @param container
- * @param object
- */
 void
-at_gl_container_add_object(AtGLContainer* container, AtGLObject* object);
+at_gl_materialcollection_add(AtGLMaterialCollection* collection,
+                             AtGLMaterial* material);
+
+void
+at_gl_materialcollection_remove(AtGLMaterialCollection* collection,
+                                AtGLMaterial* material);
+
+void
+at_gl_materialcollection_remove_by_name(AtGLMaterialCollection* collection,
+                                        char* name);
+
+AtGLMaterial*
+at_gl_materialcollection_find(AtGLMaterialCollection* collection, char* name);
+
+AtGLMaterial*
+at_gl_materialcollection_get_by_index(AtGLMaterialCollection* collection, uint8_t index);
+
+AtGLMaterialCollection*
+at_gl_materialcollection_join(AtGLMaterialCollection* collection, AtGLMaterialCollection* subcollection);
 
 G_END_DECLS
 #endif

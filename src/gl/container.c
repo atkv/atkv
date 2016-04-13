@@ -5,15 +5,12 @@
  * PRIVATE API
  *===========================================================================*/
 typedef struct _AtGLContainerPrivate{
-  AtGLObject** children;
-  uint32_t num_children;
   uint64_t num_allocated;
+  uint32_t num_children;
+  AtGLObject** children;
 }AtGLContainerPrivate;
 
-static void
-at_gl_container_object_interface_init(AtGLObject *iface);
-
-G_DEFINE_TYPE_WITH_PRIVATE_AND_CODE(AtGLContainer, at_gl_container, G_TYPE_OBJECT, G_IMPLEMENT_INTERFACE(AT_TYPE_GL_OBJECT, at_gl_container_object_interface_init))
+G_DEFINE_TYPE_WITH_PRIVATE(AtGLContainer, at_gl_container, AT_TYPE_GL_MOVABLEOBJECT)
 
 static void
 at_gl_container_dispose(GObject* object){
@@ -24,6 +21,7 @@ at_gl_container_dispose(GObject* object){
   g_free(priv->children);
   G_OBJECT_CLASS(at_gl_container_parent_class)->dispose(object);
 }
+
 static void
 at_gl_container_finalize(GObject* object){
   G_OBJECT_CLASS(at_gl_container_parent_class)->finalize(object);
@@ -32,25 +30,27 @@ at_gl_container_finalize(GObject* object){
 static void
 at_gl_container_class_init(AtGLContainerClass *klass){
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
-  object_class->dispose = at_gl_container_dispose;
-  object_class->finalize = at_gl_container_finalize;
+  object_class->dispose      = at_gl_container_dispose;
+  object_class->finalize     = at_gl_container_finalize;
 }
 
 static void
 at_gl_container_init(AtGLContainer *self){
   AtGLContainerPrivate* priv = at_gl_container_get_instance_private(self);
-  priv->children = NULL;
-  priv->num_children = 0;
-  priv->num_allocated = 0;
-}
-static void
-at_gl_container_object_interface_init(AtGLObject *iface){
-
+  priv->children             = NULL;
+  priv->num_children         = 0;
+  priv->num_allocated        = 0;
 }
 
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
+
+AtGLContainer*
+at_gl_container_new(){
+  return g_object_new(AT_TYPE_GL_CONTAINER, NULL);
+}
+
 uint8_t
 at_gl_container_get_num_children(AtGLContainer* container){
   AtGLContainerPrivate* priv = at_gl_container_get_instance_private(container);

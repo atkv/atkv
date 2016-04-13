@@ -23,6 +23,8 @@ typedef struct _AtGLMaterialPrivate{
   char* name;
 }AtGLMaterialPrivate;
 
+#define GET_PRIV(material) AtGLMaterialPrivate* priv = \
+                           at_gl_material_get_instance_private(material);
 G_DEFINE_TYPE_WITH_PRIVATE(AtGLMaterial, at_gl_material, G_TYPE_OBJECT)
 static void
 at_gl_material_class_init(AtGLMaterialClass *klass){
@@ -30,7 +32,7 @@ at_gl_material_class_init(AtGLMaterialClass *klass){
 }
 static void
 at_gl_material_init(AtGLMaterial *self){
-  AtGLMaterialPrivate* priv = at_gl_material_get_instance_private(self);
+  GET_PRIV(self)
   priv->name       = NULL;
 }
 
@@ -41,4 +43,16 @@ at_gl_material_init(AtGLMaterial *self){
 AtGLMaterial*
 at_gl_material_new(){
   return g_object_new(AT_TYPE_GL_MATERIAL, NULL);
+}
+
+char*
+at_gl_material_get_name(AtGLMaterial* material){
+  GET_PRIV(material);
+  return priv->name;
+}
+
+void
+at_gl_material_set_name(AtGLMaterial* material, char* name){
+  GET_PRIV(material);
+  priv->name = name;
 }

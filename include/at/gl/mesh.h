@@ -25,9 +25,9 @@ G_BEGIN_DECLS
  * CLASS DECLARATION
  *===========================================================================*/
 #define AT_TYPE_GL_MESH at_gl_mesh_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLMesh, at_gl_mesh, AT, GL_MESH, GObject)
+G_DECLARE_DERIVABLE_TYPE(AtGLMesh, at_gl_mesh, AT, GL_MESH, AtGLMovableObject)
 typedef struct _AtGLMeshClass{
-  GObjectClass parent_class;
+  AtGLMovableObjectClass parent_class;
 }AtGLMeshClass;
 
 /*===========================================================================
@@ -39,14 +39,6 @@ typedef struct _AtGLMeshClass{
  */
 AtGLMesh*
 at_gl_mesh_new();
-/**
- * @brief at_gl_mesh_new_from_file
- * @param file
- * @param error
- * @return
- */
-AtGLMesh*
-at_gl_mesh_new_from_file(char* file, GError** error);
 /**
  * @brief at_gl_mesh_get_num_vertices
  * @param mesh
@@ -68,6 +60,7 @@ at_gl_mesh_get_num_faces(AtGLMesh* mesh);
  */
 uint32_t
 at_gl_mesh_get_num_normals(AtGLMesh* mesh);
+
 /**
  * @brief at_gl_mesh_get_num_uvs
  * @param mesh
@@ -76,6 +69,21 @@ at_gl_mesh_get_num_normals(AtGLMesh* mesh);
 uint32_t
 at_gl_mesh_get_num_uvs(AtGLMesh* mesh);
 
+/**
+ * @brief at_gl_mesh_pack_indices
+ * @param mesh
+ */
+void
+at_gl_mesh_pack_indices(AtGLMesh* mesh);
+
+/**
+ * @brief at_gl_mesh_calculate_normalmatrix
+ * @param mesh
+ * @param viewmatrix
+ */
+void
+at_gl_mesh_calculate_normalmatrix(AtGLMesh* mesh, AtMat4* viewmatrix);
+
 /*===========================================================================
  * ERROR HANDLING
  *===========================================================================*/
@@ -83,7 +91,7 @@ at_gl_mesh_get_num_uvs(AtGLMesh* mesh);
 #define AT_GL_MESH_ERROR at_gl_mesh_error_quark()
 
 typedef enum {
-  AT_GL_MESH_ERROR_FILE_OPEN   = 103,
+  AT_ERROR_GL_MESH_FILE_OPEN   = 103,
 }AtGLMeshError;
 
 GQuark

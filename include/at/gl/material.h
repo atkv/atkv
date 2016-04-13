@@ -36,5 +36,21 @@ typedef struct _AtGLMaterialClass{
 AtGLMaterial*
 at_gl_material_new();
 
+/**
+ * @brief at_gl_material_get_name
+ * @param material
+ * @return
+ */
+char*
+at_gl_material_get_name(AtGLMaterial* material);
+
+/**
+ * @brief at_gl_material_set_name
+ * @param material
+ * @param name
+ */
+void
+at_gl_material_set_name(AtGLMaterial* material, char* name);
+
 G_END_DECLS
 #endif

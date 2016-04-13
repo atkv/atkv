@@ -183,10 +183,28 @@ set(AT_IFT_TESTS ift)
 
 # GL
 # ----------------
-set(AT_GL_HDRS shader.h program.h object.h movableobject.h container.h camera.h perspectivecamera.h orthographiccamera.h light.h pointlight.h directionallight.h material.h geometry.h mesh.h renderer.h scene.h texturematerial.h colormaterial.h engine.h )
-set(AT_GL_SRCS shader.c program.c object.c movableobject.c container.c camera.c perspectivecamera.c orthographiccamera.c light.c pointlight.c directionallight.c material.c geometry.c mesh.c renderer.c scene.c texturematerial.c colormaterial.c engine.c )
+set(AT_GL_HDRS camera.h perspectivecamera.h orthographiccamera.h      # cameras
+               light.h pointlight.h directionallight.h                # lights
+               material.h texturematerial.h colormaterial.h           # materials
+               materialcollection.h
+               geometry.h trianglegeometry.h spheregeometry.h         # geometries
+               conegeometry.h cylindergeometry.h cubegeometry.h
+               object.h movableobject.h container.h                   # objects
+               mesh.h loader.h scene.h
+               shader.h program.h renderer.h engine.h                 # core
+)
+set(AT_GL_SRCS camera.c perspectivecamera.c orthographiccamera.c      # cameras
+               light.c pointlight.c directionallight.c                # lights
+               material.c texturematerial.c colormaterial.c           # materials
+               materialcollection.c
+               geometry.c trianglegeometry.c spheregeometry.c         # geometries
+               conegeometry.c cylindergeometry.c cubegeometry.c
+               object.c movableobject.c container.c                   # objects
+               mesh.c loader.c scene.c
+               shader.c program.c renderer.c engine.c                 # core
+)
 set(AT_GL_LIBRARIES at_gl ${AT_CORE_LIBRARIES} ${EPOXY_LIBRARIES} ${GTK3_LIBRARIES})
-set(AT_GL_TESTS gl)
+set(AT_GL_TESTS gl loader)
 
 # GUI
 # ----------------

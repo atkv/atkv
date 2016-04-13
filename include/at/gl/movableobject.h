@@ -24,6 +24,7 @@ G_BEGIN_DECLS
 /*===========================================================================
  * CLASS STRUCTURE
  *===========================================================================*/
+#define AT_TYPE_GL_MOVABLEOBJECT at_gl_movableobject_get_type()
 G_DECLARE_DERIVABLE_TYPE(AtGLMovableObject, at_gl_movableobject, AT, 
                          GL_MOVABLEOBJECT, GObject)
 typedef struct _AtGLMovableObjectClass{
