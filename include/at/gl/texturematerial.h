@@ -105,7 +105,14 @@ at_gl_texturematerial_set_bump(AtGLTextureMaterial* texturematerial,
 void
 at_gl_texturematerial_set_displacement(AtGLTextureMaterial* texturematerial,
                                    char* disp_map);
-
+/**
+ * @brief at_gl_texturematerial_set_alpha
+ * @param texturematerial
+ * @param alpha_map
+ */
+void
+at_gl_texturematerial_set_alpha(AtGLTextureMaterial* texturematerial,
+                                char* alpha_map);
 
 /**
  * @brief at_gl_texturematerial_get_ambient

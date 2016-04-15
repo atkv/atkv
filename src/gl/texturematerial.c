@@ -28,13 +28,28 @@ typedef struct _AtGLTextureMaterialPrivate{
   char* normal_map;
   char* bump_map;
   char* disp_map;
-
-  char  padding[1]; // For data alignment
+  char* alpha_map;
 }AtGLTextureMaterialPrivate;
 G_DEFINE_TYPE_WITH_PRIVATE(AtGLTextureMaterial, at_gl_texturematerial, AT_TYPE_GL_MATERIAL)
+
+static void
+at_gl_texturematerial_finalize(GObject* object){
+  GET_PRIV(AT_GL_TEXTUREMATERIAL(object));
+  if(priv->alpha_map)    g_free(priv->alpha_map);
+  if(priv->ambient_map)  g_free(priv->ambient_map);
+  if(priv->bump_map)     g_free(priv->bump_map);
+  if(priv->diffuse_map)  g_free(priv->diffuse_map);
+  if(priv->disp_map)     g_free(priv->disp_map);
+  if(priv->emissive_map) g_free(priv->emissive_map);
+  if(priv->normal_map)   g_free(priv->normal_map);
+  if(priv->specular_map) g_free(priv->specular_map);
+  G_OBJECT_CLASS(at_gl_texturematerial_parent_class)->finalize(object);
+}
+
 static void
 at_gl_texturematerial_class_init(AtGLTextureMaterialClass *klass){
-
+  GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  object_class->finalize = at_gl_texturematerial_finalize;
 }
 
 static void
@@ -56,51 +71,57 @@ void
 at_gl_texturematerial_set_ambient(AtGLTextureMaterial* texturematerial,
                                   char* ambient_map){
   GET_PRIV(texturematerial);
-  priv->ambient_map = ambient_map;
+  priv->ambient_map = g_strdup(ambient_map);
 }
 
 void
 at_gl_texturematerial_set_diffuse(AtGLTextureMaterial* texturematerial,
                                   char* diffuse_map){
   GET_PRIV(texturematerial);
-  priv->diffuse_map = diffuse_map;
+  priv->diffuse_map = g_strdup(diffuse_map);
 }
 
 void
 at_gl_texturematerial_set_specular(AtGLTextureMaterial* texturematerial,
                                    char* specular_map){
   GET_PRIV(texturematerial);
-  priv->specular_map = specular_map;
+  priv->specular_map = g_strdup(specular_map);
 }
 
 void
 at_gl_texturematerial_set_emissive(AtGLTextureMaterial* texturematerial,
                                    char* emissive_map){
   GET_PRIV(texturematerial);
-  priv->emissive_map = emissive_map;
+  priv->emissive_map = g_strdup(emissive_map);
 }
 
 void
 at_gl_texturematerial_set_normal(AtGLTextureMaterial* texturematerial,
                                    char* normal_map){
   GET_PRIV(texturematerial);
-  priv->normal_map = normal_map;
+  priv->normal_map = g_strdup(normal_map);
 }
 
 void
 at_gl_texturematerial_set_bump(AtGLTextureMaterial* texturematerial,
                                    char* bump_map){
   GET_PRIV(texturematerial);
-  priv->bump_map = bump_map;
+  priv->bump_map = g_strdup(bump_map);
 }
 
 void
 at_gl_texturematerial_set_displacement(AtGLTextureMaterial* texturematerial,
                                    char* disp_map){
   GET_PRIV(texturematerial);
-  priv->disp_map = disp_map;
+  priv->disp_map = g_strdup(disp_map);
 }
 
+void
+at_gl_texturematerial_set_alpha(AtGLTextureMaterial* texturematerial,
+                                   char* alpha_map){
+  GET_PRIV(texturematerial);
+  priv->alpha_map = g_strdup(alpha_map);
+}
 
 
 char*

@@ -4,6 +4,8 @@
 /*===========================================================================
  * PRIVATE API
  *===========================================================================*/
+#define GET_PRIV(obj) AtGLContainerPrivate* priv = \
+                      at_gl_container_get_instance_private(obj);
 typedef struct _AtGLContainerPrivate{
   uint64_t num_allocated;
   uint32_t num_children;
@@ -56,6 +58,13 @@ at_gl_container_get_num_children(AtGLContainer* container){
   AtGLContainerPrivate* priv = at_gl_container_get_instance_private(container);
   return priv->num_children;
 }
+
+AtGLObject*
+at_gl_container_get_by_index(AtGLContainer* container, uint32_t index){
+  GET_PRIV(container);
+  return priv->children[index];
+}
+
 
 void
 at_gl_container_add_object(AtGLContainer* container, AtGLObject* object){

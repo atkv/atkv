@@ -31,9 +31,9 @@ static void
 test_at_gl_loader_obj(){
   g_autoptr(AtGLContainer)          container = NULL;
   g_autoptr(AtGLMaterialCollection) materials = NULL;
-  GError** error = NULL;
+  GError* error = NULL;
 
-  at_gl_loader_read_obj("cube.obj", &container,&materials, error);
+  at_gl_loader_read_obj("cube.obj", &container,&materials, &error);
 
   // Without error and container/materials filled
   g_assert_null(error);
@@ -41,8 +41,8 @@ test_at_gl_loader_obj(){
   g_assert_nonnull(materials);
 
   // Correct name and Just 1 child: the cube mesh
-  g_assert_cmpstr(at_gl_object_get_name(AT_GL_OBJECT(container)),=,"cube.obj");
-  g_assert_cmpint(at_gl_container_get_num_children(container),=,1);
+  g_assert_cmpstr(at_gl_object_get_name(AT_GL_OBJECT(container)),==,"cube.obj");
+  g_assert_cmpint(at_gl_container_get_num_children(container),==,1);
 
   // Its child should be a mesh
   AtGLObject* child = at_gl_container_get_by_index(container, 0);
@@ -53,8 +53,8 @@ test_at_gl_loader_obj(){
   g_assert_cmpstr(at_gl_object_get_name(child),==,"Cube");
 
   // It should be a collection of triangles
-  AtGLGeometry* geometry = at_gl_get_geometry(mesh);
-  g_assert_true(AT_IS_TRIANGLE_GEOMETRY(geometry));
+  AtGLGeometry* geometry = at_gl_mesh_get_geometry(mesh);
+  g_assert_true(AT_IS_GL_TRIANGLEGEOMETRY(geometry));
 
   // It should have 12 triangles
   AtGLTriangleGeometry* triangles = AT_GL_TRIANGLEGEOMETRY(geometry);
@@ -90,6 +90,53 @@ test_at_gl_loader_obj(){
     g_assert_cmpfloat(s[i],==,s_gt[i]);
     g_assert_cmpfloat(e[i],==,e_gt[i]);
   }
+
+  // The geometry should have the proper positions, normals and indices
+  AtVec3*   positions_pkd = at_gl_trianglegeometry_get_positions_pkd(geometry);
+  AtVec3*   normals_pkd   = at_gl_trianglegeometry_get_normals_pkd(geometry);
+  AtVec2*   uvs_pkd       = at_gl_trianglegeometry_get_uvs_pkd(geometry);
+  uint32_t* indices_pkd   = at_gl_trianglegeometry_get_indices_pkd(geometry);
+
+  AtVec3    positions_gt[8]     = {{ 1.000000, -1.000000, -1.000000},
+                                   { 1.000000, -1.000000,  1.000000},
+                                   {-1.000000, -1.000000,  1.000000},
+                                   {-1.000000, -1.000000, -1.000000},
+                                   { 1.000000,  1.000000, -0.999999},
+                                   { 0.999999,  1.000000,  1.000001},
+                                   {-1.000000,  1.000000,  1.000000},
+                                   {-1.000000,  1.000000, -1.000000}};
+  AtVec3    positions_pkd_gt[8] = {{ 1.000000, -1.000000, -1.000000},
+                                   { 1.000000, -1.000000,  1.000000},
+                                   {-1.000000, -1.000000,  1.000000},
+                                   {-1.000000, -1.000000, -1.000000},
+                                   { 1.000000,  1.000000, -0.999999},
+                                   { 0.999999,  1.000000,  1.000001},
+                                   {-1.000000,  1.000000,  1.000000},
+                                   {-1.000000,  1.000000, -1.000000}};
+
+  AtVec3    normals_pkd_gt[6]   = {{ 0.000000, -1.000000,  0.000000},
+                                   { 0.000000,  1.000000,  0.000000},
+                                   { 1.000000, -0.000000,  0.000000},
+                                   { 0.000000, -0.000000,  1.000000},
+                                   {-1.000000, -0.000000, -0.000000},
+                                   { 0.000000,  0.000000, -1.000000}};
+
+  AtVec3    normals_gt[6]       = {{ 0.000000, -1.000000,  0.000000},
+                                   { 0.000000,  1.000000,  0.000000},
+                                   { 1.000000, -0.000000,  0.000000},
+                                   { 0.000000, -0.000000,  1.000000},
+                                   {-1.000000, -0.000000, -0.000000},
+                                   { 0.000000,  0.000000, -1.000000}};
+
+  AtVec3    indices_pkd[6]      = { 0, 1, 2,
+                                    3, 4, 5,
+                                    6, 7, 8,
+                                    9,10,11,
+                                   12,13,14,
+                                   15,16,17,
+                                    0,18, 1,
+                                    };
+
 }
 
 /*===========================================================================
@@ -104,11 +151,5 @@ main(int argc, char** argv){
   g_test_add_func("/at_gl/test_at_gl_loader_obj",
                   test_at_gl_loader_obj);
 
-  g_test_add("/at_gl/test_at_scene",
-             TestAtGLFixture,
-             NULL,
-             test_at_gl_fixture_set_up,
-             test_at_gl_scene,
-             test_at_gl_fixture_tear_down);
   return g_test_run();
 }

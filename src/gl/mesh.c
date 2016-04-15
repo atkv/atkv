@@ -24,6 +24,8 @@
 /*===========================================================================
  * PRIVATE API
  *===========================================================================*/
+#define GET_PRIV(obj) AtGLMeshPrivate* priv = \
+                      at_gl_mesh_get_instance_private(obj);
 typedef struct _AtGLMeshPrivate{
   AtGLGeometry* geometry;
   AtGLMaterial* material;
@@ -264,30 +266,30 @@ at_gl_mesh_new(){
   return g_object_new(AT_TYPE_GL_MESH, NULL);
 }
 
-uint32_t
-at_gl_mesh_get_num_vertices(AtGLMesh* mesh){
-  return 0;
+AtGLGeometry*
+at_gl_mesh_get_geometry(AtGLMesh* mesh){
+  GET_PRIV(mesh);
+  return priv->geometry;
 }
 
-uint32_t
-at_gl_mesh_get_num_faces(AtGLMesh* mesh){
-  return 0;
-}
-
-uint32_t
-at_gl_mesh_get_num_normals(AtGLMesh* mesh){
-  return 0;
-}
-
-uint32_t
-at_gl_mesh_get_num_uvs(AtGLMesh* mesh){
-  return 0;
+AtGLMaterial*
+at_gl_material_get_material(AtGLMesh* mesh){
+  GET_PRIV(mesh);
+  return priv->material;
 }
 
 void
-at_gl_mesh_pack_indices(AtGLMesh* mesh){
-
+at_gl_mesh_set_geometry(AtGLMesh* mesh, AtGLGeometry* geometry){
+  GET_PRIV(mesh);
+  g_set_object(&priv->geometry, geometry);
 }
+
+void
+at_gl_mesh_set_material(AtGLMesh* mesh, AtGLMaterial* material){
+  GET_PRIV(mesh);
+  g_set_object(&priv->material, material);
+}
+
 
 void
 at_gl_mesh_calculate_normalmatrix(AtGLMesh* mesh, AtMat4* viewmatrix){
@@ -300,6 +302,9 @@ at_gl_mesh_calculate_normalmatrix(AtGLMesh* mesh, AtMat4* viewmatrix){
   at_mat4_transpose(&priv->normalmatrix, &priv->normalmatrix);
 }
 
+/*===========================================================================
+ * ERROR HANDLING
+ *===========================================================================*/
 GQuark
 at_gl_mesh_error_quark(void){
   return g_quark_from_static_string("at-gl-mesh-error-quark");

@@ -39,42 +39,38 @@ typedef struct _AtGLMeshClass{
  */
 AtGLMesh*
 at_gl_mesh_new();
-/**
- * @brief at_gl_mesh_get_num_vertices
- * @param mesh
- * @return
- */
-uint32_t
-at_gl_mesh_get_num_vertices(AtGLMesh* mesh);
-/**
- * @brief at_gl_mesh_get_num_faces
- * @param mesh
- * @return
- */
-uint32_t
-at_gl_mesh_get_num_faces(AtGLMesh* mesh);
-/**
- * @brief at_gl_mesh_get_num_normals
- * @param mesh
- * @return
- */
-uint32_t
-at_gl_mesh_get_num_normals(AtGLMesh* mesh);
 
 /**
- * @brief at_gl_mesh_get_num_uvs
+ * @brief at_gl_mesh_get_geometry
  * @param mesh
  * @return
  */
-uint32_t
-at_gl_mesh_get_num_uvs(AtGLMesh* mesh);
+AtGLGeometry*
+at_gl_mesh_get_geometry(AtGLMesh* mesh);
 
 /**
- * @brief at_gl_mesh_pack_indices
+ * @brief at_gl_material_get_material
  * @param mesh
+ * @return
+ */
+AtGLMaterial*
+at_gl_material_get_material(AtGLMesh* mesh);
+
+/**
+ * @brief at_gl_mesh_set_geometry
+ * @param mesh
+ * @param geometry
  */
 void
-at_gl_mesh_pack_indices(AtGLMesh* mesh);
+at_gl_mesh_set_geometry(AtGLMesh* mesh, AtGLGeometry* geometry);
+
+/**
+ * @brief at_gl_mesh_set_material
+ * @param mesh
+ * @param material
+ */
+void
+at_gl_mesh_set_material(AtGLMesh* mesh, AtGLMaterial* material);
 
 /**
  * @brief at_gl_mesh_calculate_normalmatrix

@@ -25,16 +25,17 @@ G_BEGIN_DECLS
  * CLASS DECLARATION
  *===========================================================================*/
 #define AT_TYPE_GL_GEOMETRY at_gl_geometry_get_type()
-G_DECLARE_DERIVABLE_TYPE(AtGLGeometry, at_gl_geometry, AT, GL_GEOMETRY, GObject)
-typedef struct _AtGLGeometryClass{
-  GObjectClass parent_class;
-}AtGLGeometryClass;
+G_DECLARE_INTERFACE(AtGLGeometry, at_gl_geometry, AT, GL_GEOMETRY, GObject)
+typedef struct _AtGLGeometryInterface{
+  GTypeInterface parent_iface;
+
+  uint8_t padding[4]; // 4 future functions (to keep ABI compatibility)
+
+}AtGLGeometryInterface;
 
 /*===========================================================================
  * PUBLIC API
  *===========================================================================*/
-AtGLGeometry*
-at_gl_geometry_new();
 
 G_END_DECLS
 #endif

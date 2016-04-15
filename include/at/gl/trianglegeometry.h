@@ -27,9 +27,9 @@ G_BEGIN_DECLS
  *===========================================================================*/
 #define AT_TYPE_GL_TRIANGLEGEOMETRY at_gl_trianglegeometry_get_type()
 G_DECLARE_DERIVABLE_TYPE(AtGLTriangleGeometry, at_gl_trianglegeometry, AT,
-                         GL_TRIANGLEGEOMETRY, AtGLGeometry)
+                         GL_TRIANGLEGEOMETRY, GObject)
 typedef struct _AtGLTriangleGeometryClass{
-  AtGLGeometryClass parent_class;
+  GObjectClass parent_class;
 }AtGLTriangleGeometryClass;
 
 /*===========================================================================
@@ -47,73 +47,58 @@ at_gl_trianglegeometry_new();
  * @param geometry
  * @return
  */
-AtVec3
+AtVec3*
 at_gl_trianglegeometry_get_positions(AtGLTriangleGeometry* geometry);
 /**
  * @brief at_gl_trianglegeometry_get_normals
  * @param geometry
  * @return
  */
-AtVec3
+AtVec3*
 at_gl_trianglegeometry_get_normals(AtGLTriangleGeometry* geometry);
 /**
  * @brief at_gl_trianglegeometry_get_uvs
  * @param geometry
  * @return
  */
-AtVec2
+AtVec2*
 at_gl_trianglegeometry_get_uvs(AtGLTriangleGeometry* geometry);
+/**
+ * @brief at_gl_trianglegeometry_get_indices
+ * @param geometry
+ * @return
+ */
+AtVec3i*
+at_gl_trianglegeometry_get_indices(AtGLTriangleGeometry* geometry);
+/**
+ * @brief at_gl_trianglegeometry_get_positions_pkd
+ * @param geometry
+ * @return
+ */
+AtVec3*
+at_gl_trianglegeometry_get_positions_pkd(AtGLTriangleGeometry* geometry);
+/**
+ * @brief at_gl_trianglegeometry_get_normals_pkd
+ * @param geometry
+ * @return
+ */
+AtVec3*
+at_gl_trianglegeometry_get_normals_pkd(AtGLTriangleGeometry* geometry);
+/**
+ * @brief at_gl_trianglegeometry_get_uvs_pkd
+ * @param geometry
+ * @return
+ */
+AtVec2*
+at_gl_trianglegeometry_get_uvs_pkd(AtGLTriangleGeometry* geometry);
+/**
+ * @brief at_gl_trianglegeometry_get_indices_pkd
+ * @param geometry
+ * @return
+ */
+uint32_t*
+at_gl_trianglegeometry_get_indices_pkd(AtGLTriangleGeometry* geometry);
 
-/**
- * @brief at_gl_trianglegeometry_set_positions
- * @param geometry
- * @param positions
- * @param num_positions
- */
-void
-at_gl_trianglegeometry_set_positions(AtGLTriangleGeometry* geometry,
-                                     AtVec3* positions, uint32_t num_positions);
-/**
- * @brief at_gl_trianglegeometry_set_normals
- * @param geometry
- * @param normals
- * @param num_normals
- */
-void
-at_gl_trianglegeometry_set_normals(AtGLTriangleGeometry* geometry,
-                                     AtVec3* normals, uint32_t num_normals);
-/**
- * @brief at_gl_trianglegeometry_set_uvs
- * @param geometry
- * @param uvs
- * @param num_uvs
- */
-void
-at_gl_trianglegeometry_set_uvs(AtGLTriangleGeometry* geometry,
-                                     AtVec3* uvs, uint32_t num_uvs);
-/**
- * @brief at_gl_trianglegeometry_add_position
- * @param geometry
- * @param position
- */
-void
-at_gl_trianglegeometry_add_position(AtGLTriangleGeometry* geometry, AtVec3* position);
-
-/**
- * @brief at_gl_trianglegeometry_add_normal
- * @param geometry
- * @param normal
- */
-void
-at_gl_trianglegeometry_add_normal(AtGLTriangleGeometry* geometry, AtVec3* normal);
-
-/**
- * @brief at_gl_trianglegeometry_add_uv
- * @param geometry
- * @param uv
- */
-void
-at_gl_trianglegeometry_add_uv(AtGLTriangleGeometry* geometry, AtVec2 uv);
 /**
  * @brief at_gl_trianglegeometry_get_num_positions
  * @param geometry
@@ -142,6 +127,95 @@ at_gl_trianglegeometry_get_num_uvs(AtGLTriangleGeometry* geometry);
  */
 uint32_t
 at_gl_trianglegeometry_get_num_indices(AtGLTriangleGeometry* geometry);
+/**
+ * @brief at_gl_trianglegeometry_get_num_packed
+ * @param geometry
+ * @return
+ */
+uint32_t
+at_gl_trianglegeometry_get_num_packed(AtGLTriangleGeometry* geometry);
+/**
+ * @brief at_gl_trianglegeometry_set_positions
+ * @param geometry
+ * @param positions
+ * @param num_positions
+ */
+void
+at_gl_trianglegeometry_set_positions(AtGLTriangleGeometry* geometry,
+                                     AtVec3* positions, uint32_t num_positions);
+/**
+ * @brief at_gl_trianglegeometry_set_normals
+ * @param geometry
+ * @param normals
+ * @param num_normals
+ */
+void
+at_gl_trianglegeometry_set_normals(AtGLTriangleGeometry* geometry,
+                                     AtVec3* normals, uint32_t num_normals);
+/**
+ * @brief at_gl_trianglegeometry_set_uvs
+ * @param geometry
+ * @param uvs
+ * @param num_uvs
+ */
+void
+at_gl_trianglegeometry_set_uvs(AtGLTriangleGeometry* geometry,
+                                     AtVec2* uvs, uint32_t num_uvs);
+/**
+ * @brief at_gl_trianglegeometry_set_indices
+ * @param geometry
+ * @param indices
+ * @param num_indices
+ */
+void
+at_gl_trianglegeometry_set_indices(AtGLTriangleGeometry* geometry,
+                                   AtVec3i* indices, uint32_t num_indices);
+/**
+ * @brief at_gl_trianglegeometry_add_position
+ * @param geometry
+ * @param position
+ */
+void
+at_gl_trianglegeometry_add_position(AtGLTriangleGeometry* geometry, AtVec3* position);
+
+/**
+ * @brief at_gl_trianglegeometry_add_normal
+ * @param geometry
+ * @param normal
+ */
+void
+at_gl_trianglegeometry_add_normal(AtGLTriangleGeometry* geometry, AtVec3* normal);
+
+/**
+ * @brief at_gl_trianglegeometry_add_uv
+ * @param geometry
+ * @param uv
+ */
+void
+at_gl_trianglegeometry_add_uv(AtGLTriangleGeometry* geometry, AtVec2* uv);
+/**
+ * @brief at_gl_trianglegeometry_add_index
+ * @param geometry
+ * @param indice
+ */
+void
+at_gl_trianglegeometry_add_index(AtGLTriangleGeometry* geometry, AtVec3i* indice);
+
+
+
+/**
+ * @brief at_gl_trianglegeometry_pack
+ * @param geometry
+ */
+void
+at_gl_trianglegeometry_pack(AtGLTriangleGeometry* geometry);
+
+/**
+ * @brief at_gl_trianglegeometry_get_num_triangles
+ * @param geometry
+ */
+uint32_t
+at_gl_trianglegeometry_get_num_triangles(AtGLTriangleGeometry* geometry);
 
 G_END_DECLS
 #endif

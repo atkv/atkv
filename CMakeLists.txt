@@ -204,7 +204,7 @@ set(AT_GL_SRCS camera.c perspectivecamera.c orthographiccamera.c      # cameras
                shader.c program.c renderer.c engine.c                 # core
 )
 set(AT_GL_LIBRARIES at_gl ${AT_CORE_LIBRARIES} ${EPOXY_LIBRARIES} ${GTK3_LIBRARIES})
-set(AT_GL_TESTS gl loader)
+set(AT_GL_TESTS gl trianglegeometry loader camera)
 
 # GUI
 # ----------------

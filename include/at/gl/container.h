@@ -46,6 +46,15 @@ at_gl_container_new();
  */
 uint8_t
 at_gl_container_get_num_children(AtGLContainer* container);
+
+/**
+ * @brief at_gl_container_get_by_index
+ * @param container
+ * @param index
+ */
+AtGLObject*
+at_gl_container_get_by_index(AtGLContainer* container, uint32_t index);
+
 /**
  * @brief at_gl_container_index_of
  * @param container

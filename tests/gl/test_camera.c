@@ -16,17 +16,26 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+
+#include <locale.h>
+#include <glib-object.h>
 #include <at/gl.h>
+
 /*===========================================================================
- * PRIVATE API
+ * TEST CASES
  *===========================================================================*/
 
-G_DEFINE_INTERFACE(AtGLGeometry, at_gl_geometry, G_TYPE_OBJECT)
-static void
-at_gl_geometry_default_init(AtGLGeometryInterface *iface){
+/*===========================================================================
+ * MAIN FUNCTION
+ *===========================================================================*/
+int
+main(int argc, char** argv){
+  setlocale(LC_ALL, "");
+  g_test_init(&argc, &argv, NULL);
+  g_test_bug_base("http://github.com/atkv/atkv/issues/");
 
+//  g_test_add_func("/at_gl/test_at_gl_loader_obj",
+//                  test_at_gl_loader_obj);
+
+  return g_test_run();
 }
-
-/*===========================================================================
- * PUBLIC API
- *===========================================================================*/

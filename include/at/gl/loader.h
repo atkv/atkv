@@ -245,6 +245,10 @@ typedef enum{
   AT_ERROR_GL_LOADER_READ_FORMAT_JMA_INVALID = 111,
 }AtErrorGLLoader;
 
+typedef enum{
+  AT_ERROR_FILE_NOT_FOUND = 112,
+}AtErrorFile;
+
 GQuark
 at_error_gl_loader_quark(void);
 

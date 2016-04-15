@@ -98,3 +98,9 @@ AtGLMaterialCollection*
 at_gl_materialcollection_join(AtGLMaterialCollection* collection, AtGLMaterialCollection* subcollection){
 
 }
+
+uint32_t
+at_gl_materialcollection_get_num_materials(AtGLMaterialCollection* collection){
+  GET_PRIV(collection);
+  return g_hash_table_size(priv->hash_table);
+}

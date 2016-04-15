@@ -22,32 +22,53 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
+/*===========================================================================
+ * PRIVATE API
+ *===========================================================================*/
 // SOME MACROS TO FILL LIST
 // ----------------------------
 #define COMMAND_IS(type,n) strncmp(line, type, n) == 0
-#define FIX_LIST_SIZE(list, size, typesize, num_vertices, num_vertices_alloc) \
-if(vertices == NULL){ \
- vertices = g_malloc(size * typesize); \
- num_vertices_alloc = 1; \
-}else if(num_vertices == num_vertices_alloc){ \
- num_vertices_alloc <<= 1; \
- list = g_realloc(list, num_vertices_alloc * size * typesize); \
-}
-#define FILL_LIST(list,size,typesize,num_vertices,num_vertices_alloc) \
-FIX_LIST_SIZE(list,size,typesize,num_vertices,num_vertices_alloc) \
-for(vi = 0; vi < size; vi++){ \
- vertices[size*num_vertices+vi] = strtof(p1, &p2); \
- p1 = p2; \
-} \
-num_vertices++;
+#define FILL_LIST(item,size)\
+for(vi = 0; vi < size; vi++){\
+  item.data[vi] = strtod(p1, &p2);\
+  p1 = p2;\
+}\
+at_gl_trianglegeometry_add_##item(cur_geometry,&item);
 
+#define FILL_COLOR_MATERIAL(item,size)\
+for(vi = 0; vi < size; vi++){\
+  item.data[vi] = strtod(p1, &p2);\
+  p1 = p2;\
+}\
+at_gl_colormaterial_set_##item(AT_GL_COLORMATERIAL(cur_material),&item);
 
 #define LOADER_READ(type) \
 if(g_str_has_suffix(filename,#type)){ \
   at_gl_loader_read_##type(filename, container, materials,error); \
 }
+#define COLOR_TO_TEXTURE_MATERIAL() \
+if(AT_IS_GL_COLORMATERIAL(cur_material)){ \
+  g_set_object(&old_material, cur_material); \
+  cur_material = AT_GL_MATERIAL(at_gl_texturematerial_new_from_material(cur_material)); \
+  at_gl_materialcollection_add(materials,cur_material); \
+  g_clear_object(&old_material); \
+}
+static AtGLTextureMaterial*
+at_gl_texturematerial_new_from_material(AtGLMaterial* material){
+  AtGLTextureMaterial* texturematerial = at_gl_texturematerial_new();
+  at_gl_material_set_name(AT_GL_MATERIAL(texturematerial),
+                          at_gl_material_get_name(material));
+  return texturematerial;
+}
+#define FILL_TEXTURE_MATERIAL(item, mapname) \
+p2 = strchr(p1,'\n'); \
+memcpy(map_##mapname,p1,p2-p1); \
+map_##mapname[p2-p1] = 0; \
+at_gl_texturematerial_set_##item(AT_GL_TEXTUREMATERIAL(cur_material),map_##mapname);
 
+/*===========================================================================
+ * PUBLIC API
+ *===========================================================================*/
 void
 at_gl_loader_read(char *filename, AtGLContainer **container, AtGLMaterialCollection **materials, GError **error){
   LOADER_READ(obj)  else
@@ -93,14 +114,8 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
   uint8_t  k;
   char    *p1, *p2; // start and end of a token
 
-  // Mesh data
-  float   *vertices = NULL       , *texcoords=NULL      , *normals=NULL;
-  uint32_t num_vertices       = 0, num_texcoords      =0, num_normals      =0;
-  uint32_t num_vertices_alloc = 0, num_texcoords_alloc=0, num_normals_alloc=0;
-  // indices data
-  uint32_t*indices  = NULL, num_indices=0, num_indices_alloc=0;
-
-  AtGLMesh* cur_mesh = NULL;
+  AtGLMesh*             cur_mesh     = NULL;
+  AtGLTriangleGeometry* cur_geometry = NULL;
 
   char     index[8]; // index in string
   char     seps[3] = "// ";
@@ -121,11 +136,21 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
                 filename);
     return;
   }
+  char* path = g_path_get_dirname(filename);
+  g_autofree char* material_path_filename = NULL;
+
 
   *container_ptr = at_gl_container_new();
 
+
   AtGLContainer* container = *container_ptr;
   AtGLMaterialCollection* materials = NULL;
+  AtVec3 position;
+  AtVec3 normal;
+  AtVec2 uv;
+  AtVec3i index2;
+
+  at_gl_object_set_name(AT_GL_OBJECT(container), filename);
 
   // PARSING THE OBJ FILE
   // ----------------------------
@@ -138,7 +163,8 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
       p2 = strchr(p1,'\n');
       memcpy(material_filename,p1,p2-p1);
       material_filename[p2-p1] = 0;
-      at_gl_loader_read_mtl(material_filename, materials_ptr, error);
+      material_path_filename = g_build_filename(path,material_filename, NULL);
+      at_gl_loader_read_mtl(material_path_filename, materials_ptr, error);
       if(*error != NULL){
         fclose(fp);
         g_clear_object(container_ptr);
@@ -153,27 +179,34 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
       p2 = strchr(p1,'\n');
       memcpy(object_name,p1,p2-p1);
       object_name[p2-p1] = 0;
-      if(cur_mesh)
-        at_gl_mesh_pack_indices(cur_mesh);
-      cur_mesh = at_gl_mesh_new();
+      if(cur_geometry)
+        at_gl_trianglegeometry_pack(cur_geometry);
+
+      cur_mesh     = at_gl_mesh_new();
+      cur_geometry = at_gl_trianglegeometry_new();
+      at_gl_mesh_set_geometry(cur_mesh, AT_GL_GEOMETRY(cur_geometry));
+
       at_gl_object_set_name(AT_GL_OBJECT(cur_mesh), object_name);
       at_gl_container_add_object(container,AT_GL_OBJECT(cur_mesh));
     }else
 
     // It's an a vertex position
     if(COMMAND_IS("v ",2)){
-      FILL_LIST(vertices, 3, sizeof(float), num_vertices, num_vertices_alloc);
-    }else
-
-    // It's a vertex texture
-    if(COMMAND_IS("vt",2)){  // If it's a vertex texture uv coord
-      FILL_LIST(texcoords, 2, sizeof(float), num_texcoords, num_texcoords_alloc);
-      has_uv = TRUE;
+      FILL_LIST(position, 3);
+      //FILL_LIST(vertices, 3, sizeof(float), num_vertices, num_vertices_alloc);
     }else
 
     // It's a vertex normal
     if(COMMAND_IS("vn",2)){ // It's a vertex normal data
-      FILL_LIST(normals, 3, sizeof(float), num_normals, num_normals_alloc);
+      FILL_LIST(normal, 3);
+      //FILL_LIST(normals, 3, sizeof(float), num_normals, num_normals_alloc);
+    }else
+
+    // It's a vertex texture
+    if(COMMAND_IS("vt",2)){  // If it's a vertex texture uv coord
+      FILL_LIST(uv, 2);
+      //FILL_LIST(texcoords, 2, sizeof(float), num_texcoords, num_texcoords_alloc);
+      has_uv = TRUE;
     }else
 
     // It's a material name used by the current object
@@ -181,6 +214,8 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
       p2 = strchr(p1,'\n');
       memcpy(material_name,p1,p2-p1);
       material_name[p2-p1] = 0;
+      AtGLMaterial* material = at_gl_materialcollection_find(materials,material_name);
+      at_gl_mesh_set_material(cur_mesh,material);
     }else
 
     // It's a shadow parameter
@@ -190,16 +225,6 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
 
     // It's a face
     if(COMMAND_IS("f",1)){ // It's a face (9 numbers)
-      // Fix list
-      if(indices == NULL){
-        num_indices_alloc = 3;
-        indices = g_malloc(num_indices_alloc * 3 *sizeof(uint32_t));
-      }
-      else if(num_indices == num_indices_alloc){
-        num_indices_alloc <<= 1;
-        indices = g_realloc(indices,num_indices_alloc * 3 * sizeof(uint32_t));
-      }
-
       for(vi = 0; vi < 3; vi++){
         for(k = 0; k < 3; k++){
           if(vi == 2 && k == 2)
@@ -212,21 +237,127 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
           if(p1 == p2) p1+=2;
           else p1 = p2;
 
-          indices[3*num_indices+k] = strtoul(index, NULL,10);
+          index2.data[k] = strtoul(index, NULL, 10);
         }
-        num_indices++;
+        at_gl_trianglegeometry_add_index(cur_geometry,&index2);
       }
     }
   }
-
-  if(cur_mesh) at_gl_mesh_pack_indices(cur_mesh);
-  at_gl_mesh_read_mtl(material_filename);
+  if(cur_geometry)
+    at_gl_trianglegeometry_pack(cur_geometry);
   setlocale(LC_NUMERIC,oldLocale);
 }
 
 void
-at_gl_loader_read_mtl(char* filename, AtGLMaterialCollection **materials, GError **error){
+at_gl_loader_read_mtl(char* filename, AtGLMaterialCollection **materials_ptr, GError **error){
+  g_autofree char* line = g_malloc(256 * sizeof(char)); // string of line of MTL file
+  size_t   len;                    // number of chars in `line`
+  ssize_t  read;                   // read
+  FILE* fp = fopen(filename, "r");
+  if(!fp){
+    g_set_error(error,AT_ERROR_GL_LOADER, AT_ERROR_FILE_NOT_FOUND,
+                "Couldn't load OBJ mesh: could not open file %s for reading",
+                filename);
+    return;
+  }
+  uint8_t  vi;
+  char    *p1, *p2; // start and end of a token
+  char     material_name[128];     // newmtl <material_name>
+  *materials_ptr = at_gl_materialcollection_new();
+  AtGLMaterialCollection* materials = *materials_ptr;
+  AtGLMaterial* cur_material, *old_material;
+  AtVec3 ambient, diffuse, specular, emissive;
 
+  char map_Ka[128];
+  char map_Kd[128];
+  char map_Ks[128];
+  char map_Ke[128];
+  char map_d[128];
+  char map_Ns[128];
+  char map_disp[128];
+  char map_bump[128];
+
+  // PARSING THE OBJ FILE
+  // ----------------------------
+  while((read = getline(&line,&len,fp)) != -1){
+    p1 = line;
+    p2 = strchr(p1,' ');p1 = p2 + 1;
+
+    // It's a material filename
+    if(COMMAND_IS("newmtl",6)){
+      p2 = strchr(p1,'\n');
+      memcpy(material_name,p1,p2-p1);
+      material_name[p2-p1] = 0;
+      cur_material = AT_GL_MATERIAL(at_gl_colormaterial_new());
+      at_gl_material_set_name(cur_material,material_name);
+      at_gl_materialcollection_add(materials,cur_material);
+    }else
+
+    if(COMMAND_IS("Ka", 2)){
+      FILL_COLOR_MATERIAL(ambient, 3);
+    }else
+
+    if(COMMAND_IS("Kd", 2)){
+      FILL_COLOR_MATERIAL(diffuse, 3);
+    }else
+
+    if(COMMAND_IS("Ks", 2)){
+      FILL_COLOR_MATERIAL(specular, 3);
+    }else
+
+    if(COMMAND_IS("Ke", 2)){
+      FILL_COLOR_MATERIAL(emissive, 3);
+    }else
+
+    if(COMMAND_IS("Ns", 2)){
+    }else
+
+    if(COMMAND_IS("d", 1)){
+    }else
+
+    if(COMMAND_IS("illum", 5)){
+    }else
+
+    if(COMMAND_IS("map_Ka", 6)){
+      COLOR_TO_TEXTURE_MATERIAL();
+      FILL_TEXTURE_MATERIAL(ambient, Ka);
+    }else
+
+    if(COMMAND_IS("map_Kd", 6)){
+      COLOR_TO_TEXTURE_MATERIAL();
+      FILL_TEXTURE_MATERIAL(diffuse, Kd);
+    }else
+
+    if(COMMAND_IS("map_Ks", 6)){
+      COLOR_TO_TEXTURE_MATERIAL();
+      FILL_TEXTURE_MATERIAL(specular, Ks);
+    }else
+
+    if(COMMAND_IS("map_Ke", 6)){
+      COLOR_TO_TEXTURE_MATERIAL();
+      FILL_TEXTURE_MATERIAL(emissive, Ke);
+    }else
+
+    if(COMMAND_IS("map_Ns", 6)){
+      COLOR_TO_TEXTURE_MATERIAL();
+
+    }else
+
+    if(COMMAND_IS("disp", 4)){
+      COLOR_TO_TEXTURE_MATERIAL();
+      FILL_TEXTURE_MATERIAL(displacement, disp);
+    }else
+
+    if(COMMAND_IS("map_d", 5)){
+      COLOR_TO_TEXTURE_MATERIAL();
+      FILL_TEXTURE_MATERIAL(alpha, d);
+    }else
+
+    if(COMMAND_IS("map_bump", 5) || COMMAND_IS("bump", 4)){
+      COLOR_TO_TEXTURE_MATERIAL();
+      FILL_TEXTURE_MATERIAL(bump, bump);
+    }
+  }
 }
 
 void
@@ -323,4 +454,9 @@ void
 at_gl_loader_read_jma(char* filename, AtGLContainer** container,
                       AtGLMaterialCollection** materials, GError** error){
 
+}
+
+GQuark
+at_error_gl_loader_quark(void){
+  return g_quark_from_static_string("at-error-gl-loader-quark");
 }

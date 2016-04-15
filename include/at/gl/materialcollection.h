@@ -59,5 +59,8 @@ at_gl_materialcollection_get_by_index(AtGLMaterialCollection* collection, uint8_
 AtGLMaterialCollection*
 at_gl_materialcollection_join(AtGLMaterialCollection* collection, AtGLMaterialCollection* subcollection);
 
+uint32_t
+at_gl_materialcollection_get_num_materials(AtGLMaterialCollection* collection);
+
 G_END_DECLS
 #endif
