@@ -91,9 +91,9 @@ test_at_gl_trianglegeometry(){
   AtVec3  positions_p[5] = {{-1.0, -1.0, 0.0},{1.0,-1.0,0.0},{0.0,1.0,0.0},
                             {0.0,1.0,0.0},{1.0,1.0,0.0}};
   AtVec3  normals_p[5]   = {{-1.0, -1.0, 0.0},{1.0,-1.0,0.0},{0.0,1.0,0.0},
-                            {1.0,-1.0,0.0},{1.0,1.0,0.0}};
+                            {-1.0, -1.0, 0.0},{1.0,1.0,0.0}};
   AtVec2  uvs_p[5]       = {{0.0, 1.0},       {1.0,1.0},     {0.5,0.0},
-                            {0.0, 1.0},       {1.0,0.0}};
+                            {1.0, 1.0},       {1.0,0.0}};
   uint32_t indices_p[6]  = {0,1,2,3,1,4};
   at_gl_trianglegeometry_pack(triangle2);
   g_assert_cmpint(at_gl_trianglegeometry_get_num_packed(triangle2),==, 5);

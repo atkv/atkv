@@ -296,7 +296,9 @@ at_gl_trianglegeometry_pack(AtGLTriangleGeometry* geometry){
   priv->indices_pkd   = g_malloc(sizeof(uint32_t)*priv->num_indices);
 
   // Auxiliary structures
-  uint64_t step[3]  = {priv->num_normals*priv->num_uvs,priv->num_normals,1};
+  uint64_t step0    = priv->num_normals == 0? 1:priv->num_normals;
+  uint64_t step1    = priv->num_uvs == 0? 1:priv->num_uvs;
+  uint64_t step[3]  = {step1*step0,step0,1};
   GHashTable* table =  g_hash_table_new(g_direct_hash, g_direct_equal);
 
   int64_t key;

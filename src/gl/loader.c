@@ -238,6 +238,7 @@ at_gl_loader_read_obj(char* filename, AtGLContainer** container_ptr, AtGLMateria
           else p1 = p2;
 
           index2.data[k] = strtoul(index, NULL, 10);
+          if(index2.data[k] != 0) index2.data[k]--;
         }
         at_gl_trianglegeometry_add_index(cur_geometry,&index2);
       }
