@@ -59,7 +59,7 @@ static void change_event(int pos){
 #endif
 
 static void test_at_nifti_open(void** state){
-  image = at_nifti_image_read("../atkv/data/MRHead.nii.gz",1);
+  image = at_nifti_image_read("MRHead.nii.gz",1);
   AtArray(uint16_t)* array2         = AT_ARRAY_uint16_t(image);
   uint64_t* image_size       = at_array_get_size(array2);
   uint16_t  image_dim        = at_array_get_dim(array2);

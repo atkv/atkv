@@ -2,15 +2,16 @@ cmake_minimum_required(VERSION 2.8)
 project(atkv)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 # ===================================================================== OPTIONS
-option(BUILD_CORE "" ON)
-option(BUILD_GRAPH "" ON)
+option(BUILD_CORE    "" ON)
+option(BUILD_GRAPH   "" ON)
 option(BUILD_IMGPROC "" ON)
-option(BUILD_STUDIO "" ON)
-option(BUILD_ML "" OFF)
+option(BUILD_GUI     "" ON)
+option(BUILD_STUDIO  "" ON)
+option(BUILD_ML      "" OFF)
 option(BUILD_MEDICAL "" OFF)
-option(BUILD_IFT "" ON)
-option(BUILD_CHART "" OFF)
-option(BUILD_GL "" OFF)
+option(BUILD_IFT     "" ON)
+option(BUILD_CHART   "" OFF)
+option(BUILD_GL      "" OFF)
 option(BUILD_TESTING "" ON)
 option(BUILD_DOCS    "Build doxygen documentation" OFF)
 option(COVERALLS     "Generate coveralls data" OFF)
@@ -65,7 +66,7 @@ if(BUILD_IMGPROC)
 endif()
 
 # ===================================================================== MODULES
-set(AT_MODULES chart core graph gl ift imgproc medical ml)
+set(AT_MODULES chart core graph gl ift imgproc gui medical ml)
 set(AT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(AT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 FOREACH(AT_MODULE ${AT_MODULES})
@@ -87,7 +88,7 @@ set(CMAKE_BUILD_TYPE Debug)
 set(AT_TYPES uint8_t uint16_t uint32_t uint64_t
               int8_t  int16_t  int32_t  int64_t
               float  double)
-set(AT_VEC_TYPES 3 4 5 6 7)
+set(AT_VEC_TYPES 2 3 4 5 6 7)
 set(AT_TYPES_ENUM UINT8 UINT16 UINT32 UINT64
                    INT8  INT16  INT32  INT64
                   FLOAT DOUBLE)
@@ -122,8 +123,12 @@ endforeach()
 foreach(AT_VEC_TYPE ${AT_VEC_TYPES})
   list(APPEND AT_VEC_TYPES_HDRS vec${AT_VEC_TYPE}.h)
   list(APPEND AT_VEC_TYPES_SRCS vec${AT_VEC_TYPE}.c)
+  list(APPEND AT_VEC_TYPES_HDRS vec${AT_VEC_TYPE}i.h)
+  list(APPEND AT_VEC_TYPES_SRCS vec${AT_VEC_TYPE}i.c)
   configure_file(${AT_INCLUDE_DIR}/at/core/vec_template.h.in ${AT_INCLUDE_DIR}/at/core/vec${AT_VEC_TYPE}.h)
   configure_file(${AT_SOURCE_DIR}/core/vec_template.c.in ${AT_SOURCE_DIR}/core/vec${AT_VEC_TYPE}.c)
+  configure_file(${AT_INCLUDE_DIR}/at/core/veci_template.h.in ${AT_INCLUDE_DIR}/at/core/vec${AT_VEC_TYPE}i.h)
+  configure_file(${AT_SOURCE_DIR}/core/veci_template.c.in ${AT_SOURCE_DIR}/core/vec${AT_VEC_TYPE}i.c)
 endforeach()
 
 set(AT_CORE_HDRS type.h range.h macro.h config.h ${AT_VEC_TYPES_HDRS} mat4.h arraybase.h
@@ -134,11 +139,6 @@ set(AT_CORE_LIBRARIES at_core m ${GOBJECT_LIBRARIES})
 CONFIGURE_FILE("${AT_CORE_INCLUDE_DIR}/config.h.in"
                "${AT_CORE_INCLUDE_DIR}/config.h")
 
-# STUDIO
-# ----------------
-set(AT_STUDIO_HDRS app.h window.h)
-set(AT_STUDIO_SRCS app.c window.c main.c)
-set(AT_STUDIO_LIBRARIES ${AT_CORE_LIBRARIES} ${GTK3_LIBRARIES})
 
 # ML
 # ----------------
@@ -152,10 +152,10 @@ set(AT_MEDICAL_SRCS app.c window.c)
 
 # IMGPROC
 # ----------------
-set(AT_IMGPROC_HDRS znzfile.h nifti.h dicom.h image_io.h)
-set(AT_IMGPROC_SRCS znzfile.c nifti.c dicom.c image_io.c)
+set(AT_IMGPROC_HDRS znzfile.h nifti.h dicom.h image_io.h drawing.h)
+set(AT_IMGPROC_SRCS znzfile.c nifti.c dicom.c image_io.c drawing.c)
 set(AT_IMGPROC_LIBRARIES at_imgproc ${AT_CORE_LIBRARIES} ${ZLIB_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES})
-set(AT_IMGPROC_TESTS nifti dicom image_io)
+set(AT_IMGPROC_TESTS nifti dicom image_io drawing)
 
 
 # GRAPH
@@ -172,21 +172,21 @@ set(AT_IFT_SRCS ift.c)
 set(AT_IFT_LIBRARIES at_ift ${AT_GRAPH_LIBRARIES})
 set(AT_IFT_TESTS ift)
 
+# GUI
+# ----------------
+set(AT_GUI_HDRS imageviewer.h)
+set(AT_GUI_SRCS imageviewer.c)
+set(AT_GUI_LIBRARIES at_gui ${AT_IMGPROC_LIBRARIES} ${GTK3_LIBRARIES})
+
+# STUDIO
+# ----------------
+set(AT_STUDIO_HDRS app.h window.h)
+set(AT_STUDIO_SRCS app.c window.c main.c)
+set(AT_STUDIO_LIBRARIES ${AT_CORE_LIBRARIES} ${GTK3_LIBRARIES})
+
 
 # Compiling modules
 at_create_libraries("${AT_MODULES}")
-
-# Studio Executable
-if(BUILD_STUDIO)
-  foreach(AT_HDR ${AT_STUDIO_HDRS})
-    list(APPEND AT_STUDIO_HDRS_ABS ${AT_INCLUDE_DIR}/at/studio/${AT_HDR})
-  endforeach()
-  foreach(AT_SRC ${AT_STUDIO_SRCS})
-    list(APPEND AT_STUDIO_SRCS_ABS ${AT_SOURCE_DIR}/studio/${AT_SRC})
-  endforeach()
-  add_executable(at_studio ${AT_STUDIO_HDRS_ABS} ${AT_STUDIO_SRCS_ABS})
-  target_link_libraries(at_studio ${GTK3_LIBRARIES})
-endif()
 
 # ======================================================================= TESTS
 if(BUILD_TESTING)
@@ -214,4 +214,29 @@ if(BUILD_TESTING)
   Message(STATUS "Tests compilation configured...")
 endif(BUILD_TESTING)
 
+# ============================================================== DEMOS AND APPS
+
+# STUDIO
+# ----------------
+if(BUILD_STUDIO)
+  foreach(AT_HDR ${AT_STUDIO_HDRS})
+    list(APPEND AT_STUDIO_HDRS_ABS ${AT_INCLUDE_DIR}/at/studio/${AT_HDR})
+  endforeach()
+  foreach(AT_SRC ${AT_STUDIO_SRCS})
+    list(APPEND AT_STUDIO_SRCS_ABS ${AT_SOURCE_DIR}/studio/${AT_SRC})
+  endforeach()
+  add_executable(at_studio ${AT_STUDIO_HDRS_ABS} ${AT_STUDIO_SRCS_ABS})
+  target_link_libraries(at_studio ${GTK3_LIBRARIES})
+endif()
+
+# IMAGEVIEWER DEMO
+# -----------------
+if(BUILD_GUI)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+  add_executable(demo_imageviewer tests/gui/test_imageviewer.c)
+  target_link_libraries(demo_imageviewer ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
+endif()
 # ======================================================================== DOCS
+file(COPY ${CMAKE_SOURCE_DIR}/data/ DESTINATION ${CMAKE_BINARY_DIR})
