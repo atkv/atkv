@@ -213,6 +213,7 @@
 )
 #define LINE_NEW4(type, x, y) AtArray_##type **: _Generic((y),\
   int: at_array_##type##_##x##_3D,\
+  uint64_t: at_array_##type##_##x##_3D,\
   uint64_t*: at_array_##type##_##x##_with_data\
 )
 #define LINE_NEW42(type, x, y) AtArray_##type **: _Generic((y),\

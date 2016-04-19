@@ -485,14 +485,14 @@ at_orfc_out_cut_apply_array_uint8_t(AtIFTArray_uint8_t** ift,
 }
 
 AtArray_uint16_t*
-at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t** ift,
-                                   AtArray_uint8_t* image,
-                                   uint16_t map_dimension,
-                                   AtAdjacency adjacency,
-                                   AtOptimization optimization,
+at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t**       ift,
+                                   AtArray_uint8_t*           image,
+                                   uint16_t                   map_dimension,
+                                   AtAdjacency                adjacency,
+                                   AtOptimization             optimization,
                                    AtConnectivityFunc_uint8_t connectivity_func,
-                                   AtWeightingFunc_uint8_t weighting_func,
-                                   AtArray_uint64_t* seeds){
+                                   AtWeightingFunc_uint8_t    weighting_func,
+                                   AtArray_uint64_t*          seeds){
   // Apply IFT to find Vb(si)
   g_autoptr(AtArray(uint64_t)) seeds_background = NULL;
   at_seeds_filter_by_label(&seeds_background, seeds, 0);
@@ -519,16 +519,22 @@ at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t** ift,
   uint64_t num_elements = at_array_get_num_elements(priv->original);
 
   // Remove edges with different energies or lower weight values
+  uint8_t weight, neighbors_in;
   AtArray(uint64_t)* neighbors = at_grapharray_get_neighbors(grapharray);
+  AtArray(uint8_t)* edges = at_grapharray_get_neighbors_edges(grapharray);
   for(i = 0, in = 0; i < num_elements; i++){
     for(n = 0; n < num_neighbors; n++, in++){
-      if(at_array_get(neighbors,in)==TRUE){
+      neighbors_in = at_array_get(edges,in);
+      if(neighbors_in){
         a = i;
         b = at_array_get(neighbors,in);
         vb_a = at_array_get(priv->connectivity, a);
         vb_b = at_array_get(priv->connectivity, b);
-        if(at_array_get(priv->weights,in) <= vb_si ||
-           vb_a != vb_si || vb_b != vb_si || vb_a != vb_b){
+        weight = at_array_get(priv->weights,in);
+
+        if(vb_a != vb_si || vb_b != vb_si || vb_a != vb_b ||
+           (optimization == AT_OPTIMIZATION_MIN && weight >= vb_si) ||
+           (optimization == AT_OPTIMIZATION_MAX && weight <= vb_si)){
           at_grapharray_remove_arc_by_index(grapharray,in);
         }
       }

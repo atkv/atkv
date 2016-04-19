@@ -533,19 +533,18 @@ at_imageviewer_show_uint8_t(AtImageViewer* imageviewer, AtArray_uint8_t* array, 
   AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(imageviewer);
 
   // Avoid memory leak
-  g_clear_object(&priv->image);
   if(priv->image_size) g_free(priv->image_size);
   if(priv->image_step) g_free(priv->image_step);
 
 
   // Create the image in proper format
-  priv->image = at_cvt_color(array, format, AT_COLOR_BGRA);
+  g_set_object(&priv->image, at_cvt_color(array, format, AT_COLOR_BGRA));
   priv->image_size    = at_array_get_size(priv->image);
   priv->image_step    = at_array_get_step(priv->image);
 
   at_imageviewer_update_image_scaled(imageviewer);
 
-  //gtk_widget_set_size_request(priv->scrolled_window, size[1],size[0]);
+  gtk_widget_set_size_request(priv->scrolled_window, priv->image_size[1],priv->image_size[0]);
   gtk_widget_queue_draw(priv->drawing_area);
   gtk_widget_show_all(GTK_WIDGET(priv->window));
 }

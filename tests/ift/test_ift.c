@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <cmocka.h>
 #include <at/ift.h>
+#include <at/imgproc.h>
 
 static void
 test_at_ift_min_f_max_array(void** state){
@@ -98,18 +99,66 @@ test_at_ift_min_f_max_array(void** state){
   }
 }
 
+static void
 test_orfc_core_array(void** state){
   // Ler o círculo
+  // intensities of the array
+  uint8_t intensities[16] = {  0,  0,  0,  0,
+                               0,  0,  0,255,
+                               0,255,255,255,
+                             255,255,255,255};
+  uint8_t labels[16]      = {  0,  0,  0,  0,
+                               0,  0,  0,  1,
+                               0,  1,  1,  1,
+                               1,  1,  1,  1};
+  uint8_t predecessors[16]= {  0,  0,  1,  2,
+                               0,  1,  2, 11,
+                               4, 13, 14, 15,
+                              13, 14, 15, 15};
+  uint8_t roots[16]       = {  0,  0,  0,  0,
+                               0,  0,  0, 15,
+                               0, 15, 15, 15,
+                              15, 15, 15, 15};
+  double connectivity[16] = {-DBL_MAX,0.0,0.0,0.0,
+                                  0.0,0.0,0.0,0.0,
+                                  0.0,0.0,0.0,0.0,
+                                  0.0,0.0,0.0,-DBL_MAX};
+  //pos, label
+  uint64_t seeds_data[4]   = {  0, 0,
+                               15, 1};
 
+  // Create the image
+  g_autoptr(AtArray(uint8_t)) image = NULL;
+  uint64_t size[2] = {4,4};
+  at_array_new(&image, 2, size, intensities);
 
-  // Definir as sementes
+  // Create the seeds
+  g_autoptr(AtArray(uint64_t)) seeds = NULL;
+  uint64_t seeds_size[2] = {2,2};
+  at_array_new(&seeds, 2, seeds_size, seeds_data);
 
 
   // Achar o núcleo do ORFC
+  g_autoptr(AtIFTArray(uint8_t)) ift     = NULL;
+  g_autoptr(AtArray(uint16_t)) component = NULL;
+  uint16_t dim = at_array_get_dim(image);
+  component = at_orfc_out_cut_core_array_uint8_t(&ift,
+     image,
+     dim,
+     AT_ADJACENCY_4,
+     AT_OPTIMIZATION_MIN,
+     at_connectivity(max,ift),
+     at_weighting(abs_diff, ift),
+     seeds);
 
-
-  // Salvar
-
+  assert_non_null(ift);
+  assert_non_null(component);
+  uint16_t* component_data = at_array_get(component);
+  uint8_t i;
+  for(i = 0; i < 15; i++){
+    if(labels[i] == 1)
+      assert_int_equal(component_data[i], component_data[15]);
+  }
 }
 
 
@@ -117,8 +166,9 @@ int
 main(int argc, char** argv){
   (void)argc;
   (void)argv;
-  const struct CMUnitTest tests[1]={
+  const struct CMUnitTest tests[2]={
     cmocka_unit_test(test_at_ift_min_f_max_array),
+    cmocka_unit_test(test_orfc_core_array),
   };
   return cmocka_run_group_tests(tests,NULL,NULL);
 }

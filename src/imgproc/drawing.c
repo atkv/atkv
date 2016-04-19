@@ -1056,6 +1056,8 @@ static AtVec2i at_rectangle_bottom_right(AtVec4i rect){
 
 AtArray_uint8_t*
 at_cvt_color(AtArray_uint8_t* image, AtColorFormat from, AtColorFormat to){
+  if(from == to) return image;
+
   AtArray_uint8_t* image_cvt = NULL;
   // Get some image info
   uint8_t* data = at_array_uint8_t_get_data(image);
