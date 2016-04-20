@@ -222,7 +222,7 @@ static void
 at_ift_array_uint8_t_create_weights_map(AtIFTArray_uint8_t* ift){
   uint64_t i,j,k;
   AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(ift);
-  uint64_t num_elements = at_array_get_num_elements(priv->original);
+  uint64_t  num_elements  = at_array_get_num_elements(priv->original);
   at_array_min(priv->original, &priv->min_value);
   at_array_max(priv->original, &priv->max_value);
   g_autofree uint64_t* neighbors_size = at_array_get_size(priv->neighbors);
@@ -422,8 +422,8 @@ at_ift_apply_array_uint8_t(AtIFTArray_uint8_t**       ift,
   AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(*ift);
 
   // Save parameters
-  priv->original          = image;
-  priv->seeds             = seeds;
+  g_set_object(&priv->original, image);
+  g_set_object(&priv->seeds   , seeds);
   //g_set_object(&priv->original, image);
   //g_set_object(&priv->seeds, seeds);
   priv->adjacency         = adjacency;

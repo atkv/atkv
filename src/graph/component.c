@@ -25,8 +25,13 @@ typedef struct AtTarjanInfo{
   uint64_t  num_elements;
   uint64_t* n_size;
   int64_t   si;
-  uint64_t* stack ;
+  int64_t   sdi;
+  uint64_t* stack;
+  uint64_t* stack_v;
+  uint64_t* stack_ew;
+  uint64_t* stack_ewi;
   uint64_t* n;
+  uint16_t* stack_lower;
   uint16_t* id;
   uint16_t* low;
   uint8_t * marked;
@@ -34,6 +39,7 @@ typedef struct AtTarjanInfo{
   uint16_t  pre;
   uint16_t  count;
   uint16_t  dim;
+  uint8_t   recursive;
 }AtTarjanInfo;
 
 void
@@ -43,6 +49,8 @@ at_tarjan_info_init(AtTarjanInfo* info, AtGraphArray* grapharray){
   info->count         = 0;
   info->pre           = 0;
   info->si            = -1;
+  info->sdi           = -1;
+  info->recursive     = TRUE;
   info->n             = at_array_get(neighbors);
   info->ne            = at_array_get(neighbors_edges);
 
@@ -53,6 +61,10 @@ at_tarjan_info_init(AtTarjanInfo* info, AtGraphArray* grapharray){
   size_t size = info->num_elements * sizeof(uint8_t);
   info->marked        = g_malloc(size) ;//new boolean[G.V()];
   info->stack         = g_malloc(size << 3);//new Stack<Integer>();
+  info->stack_v       = g_malloc(size << 3);//new Stack<Integer>();
+  info->stack_ew      = g_malloc(size << 3);//new Stack<Integer>();
+  info->stack_ewi     = g_malloc(size << 3);//new Stack<Integer>();
+  info->stack_lower   = g_malloc(size << 1);//new Stack<Integer>();
   info->id            = g_malloc(size << 1);//new int[G.V()];
   info->low           = g_malloc(size << 1);//new int[G.V()];
   info->n_size        = at_array_get_size(neighbors);
@@ -66,6 +78,10 @@ at_tarjan_info_destroy(AtTarjanInfo* info){
   g_free(info->low);
   g_free(info->marked);
   g_free(info->n_size);
+  g_free(info->stack_v);
+  g_free(info->stack_ew);
+  g_free(info->stack_ewi);
+  g_free(info->stack_lower);
 }
 void
 at_tarjan_info_push(AtTarjanInfo* info, uint64_t v){
@@ -77,52 +93,69 @@ at_tarjan_info_pop(AtTarjanInfo* info){
 }
 
 void
-at_dfs(AtTarjanInfo* info, uint64_t v){
-  int w, ew, ewi;
+at_dfs_push(AtTarjanInfo* info, uint64_t v, uint64_t ew, uint64_t ewi, uint16_t lower){
+  info->sdi++;
+  info->stack_v    [info->sdi] = v;
+  info->stack_ew   [info->sdi] = ew;
+  info->stack_ewi  [info->sdi] = ewi;
+  info->stack_lower[info->sdi] = lower;
+  info->recursive = TRUE;
+}
+void
+at_dfs_pop(AtTarjanInfo* info, uint64_t* v, uint64_t* ew, uint64_t* ewi, uint16_t* lower){
+  if(info->sdi >= 0){
+    *v     = info->stack_v    [info->sdi];
+    *ew    = info->stack_ew   [info->sdi];
+    *ewi   = info->stack_ewi  [info->sdi];
+    *lower = info->stack_lower[info->sdi];
+  }
+  info->sdi--;
+  info->recursive = FALSE;
+}
 
-  while()
-  switch(info->action){
-    case AT_ACTION_IN:
+void
+at_dfs(AtTarjanInfo* info, uint64_t v){
+  uint64_t w, ew, ewi;
+  uint16_t lower;
+  do{
+    if(info->recursive){
+      info->recursive = FALSE;
       info->marked[v] = TRUE;
       info->low[v]    = info->pre++;
-      uint16_t lower  = info->low[v];
+      lower           = info->low[v];
       at_tarjan_info_push(info, v);
-      ewi = v*info->num_neighbors;
-      for(ew = ewi; ew < ewi + info->num_neighbors; ew++){
-        if(info->ne[ew]){
-          w = info->n[ew];
-          if(!info->marked[w]){
-            at_dfs_push(info, v, ew, ewi, lower);
-            v = w;
-            break;
-          }
-          lower = min(lower, info->low[w]);
+      ewi             = v*info->num_neighbors;
+      ew              = ewi;
+    }
+
+    for(; ew < ewi + info->num_neighbors; ew++){
+      if(info->ne[ew]){
+        w = info->n[ew];
+        if(!info->marked[w]){
+          at_dfs_push(info, v, ew, ewi, lower);
+          v = w;
+          break;
         }
+        lower = min(lower, info->low[w]);
       }
-    break;
-    case AT_ACTION_OUT:
-
-      if(lower < info->low[v]){
+    }
+    if(!info->recursive){
+      if(lower < info->low[v])
         info->low[v] = lower;
-        at_dfs_pop(info, &v, &ew, &ewi, &lower);
-        break;
+      else{
+        do{
+          w            = at_tarjan_info_pop(info);
+          info->id[w]  = info->count;
+          info->low[w] = info->num_elements;
+        }while(w != v);
+        info->count++;
       }
-      do{
-        w            = at_tarjan_info_pop(info);
-        info->id[w]  = info->count;
-        info->low[w] = info->num_elements;
-      }while(w != v);
-
-      info->count++;
-    break;
-  }
-
-
-  if(!info->recursive){
-
- }else{
-
- }
+      at_dfs_pop(info, &v, &ew, &ewi, &lower);
+    }
+  }while(info->sdi >= -1);
+  info->recursive = TRUE;
+  info->sdi       = -1;
+  info->si        = -1;
 }
 void
 at_tarjan_info_sort(AtTarjanInfo* info){

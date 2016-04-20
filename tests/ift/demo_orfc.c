@@ -227,9 +227,11 @@ int main(int argc, char** argv){
   init_info(&info);
 
   // Ler o círculo
+  g_autoptr(AtArray(uint8_t)) array = NULL;
   //at_image_read(&info.original, "trekkie-nerdbw.png");
   //at_image_read(&info.original, "MRI_blackandwhite.png");
-  at_image_read(&info.original, "circleborder.png");
+  at_image_read(&array, "circleborder.png");
+  info.original = at_cvt_color(array, AT_COLOR_RGB, AT_COLOR_GRAY);
 
   // Converter para RGB
   info.original_rgb = at_cvt_color(info.original,AT_COLOR_GRAY, AT_COLOR_BGRA);
