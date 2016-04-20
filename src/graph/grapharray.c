@@ -231,3 +231,19 @@ at_grapharray_remove_arcs_by_indices(AtGraphArray *grapharray, uint64_t* arc_ind
     at_array_set(priv->neighbors_edges, arc_indices[i], FALSE);
   }
 }
+void
+at_grapharray_remove_arcs(AtGraphArray* grapharray, uint64_t* arcs, uint64_t num_arcs){
+  uint64_t i, ew, v, w, k;
+  AtGraphArrayPrivate* priv = at_grapharray_get_instance_private(grapharray);
+  uint64_t* n = at_array_get(priv->neighbors);
+  uint8_t* ne = at_array_get(priv->neighbors_edges);
+  for(i = 0; i < num_arcs; i++){
+    v = arcs[i<<1];
+    w = arcs[(i<<1)+1];
+    for(k = 0, ew = v*priv->num_neighbors; k < priv->num_neighbors; k++, ew++)
+      if(n[ew] == w){
+        ne[ew] = FALSE;
+        break;
+      }
+  }
+}

@@ -19,6 +19,7 @@
 #include <at/ift.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <float.h>
 /*===========================================================================
  * PRIVATE API
@@ -570,7 +571,11 @@ double
 at_connectivity_max_uint8_t  (AtIFTArray_uint8_t* ift,
                               uint64_t index_s, uint64_t index_t){
   AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(ift);
+  double* connectivities = at_array_get(priv->connectivity);;
   uint8_t is_seed;
+  if(index_s == 205120 || index_t == 205120){
+    printf("oi\n");
+  }
   if(index_s == index_t){
     is_seed = at_array_get(priv->original_is_seed,index_s);
     if(is_seed)

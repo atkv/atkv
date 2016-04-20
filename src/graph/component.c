@@ -24,6 +24,8 @@ typedef struct AtTarjanInfo{
   uint64_t  num_neighbors;
   uint64_t  num_elements;
   uint64_t* n_size;
+  uint64_t  count;
+  uint64_t  pre;
   int64_t   si;
   int64_t   sdi;
   uint64_t* stack;
@@ -31,13 +33,11 @@ typedef struct AtTarjanInfo{
   uint64_t* stack_ew;
   uint64_t* stack_ewi;
   uint64_t* n;
-  uint16_t* stack_lower;
-  uint16_t* id;
-  uint16_t* low;
+  uint64_t* stack_lower;
+  uint64_t* id;
+  uint64_t* low;
   uint8_t * marked;
   uint8_t * ne;
-  uint16_t  pre;
-  uint16_t  count;
   uint16_t  dim;
   uint8_t   recursive;
 }AtTarjanInfo;
@@ -64,9 +64,9 @@ at_tarjan_info_init(AtTarjanInfo* info, AtGraphArray* grapharray){
   info->stack_v       = g_malloc(size << 3);//new Stack<Integer>();
   info->stack_ew      = g_malloc(size << 3);//new Stack<Integer>();
   info->stack_ewi     = g_malloc(size << 3);//new Stack<Integer>();
-  info->stack_lower   = g_malloc(size << 1);//new Stack<Integer>();
-  info->id            = g_malloc(size << 1);//new int[G.V()];
-  info->low           = g_malloc(size << 1);//new int[G.V()];
+  info->stack_lower   = g_malloc(size << 3);//new Stack<Integer>();
+  info->id            = g_malloc(size << 3);//new int[G.V()];
+  info->low           = g_malloc(size << 3);//new int[G.V()];
   info->n_size        = at_array_get_size(neighbors);
   memset(info->marked, 0, size);
 }
@@ -93,7 +93,7 @@ at_tarjan_info_pop(AtTarjanInfo* info){
 }
 
 void
-at_dfs_push(AtTarjanInfo* info, uint64_t v, uint64_t ew, uint64_t ewi, uint16_t lower){
+at_dfs_push(AtTarjanInfo* info, uint64_t v, uint64_t ew, uint64_t ewi, uint64_t lower){
   info->sdi++;
   info->stack_v    [info->sdi] = v;
   info->stack_ew   [info->sdi] = ew;
@@ -102,7 +102,7 @@ at_dfs_push(AtTarjanInfo* info, uint64_t v, uint64_t ew, uint64_t ewi, uint16_t 
   info->recursive = TRUE;
 }
 void
-at_dfs_pop(AtTarjanInfo* info, uint64_t* v, uint64_t* ew, uint64_t* ewi, uint16_t* lower){
+at_dfs_pop(AtTarjanInfo* info, uint64_t* v, uint64_t* ew, uint64_t* ewi, uint64_t* lower){
   if(info->sdi >= 0){
     *v     = info->stack_v    [info->sdi];
     *ew    = info->stack_ew   [info->sdi];
@@ -116,7 +116,7 @@ at_dfs_pop(AtTarjanInfo* info, uint64_t* v, uint64_t* ew, uint64_t* ewi, uint16_
 void
 at_dfs(AtTarjanInfo* info, uint64_t v){
   uint64_t w, ew, ewi;
-  uint16_t lower;
+  uint64_t lower;
   do{
     if(info->recursive){
       info->recursive = FALSE;
@@ -167,9 +167,36 @@ at_tarjan_info_sort(AtTarjanInfo* info){
     if(info->stack[v] == 0)
       info->stack[v] = ++info->count;
 
-    info->id[i] = (uint16_t)info->stack[v];
+    info->id[i] = info->stack[v];
   }
 }
+
+static AtTarjanInfo* info = NULL;
+
+void
+at_graph_component_from_grapharray_interactive(AtArray_uint16_t** component_label_ptr, AtGraphArray* grapharray, uint64_t* next_v){
+  if(info == NULL){
+    info = malloc(sizeof(AtTarjanInfo));
+    at_tarjan_info_init(info, grapharray);
+  }
+  uint64_t v;
+  for(v = *next_v; v < info->num_elements; v++){
+    if(!info->marked[v]){
+      at_dfs(info,v);
+      *next_v = v+1;
+      break;
+    }
+  }
+
+  at_tarjan_info_sort(info);
+
+  // Creating the component
+  if(*component_label_ptr == NULL)
+    at_array_new(component_label_ptr, info->dim, info->n_size);
+  uint16_t* c_data = at_array_get(*component_label_ptr);
+  memcpy(c_data, info->id, sizeof(uint16_t)*info->num_elements);
+}
+
 void
 at_graph_component_from_grapharray(AtArray_uint16_t** component_label_ptr, AtGraphArray* grapharray){
   AtTarjanInfo info;
@@ -184,7 +211,9 @@ at_graph_component_from_grapharray(AtArray_uint16_t** component_label_ptr, AtGra
   // Creating the component
   at_array_new(component_label_ptr, info.dim, info.n_size);
   uint16_t* c_data = at_array_get(*component_label_ptr);
-  memcpy(c_data, info.id, sizeof(uint16_t)*info.num_elements);
+  for(v = 0; v < info.num_elements; v++){
+    c_data[v] = (uint16_t) info.id[v];
+  }
 
   at_tarjan_info_destroy(&info);
 }
