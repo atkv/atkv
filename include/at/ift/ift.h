@@ -120,6 +120,35 @@ at_ift_apply_array_uint8_t(AtIFTArray_uint8_t** ift,
                            AtWeightingFunc_uint8_t weighting_func,
                            AtArray_uint64_t* seeds);
 
+void
+at_orfc_in_cut_apply_array_uint8_t(AtIFTArray_uint8_t** ift,
+                                   AtArray_uint8_t* image,
+                                   uint16_t map_dimension,
+                                   AtAdjacency adjacency,
+                                   AtOptimization optimization,
+                                   AtConnectivityFunc_uint8_t connectivity_func,
+                                   AtWeightingFunc_uint8_t weighting_func,
+                                   AtArray_uint64_t* seeds);
+
+void
+at_orfc_out_cut_apply_array_uint8_t(AtIFTArray_uint8_t** ift,
+                                    AtArray_uint8_t* image,
+                                    uint16_t map_dimension,
+                                    AtAdjacency adjacency,
+                                    AtOptimization optimization,
+                                    AtConnectivityFunc_uint8_t connectivity_func,
+                                    AtWeightingFunc_uint8_t weighting_func,
+                                    AtArray_uint64_t* seeds);
+
+AtArray_uint16_t*
+at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t** ift,
+                                   AtArray_uint8_t* image,
+                                   uint16_t map_dimension,
+                                   AtAdjacency adjacency,
+                                   AtOptimization optimization,
+                                   AtConnectivityFunc_uint8_t connectivity_func,
+                                   AtWeightingFunc_uint8_t weighting_func,
+                                   AtArray_uint64_t* seeds);
 
 AtArray_uint8_t*
 at_ift_get_labels_uint8_t(AtIFTArray_uint8_t* ift);
@@ -132,6 +161,9 @@ at_ift_get_roots_uint8_t(AtIFTArray_uint8_t* ift);
 
 AtArray_double*
 at_ift_get_connectivities_uint8_t(AtIFTArray_uint8_t* ift);
+
+AtArray_double*
+at_ift_get_weights_uint8_t(AtIFTArray_uint8_t* ift);
 
 
 #define at_ift_get_labels(ift) _Generic( (ift), \

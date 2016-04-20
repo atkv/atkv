@@ -485,7 +485,8 @@ at_imageviewer_update_image_surface(AtImageViewer* imageviewer){
 static void
 at_imageviewer_update_image_scaled(AtImageViewer* imageviewer){
   AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(imageviewer);
-  g_set_object(&priv->image_scaled,at_array_uint8_t_scale(priv->image,priv->scale,AT_INTERPOLATION_NEAREST));
+  g_clear_object(&priv->image_scaled);
+  priv->image_scaled = at_array_uint8_t_scale(priv->image,priv->scale,AT_INTERPOLATION_NEAREST);
   at_imageviewer_update_image_surface(imageviewer);
 }
 /*===========================================================================
@@ -533,19 +534,27 @@ at_imageviewer_show_uint8_t(AtImageViewer* imageviewer, AtArray_uint8_t* array, 
   AtImageViewerPrivate* priv = at_imageviewer_get_instance_private(imageviewer);
 
   // Avoid memory leak
-  g_clear_object(&priv->image);
   if(priv->image_size) g_free(priv->image_size);
   if(priv->image_step) g_free(priv->image_step);
 
 
   // Create the image in proper format
-  priv->image = at_cvt_color(array, format, AT_COLOR_BGRA);
+  AtArray(uint8_t)* cvt_image = at_cvt_color(array, format, AT_COLOR_BGRA);
+  // if new array, don't increment the reference count
+  if(cvt_image != array){
+    g_clear_object(&priv->image);
+    priv->image = cvt_image;
+  // If not, manage the count
+  }else{
+    g_set_object(&priv->image, cvt_image);
+  }
+
   priv->image_size    = at_array_get_size(priv->image);
   priv->image_step    = at_array_get_step(priv->image);
 
   at_imageviewer_update_image_scaled(imageviewer);
 
-  //gtk_widget_set_size_request(priv->scrolled_window, size[1],size[0]);
+  gtk_widget_set_size_request(priv->scrolled_window, priv->image_size[1],priv->image_size[0]);
   gtk_widget_queue_draw(priv->drawing_area);
   gtk_widget_show_all(GTK_WIDGET(priv->window));
 }

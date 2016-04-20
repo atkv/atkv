@@ -203,7 +203,14 @@ at_grapharray_remove_arc_by_index(AtGraphArray* grapharray, uint64_t arc_index);
  */
 void
 at_grapharray_remove_edge_by_index(AtGraphArray* grapharray, uint64_t edge_index);
-
+/**
+ * @brief at_grapharray_remove_arcs_by_indices
+ * @param grapharray
+ * @param arc_indices
+ * @param num_indices
+ */
+void
+at_grapharray_remove_arcs_by_indices(AtGraphArray *grapharray, uint64_t* arc_indices, uint64_t num_indices);
 /**
  * @brief at_grapharray_get_neighbors
  * @param grapharray

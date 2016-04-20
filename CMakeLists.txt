@@ -238,5 +238,12 @@ if(BUILD_GUI)
   add_executable(demo_imageviewer tests/gui/test_imageviewer.c)
   target_link_libraries(demo_imageviewer ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
 endif()
+
+# ORFC CORE DEMO
+# -----------------
+if(BUILD_GUI)
+  add_executable(demo_orfccore tests/ift/demo_orfc.c)
+  target_link_libraries(demo_orfccore ${AT_GUI_LIBRARIES} ${AT_IFT_LIBRARIES})
+endif()
 # ======================================================================== DOCS
 file(COPY ${CMAKE_SOURCE_DIR}/data/ DESTINATION ${CMAKE_BINARY_DIR})

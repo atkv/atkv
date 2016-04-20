@@ -25,7 +25,8 @@ G_BEGIN_DECLS
 
 void
 at_graph_component_from_grapharray(AtArray_uint16_t** component_label_ptr, AtGraphArray* grapharray);
-
+void
+at_graph_component_from_grapharray_interactive(AtArray_uint16_t** component_label_ptr, AtGraphArray* grapharray, uint64_t* next_v);
 #undef at_stack_push
 
 G_END_DECLS
