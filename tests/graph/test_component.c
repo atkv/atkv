@@ -46,8 +46,11 @@ test_at_component_from_array(void** state){
   assert_non_null(grapharray);
 
   // Groundtruths
-  uint16_t component_label_gt_9[9] = {1,1,2,1,1,3,4,5,3}; // for 9 arcs
+  uint16_t component_label_gt_9[9]  = {1,1,2,1,1,3,4,5,3}; // for 9 arcs
   uint16_t component_label_gt_10[9] = {1,1,1,1,1,2,3,4,2};   // for 10 arcs
+  uint16_t component_label_gt_12[9] = {1,1,1,1,1,1,2,3,1};   // for 12 arcs
+  uint16_t component_label_gt_13[9] = {1,1,1,1,1,1,2,1,1};   // for 13 arcs
+  uint16_t component_label_gt_14[9] = {1,1,1,1,1,1,1,1,1};   // for 14 arcs
 
   // For 9 arcs
   _test_component(grapharray, component_label_gt_9);
@@ -56,6 +59,16 @@ test_at_component_from_array(void** state){
   at_grapharray_add_arc(grapharray,2,1);
   _test_component(grapharray, component_label_gt_10);
 
+  // For 12 arcs
+  at_grapharray_add_arc(grapharray,4,5);
+  at_grapharray_add_arc(grapharray,5,4);
+  _test_component(grapharray, component_label_gt_12);
+
+  at_grapharray_add_arc(grapharray,7,4);
+  _test_component(grapharray, component_label_gt_13);
+
+  at_grapharray_add_arc(grapharray,3,6);
+  _test_component(grapharray, component_label_gt_14);
 }
 
 int

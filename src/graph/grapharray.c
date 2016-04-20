@@ -191,6 +191,8 @@ void
 at_grapharray_add_arc(AtGraphArray* grapharray, uint64_t node1, uint64_t node2){
   AtGraphArrayPrivate* priv = at_grapharray_get_instance_private(grapharray);
   uint64_t vn = node1 * priv->num_neighbors;
+  uint8_t*  data_ne = at_array_get(priv->neighbors_edges);
+  uint64_t* data_n  = at_array_get(priv->neighbors);
   uint64_t i;
   for(i = 0; i < priv->num_neighbors; i++)
     if(at_array_get(priv->neighbors,vn+i) == node2){

@@ -147,9 +147,8 @@ at_ift_array_uint8_t_create_neighbors_map(AtIFTArray_uint8_t* ift){
   //------------------------------------------------------------------------------------
   // dim_neighbors = dim + 1
   // size_neighbors = {size[0],...,size[dim-1], 4|6|8|18|26};
-  uint16_t  original_dim  = at_array_get_dim (priv->original);
-  uint64_t* original_size = at_array_get_size(priv->original);
-  uint64_t* original_step = at_array_get_step(priv->original);
+  g_autofree uint64_t* original_size = at_array_get_size(priv->original);
+  g_autofree uint64_t* original_step = at_array_get_step(priv->original);
   uint64_t  num_elements  = at_array_get_num_elements(priv->original);
   g_autofree uint64_t* size_neighbors = malloc(sizeof(uint64_t) * (priv->map_dimension + 1));
 
@@ -226,11 +225,13 @@ at_ift_array_uint8_t_create_weights_map(AtIFTArray_uint8_t* ift){
   uint64_t num_elements = at_array_get_num_elements(priv->original);
   at_array_min(priv->original, &priv->min_value);
   at_array_max(priv->original, &priv->max_value);
-  at_array_zeros(&priv->weights,at_array_get_dim(priv->neighbors),at_array_get_size(priv->neighbors));
+  g_autofree uint64_t* neighbors_size = at_array_get_size(priv->neighbors);
+  at_array_zeros(&priv->weights,at_array_get_dim(priv->neighbors),neighbors_size);
   // Fill weights map
   //------------------------------------------------------------------------------------
   double* weights_data  = at_array_double_get_data(priv->weights);
-  uint64_t num_neighbors = at_array_get_size(priv->weights)[at_array_get_dim(priv->weights)-1];
+  g_autofree uint64_t* weights_size = at_array_get_size(priv->weights);
+  uint64_t num_neighbors = weights_size[at_array_get_dim(priv->weights)-1];
   for(i = 0,k = 0; i < num_elements; i++){
     for(j = 0; j < num_neighbors; j++,k++){
       if(at_array_get(priv->neighbors_active,k)){
@@ -244,9 +245,10 @@ at_ift_array_uint8_t_init_maps(AtIFTArray_uint8_t* ift){
   uint64_t i;
   AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(ift);
   uint64_t num_elements = at_array_get_num_elements(priv->original);
-  at_array_new(&priv->predecessors, at_array_get_dim(priv->original), at_array_get_size(priv->original));
-  at_array_new(&priv->roots       , at_array_get_dim(priv->original), at_array_get_size(priv->original));
-  at_array_new(&priv->connectivity, at_array_get_dim(priv->original), at_array_get_size(priv->original));
+  g_autofree uint64_t* original_size = at_array_get_size(priv->original);
+  at_array_new(&priv->predecessors, at_array_get_dim(priv->original), original_size);
+  at_array_new(&priv->roots       , at_array_get_dim(priv->original), original_size);
+  at_array_new(&priv->connectivity, at_array_get_dim(priv->original), original_size);
 
   for(i = 0; i < num_elements; i++){
     at_array_set(priv->predecessors, i, i);
@@ -260,7 +262,8 @@ at_ift_array_uint8_t_init_maps(AtIFTArray_uint8_t* ift){
 static double
 at_ift_get_weight(AtIFTArray_uint8_t* ift, uint64_t index_s, uint64_t index_t){
   AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(ift);
-  uint64_t num_neighbors = at_array_get_size(priv->weights)[at_array_get_dim(priv->weights)-1];
+  g_autofree uint64_t* weights_size = at_array_get_size(priv->weights);
+  uint64_t num_neighbors = weights_size[at_array_get_dim(priv->weights)-1];
   uint64_t index_t_weights, i;
   for(i = 0, index_t_weights = index_s*num_neighbors; i < num_neighbors; i++, index_t_weights++){
     if(at_array_get(priv->neighbors_active, index_t_weights)){
@@ -275,8 +278,9 @@ at_ift_get_weight(AtIFTArray_uint8_t* ift, uint64_t index_s, uint64_t index_t){
 static void
 at_ift_array_uint8_t_init_labels(AtIFTArray_uint8_t *ift){
   AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(ift);
-  at_array_zeros(&priv->labels        , at_array_get_dim(priv->original), at_array_get_size(priv->original));
-  at_array_new(&priv->original_is_seed, at_array_get_dim(priv->original), at_array_get_size(priv->original));
+  g_autofree uint64_t* original_size = at_array_get_size(priv->original);
+  at_array_zeros(&priv->labels        , at_array_get_dim(priv->original), original_size);
+  at_array_zeros(&priv->original_is_seed, at_array_get_dim(priv->original), original_size);
 
   uint64_t* seeds_data = at_array_uint64_t_get_data(priv->seeds);
   uint64_t seeds_num_elements = at_array_get_num_elements(priv->seeds) >> 1;
@@ -413,12 +417,15 @@ at_ift_apply_array_uint8_t(AtIFTArray_uint8_t**       ift,
                            AtWeightingFunc_uint8_t    weighting_func,
                            AtArray_uint64_t*          seeds){
   // Create the new structure
-  g_set_object(ift, at_ift_array_uint8_t_new());
+  //g_clear_object(ift);
+  *ift = at_ift_array_uint8_t_new();
   AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(*ift);
 
   // Save parameters
-  g_set_object(&priv->original, image);
-  g_set_object(&priv->seeds, seeds);
+  priv->original          = image;
+  priv->seeds             = seeds;
+  //g_set_object(&priv->original, image);
+  //g_set_object(&priv->seeds, seeds);
   priv->adjacency         = adjacency;
   priv->optimization      = optimization;
   priv->connectivity_func = connectivity_func;
@@ -504,10 +511,6 @@ at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t**       ift,
   g_autoptr(AtArray(uint64_t)) seeds_object = NULL;
   at_seeds_filter_by_label(&seeds_object, seeds, 1);
 
-  // Energy of object seed
-  uint64_t si_index = at_array_get(seeds_object, 0);
-  double vb_si = at_array_get(priv->connectivity, si_index);
-
   // Create a grapharray
   g_autoptr(AtGraphArray) grapharray = NULL;
   g_autofree uint64_t* size = at_array_get_size(priv->original);
@@ -515,7 +518,7 @@ at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t**       ift,
 
   uint64_t num_neighbors = at_grapharray_get_num_neighbors(grapharray);
   uint64_t i, n, in,a,b;
-  double vb_a, vb_b;
+  double   vb_a, vb_b;
   uint64_t num_elements = at_array_get_num_elements(priv->original);
 
   // Remove edges with different energies or lower weight values
@@ -526,15 +529,15 @@ at_orfc_out_cut_core_array_uint8_t(AtIFTArray_uint8_t**       ift,
     for(n = 0; n < num_neighbors; n++, in++){
       neighbors_in = at_array_get(edges,in);
       if(neighbors_in){
-        a = i;
-        b = at_array_get(neighbors,in);
-        vb_a = at_array_get(priv->connectivity, a);
-        vb_b = at_array_get(priv->connectivity, b);
+        a      = i;
+        b      = at_array_get(neighbors,in);
+        vb_a   = at_array_get(priv->connectivity, a);
+        vb_b   = at_array_get(priv->connectivity, b);
         weight = at_array_get(priv->weights,in);
 
-        if(vb_a != vb_si || vb_b != vb_si || vb_a != vb_b ||
-           (optimization == AT_OPTIMIZATION_MIN && weight >= vb_si) ||
-           (optimization == AT_OPTIMIZATION_MAX && weight <= vb_si)){
+        if(vb_a != vb_b
+           || (optimization == AT_OPTIMIZATION_MIN && weight > vb_a)
+           || (optimization == AT_OPTIMIZATION_MAX && weight < vb_a)){
           at_grapharray_remove_arc_by_index(grapharray,in);
         }
       }
@@ -556,9 +559,9 @@ at_connectivity_min_uint8_t  (AtIFTArray_uint8_t* ift,
   if(index_s == index_t){
     is_seed = at_array_get(priv->original_is_seed,index_s);
     if(is_seed)
-      return  DBL_MAX;
+      return  INFINITY;
     else
-      return -DBL_MAX;
+      return -INFINITY;
   }
   return fmin(at_array_get(priv->connectivity,index_s), at_ift_get_weight(ift, index_s, index_t));
 }
@@ -571,9 +574,9 @@ at_connectivity_max_uint8_t  (AtIFTArray_uint8_t* ift,
   if(index_s == index_t){
     is_seed = at_array_get(priv->original_is_seed,index_s);
     if(is_seed)
-      return -DBL_MAX;
+      return -INFINITY;
     else
-      return  DBL_MAX;
+      return  INFINITY;
   }
   return fmax(at_array_get(priv->connectivity,index_s), at_ift_get_weight(ift, index_s, index_t));
 }
@@ -617,3 +620,8 @@ at_ift_get_connectivities_uint8_t(AtIFTArray_uint8_t* ift){
   return priv->connectivity;
 }
 
+AtArray_double*
+at_ift_get_weights_uint8_t(AtIFTArray_uint8_t* ift){
+  AtIFTArray_uint8_tPrivate* priv = at_ift_array_uint8_t_get_instance_private(ift);
+  return priv->weights;
+}

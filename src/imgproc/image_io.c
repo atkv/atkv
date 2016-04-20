@@ -81,6 +81,7 @@ static void at_image_read_png(AtArray_uint8_t** array, const char* filename){
   uint8_t* data = at_array_uint8_t_get_data(*array);
   for(i = 0; i < size[0]; i++) buffer[i] = data + row_stride * i;
   png_read_image(png_ptr, buffer);
+  png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)0);
   fclose(infile);
   free(buffer);
 }

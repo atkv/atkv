@@ -162,6 +162,9 @@ at_ift_get_roots_uint8_t(AtIFTArray_uint8_t* ift);
 AtArray_double*
 at_ift_get_connectivities_uint8_t(AtIFTArray_uint8_t* ift);
 
+AtArray_double*
+at_ift_get_weights_uint8_t(AtIFTArray_uint8_t* ift);
+
 
 #define at_ift_get_labels(ift) _Generic( (ift), \
   AtIFTArray_uint8_t*: at_ift_get_labels_uint8_t \

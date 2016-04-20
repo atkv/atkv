@@ -65,13 +65,13 @@ at_bucketqueue_new_with_size(AtBucketQueue_uint64_t** queue_ptr, uint64_t nbucke
 
 void
 at_bucketqueue_destroy(AtBucketQueue_uint64_t** queue_ptr){
-  if(queue_ptr != NULL){
+  if(*queue_ptr != NULL){
     AtBucketQueue_uint64_t* queue = *queue_ptr;
     if(queue->buckets.first != NULL) free(queue->buckets.first);
     if(queue->buckets.last  != NULL) free(queue->buckets.last);
     if(queue->nodes         != NULL) free(queue->nodes);
     free(queue);
-    queue_ptr = NULL;
+    *queue_ptr = NULL;
   }
 }
 

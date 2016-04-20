@@ -1,6 +1,6 @@
 #include <at/gui.h>
 #include <at/ift.h>
-
+#include <stdlib.h>
 
 
 // PACKED SET -----------------------------------------------------------------
@@ -22,13 +22,14 @@ void
 at_seeds_destroy(AtSeedPackedSet* seeds){
   g_free(seeds->indices);
   g_free(seeds->labels);
+  g_free(seeds);
 }
 
 void
 at_seeds_add_seed(AtSeedPackedSet* seeds, uint64_t index, uint64_t label){
   if(seeds->num_allocated == 0)
     seeds->num_allocated = 1;
-  else if(seeds->num_elements <= seeds->num_allocated)
+  else if(seeds->num_elements == seeds->num_allocated)
     seeds->num_allocated <<= 1;
 
   seeds->indices = g_realloc(seeds->indices, sizeof(uint64_t) * seeds->num_allocated);
@@ -191,7 +192,33 @@ imageviewer_mouse_cb(AtMouseEventType event, int x, int y, AtMouseEventFlags fla
   }
 }
 
+void
+at_seeds_filter_by_label(AtArray_uint64_t** seeds_background,
+                         AtArray_uint64_t* seeds, uint64_t label){
+  g_autofree uint64_t* seeds_size = at_array_get_size(seeds);
+  g_autofree uint64_t* seeds_background_data = malloc(sizeof(uint64_t) * seeds_size[0] * 2);
+  uint64_t* data = at_array_uint64_t_get_data(seeds);
+  uint64_t  index = 0;
+  uint64_t  i;
+  uint64_t num_elements = seeds_size[0] << 1;
+  for(i = 0; i < num_elements; i += 2){
+    if(data[i+1] == label)
+    {
+      seeds_background_data[index] = data[i];
+      seeds_background_data[index+1] = data[i+1];
+      index += 2;
+    }
+  }
+  seeds_background_data = realloc(seeds_background_data,sizeof(uint64_t) * index);
+  seeds_size[0]         = index >> 1;
+  at_array_new(seeds_background,2,seeds_size,seeds_background_data);
+}
 
+
+static uint8_t
+reduce_sum(uint8_t data1, uint8_t data2){
+  return data1 + data2;
+}
 
 int main(int argc, char** argv){
 
@@ -200,7 +227,9 @@ int main(int argc, char** argv){
   init_info(&info);
 
   // Ler o círculo
-  at_image_read(&info.original, "MRI_blackandwhite.png");
+  //at_image_read(&info.original, "trekkie-nerdbw.png");
+  //at_image_read(&info.original, "MRI_blackandwhite.png");
+  at_image_read(&info.original, "circleborder.png");
 
   // Converter para RGB
   info.original_rgb = at_cvt_color(info.original,AT_COLOR_GRAY, AT_COLOR_BGRA);
@@ -222,73 +251,77 @@ int main(int argc, char** argv){
 
   // Achar o núcleo
   info.seeds_packed       = at_seeds_pack(info.seeds);
-  info.seeds_packed_array = at_seeds_packed_to_array(info.seeds_packed);
+  if(info.seeds_packed->indices){
 
+    info.seeds_packed_array = at_seeds_packed_to_array(info.seeds_packed);
+
+    uint64_t i;
+
+#define COMPONENT
 #ifdef COMPONENT
-  info.component = at_orfc_out_cut_core_array_uint8_t(
-         &info.ift,
-         info.original,
-         2,
-         AT_ADJACENCY_4,
-         AT_OPTIMIZATION_MIN,
-         at_connectivity(max, info.ift),
-         at_weighting(abs_diff, info.ift),
-         info.seeds_packed_array);
-  uint16_t k_index_si = at_array_get(info.component, info.seeds_packed->indices[0]);
-  uint16_t k_index;
-  uint64_t* component_size = at_array_get_size(info.component);
+    info.component = at_orfc_out_cut_core_array_uint8_t(
+           &info.ift,
+           info.original,
+           2,
+           AT_ADJACENCY_4,
+           AT_OPTIMIZATION_MIN,
+           at_connectivity(max, info.ift),
+           at_weighting(abs_diff, info.ift),
+           info.seeds_packed_array);
+    uint16_t k_index_si = at_array_get(info.component, info.seeds_packed->indices[0]);
+    uint16_t k_index;
+    uint64_t* component_size = at_array_get_size(info.component);
 #else
-  at_ift_apply_array_uint8_t(
-         &info.ift,
-         info.original,
-         2,
-         AT_ADJACENCY_4,
-         AT_OPTIMIZATION_MIN,
-         at_connectivity(max, info.ift),
-         at_weighting(abs_diff, info.ift),
-         info.seeds_packed_array);
-  AtArray_uint8_t* labels = at_ift_get_labels_uint8_t(info.ift);
-  // Get component index of object seed
+    at_ift_apply_array_uint8_t(
+           &info.ift,
+           info.original,
+           2,
+           AT_ADJACENCY_4,
+           AT_OPTIMIZATION_MIN,
+           at_connectivity(max, info.ift),
+           at_weighting(abs_diff, info.ift),
+           info.seeds_packed_array);
+    AtArray_uint8_t* labels = at_ift_get_labels_uint8_t(info.ift);
+    // Get component index of object seed
 
-  at_array_mult(labels,255);
-  at_imageviewer_show_uint8_t(info.imageviewer, labels, AT_COLOR_GRAY);
-  at_imageviewer_waitkey();
+    at_array_mult(labels,255);
+    at_imageviewer_show_uint8_t(info.imageviewer, labels, AT_COLOR_GRAY);
+    at_imageviewer_waitkey();
 
-  uint8_t k_index_si = at_array_get(labels, info.seeds_packed->indices[0]);
-  uint64_t* component_size = at_array_get_size(labels);
-  uint8_t k_index;
+    uint8_t k_index_si = at_array_get(labels, info.seeds_packed->indices[0]);
+    g_autofree uint64_t* component_size = at_array_get_size(labels);
+    uint8_t k_index;
 #endif
 
+    // Get component index of object seed
+    //uint64_t k_index_si = at_array_get(info.component, info.seeds_packed->indices[0]);
 
+    // Creating an image of the component
+    uint64_t x, y, k, k_rgb;
+    uint8_t component_color[4] = {255,255,255,255};
+    uint64_t component_rgb_size[3] = {component_size[0], component_size[1], 4};
 
+    at_array_zeros(&info.component_rgb, 3, component_rgb_size);
 
-  // Get component index of object seed
-  //uint64_t k_index_si = at_array_get(info.component, info.seeds_packed->indices[0]);
-
-  // Creating an image of the component
-  uint64_t i, x, y, k, k_rgb;
-  uint8_t component_color[4] = {255,255,255,255};
-  uint64_t component_rgb_size[3] = {component_size[0], component_size[1], 4};
-
-  at_array_zeros(&info.component_rgb, 3, component_rgb_size);
-
-  for(y = 0, k = 0, k_rgb = 0; y < component_size[0]; y++){
-    for(x = 0; x < component_size[1]; x++, k++){
+    for(y = 0, k = 0, k_rgb = 0; y < component_size[0]; y++){
+      for(x = 0; x < component_size[1]; x++, k++){
 #ifdef COMPONENT
-      k_index = at_array_get(info.component, k);
+       k_index = at_array_get(info.component, k);
 #else
-      k_index = at_array_get(labels, k);
+       k_index = at_array_get(labels, k);
 #endif
-      for(i = 0; i < 4; i++, k_rgb++){
-        if(k_index == k_index_si){
-          at_array_set(info.component_rgb, k_rgb, component_color[i]);
+        for(i = 0; i < 4; i++, k_rgb++){
+          if(k_index == k_index_si){
+            at_array_set(info.component_rgb, k_rgb, component_color[i]);
+          }
         }
       }
     }
-  }
 
-  at_imageviewer_show_uint8_t(info.imageviewer, info.component_rgb, AT_COLOR_BGRA);
-  at_imageviewer_waitkey();
+    at_imageviewer_show_uint8_t(info.imageviewer, info.component_rgb, AT_COLOR_BGRA);
+    at_imageviewer_waitkey();
+
+  }
 
   destroy_info(&info);
   return 0;
